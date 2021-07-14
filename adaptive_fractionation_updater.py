@@ -86,7 +86,7 @@ def value_eval(sparing_factors,data,abt = 10,abn = 3,bound = 90,riskfactor = 0):
     return:
         Values: a sparing_factor-2 x BEDT x sf dimensional matrix with the value of each BEDT/sf state
         Values4: Values of the first fraction
-        policy: a sparing_factor-2 x BEDT x sf dimensional matrix with the policy of each BEDT/sf state. first index = first fraction
+        policy: a sparing_factor-2 x BEDT x sf dimensional matrix with the policy of each BEDT/sf state. fourth index = first fraction, first index = last fraction
         policy4: policy of the first fraction'''
     sf= np.arange(0,1.41,0.01) #list of all possible sparing factors
     BEDT = np.arange(0,90.3,0.1) #list of all possible Biological effective doses
@@ -153,7 +153,10 @@ def result_calc_BEDNT(pol4,pol,actionspace,sparing_factors,abt = 10,abn = 3): #t
     print('total accumulated  biological effective dose in tumor; fraction 1 = ',round(total_bedt,1))
     print('total accumulated  biological effective dose in normal tissue; fraction 1 = ',round(total_bednt,1))
     for index,fraction in enumerate(range(3,-1,-1)):
-        dose_action = actionspace[pol[fraction][(round(total_bednt,1)*10).astype(int)][round(sparing_factors[index+1]*100)].astype(int)]
+        if fraction == 0:
+            dose_action = (-sparing_factors[index+1]+np.sqrt(sparing_factors[index+1]**2+4*sparing_factors[index+1]**2*(90-total_bednt)/abn))/(2*sparing_factors[index+1]**2/abn) 
+        else:   
+            dose_action = actionspace[pol[fraction][(round(total_bednt,1)*10).astype(int)][round(sparing_factors[index+1]*100)].astype(int)]
         dose_delivered = BED_calc0(dose_action,abt)
         total_bedt += dose_delivered
         total_bednt += BED_calc0(dose_action,abn,sparing_factors[index+1])
