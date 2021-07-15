@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 15 09:56:23 2021
-
-@author: yoelh
+This file includes a single fraction program. with value_eval one can calculate the optimal dose for a single fraction. 
+As input one needs the sparing factors measured so far, the alpha and beta parameter of the prior distribution (inverse-gamma for variance. The data_fit function can be used to get those parameters.)
+and the Biological effective dose that has been deliviered to the normal tissue so far. If the BED of the OAR is not added, only the policies and values will be given and the optimal policy has to be searched manually.
+NOTE! The sparing factors are not just from 0-1.4! This means that the policy cant be read as easily as in the updater program!
 """
 
 import numpy as np
@@ -54,11 +55,17 @@ def BED_calc( sf, ab,actionspace):
 
 
 def value_eval(sparing_factors,alpha, beta,bedn = 0,abt = 10,abn = 3,bound=90):
-    ''' calculates  the best policy for a list of k sparing factors at the k-1th fraction based on a dynamic programming algorithm. Estimation of the probability distribution is based on prior patient data
+''' calculates  the best policy for a list of k sparing factors at the k-1th fraction based on a dynamic programming algorithm. Estimation of the probability distribution is based on prior patient data
     sparing_factors: list/array of k sparing factors. A planning sparing factor is necessary!
     abt: alpha beta ratio of tumor
     abn: alpha beta ratio of Organ at risk
-    bound: upper limit of BED in OAR'''
+    bound: upper limit of BED in OAR'
+    return:
+        Values: a sparing_factor-2 x BEDT x sf dimensional matrix with the value of each BEDT/sf state
+        Values4: Values of the first fraction
+        policy: a sparing_factor-2 x BEDT x sf dimensional matrix with the policy of each BEDT/sf state. fourth index = first fraction, first index = last fraction
+        policy4: policy of the first fraction
+    Note! The sparing factors are not evenly spread from 0-1.4! One should use argfind to find the correct index of a desired sparing factor before reading the policy!'''
     mean_sf = np.mean(sparing_factors)
     std = std_calc(sparing_factors,alpha,beta)
     X = get_truncated_normal(mean=mean_sf, sd=std, low=0, upp=1.3)
