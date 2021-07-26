@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 15 09:56:23 2021
-
-@author: yoelh
+In this file are all functions to calculate the optimal dose for a single fraction, given that all previous sparing factors are known and prior date of patients from the same population is available.
+The value_eval function gives the optimal dose for a certain fraction. As input the sparing factors are needed and the alpha and beta hyperparameter of a inverse-gamma distribution to improve the probability distribution.
+if the alpha and beta value are not known, the data_fit function can be used which needs the sparing factors of prior patients as input.
 """
 
 import numpy as np
@@ -23,7 +23,8 @@ def probdist(X):
         idx +=1
     return prob
 def data_fit(data):
-    '''This function fits the alpha and beta value for the conjugate prior'''
+    '''This function fits the alpha and beta value for the conjugate prior
+    input: data: a nxk matrix with n the amount of patints and k the amount of sparing factors per patient'''
     variances = data.var(axis = 1)
     alpha,loc,beta = invgamma.fit(variances, floc = 0)
     return[alpha,beta]
