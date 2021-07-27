@@ -3,6 +3,8 @@
 In this file are all functions to calculate the optimal dose for a single fraction, given that all previous sparing factors are known and prior date of patients from the same population is available.
 The value_eval function gives the optimal dose for a certain fraction. As input the sparing factors are needed and the alpha and beta hyperparameter of a inverse-gamma distribution to improve the probability distribution.
 if the alpha and beta value are not known, the data_fit function can be used which needs the sparing factors of prior patients as input.
+The optimal policies can be extracted from pol4 and pol manually (pol4 = first fraction, first index in pol is the last fraction and the last index is the first fraction). But one must know which sparing factor is on which index. To do so one must use the extracted sf from value_eval which tells us which sparing factors have been used on which index.
+it is recommended to usethe result_calc_BEDNT to calculate plans with different sparing factors.
 """
 
 import numpy as np
@@ -130,7 +132,7 @@ def value_eval(sparing_factors,alpha, beta,bedn = 0,abt = 10,abn = 3,bound=90):
         else:
             optaction = actionspace[policy[6-len(sparing_factors)][int(round(bedn,1)*10)][argfind(sf,sparing_factors[-1])].astype(int)]
     print('optimal dose in fraction',len(sparing_factors)-1,'= ',optaction)
-    return [Values,policy,Values4,policy4]
+    return [Values,policy,Values4,policy4,sf]
 
 
 def argfind(searched_list,value): #this function is only needed as long as the BEDT and the actionspace are finally not specified, as it can be solved faster with a bit of algebra
@@ -138,6 +140,12 @@ def argfind(searched_list,value): #this function is only needed as long as the B
     return  index
     
 def result_calc_BEDNT(pol4,pol,sf,sparing_factors,abt = 10,abn = 3): #this function calculates the fractionation plan according to the reinforcement learning
+     '''in this function gives the treatment plan for a set of sparing factors based on the sparing factors that have been used to calculate the optimal policy
+    the pol4 and pol matrices are the ones that are returnedin the value_eval function
+    pol4: first fraction policy
+    pol: second - fifth fraction policy
+    sf: list of sparing factors used in value_eval. This list tells us on what index a specific sparing factor is.
+    sparing_factors: sparing factors that should be used to make a plan. list starting from first fraction''' 
     actionspace = np.arange(0,22.4,0.1)    
     total_bedt = BED_calc0(actionspace[pol4[argfind(sf,sparing_factors[0])]],abt)
     total_bednt = BED_calc0(actionspace[pol4[argfind(sf,sparing_factors[0])]],abn,sparing_factors[0])
