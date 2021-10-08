@@ -5,6 +5,7 @@ This file requires all sparing factors to be known, therefore, it isnt suited to
 value_eval and result_calc_BEDNT are the most essential codes. The results from value_eval can be used to calculate a treatment plan with result_calc_BEDNT.
 The optimal policies for each fraction can be extracted manually(pol4 = first fraction, first index in pol is the last fraction and the last index is the first fraction). but one must know what index represents which sparing factor
 Note: This file does not assume all sparing factors to be known at the start, but simulates the treatment planning as if we would get a new sparing factor at each fraction!
+This program uses a discrete state space and does not interpolate between states. Therefore, it is less precise than the interpolation programs
 """
 
 import numpy as np
