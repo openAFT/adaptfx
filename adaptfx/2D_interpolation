@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-whole patient interpolation. This program computes the doses for a whole plan when all sparing factors are known.
+In this script there are all needed programs to calculate a single fraction or a whole plan for a patient.
+value_eval allows the calculation of a single fraction, while whole_plan computes de doses for all fractions.
 
 """
 
