@@ -14,19 +14,62 @@ from scipy.interpolate import RegularGridInterpolator
 
 
 def data_fit(data):
-    '''This function fits the alpha and beta value for the conjugate prior
-    input: data: a nxk matrix with n the amount of patints and k the amount of sparing factors per patient'''
+    """
+    This function fits the alpha and beta value for the conjugate prior
+
+    Parameters
+    ----------
+    data : array
+        a nxk matrix with n the amount of patints and k the amount of sparing factors per patient.
+
+    Returns
+    -------
+    list
+        alpha and beta hyperparameter.
+    """
     variances = data.var(axis = 1)
     alpha,loc,beta = invgamma.fit(variances, floc = 0)
     return[alpha,beta]
 
 
 def get_truncated_normal(mean=0, sd=1, low=0.01, upp=10):
-    '''produces a truncated normal distribution'''
+    """
+    produces a truncated normal distribution
+
+    Parameters
+    ----------
+    mean : float, optional
+        The default is 0.
+    sd : float, optional
+        The default is 1.
+    low : float, optional
+        The default is 0.01.
+    upp : float, optional
+        The default is 10.
+
+    Returns
+    -------
+    scipy.stats._distn_infrastructure.rv_frozen
+        distribution function.
+
+    """
     return truncnorm((low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
 
 def probdist(X):
-    '''This function produces a probability distribution based on the normal distribution X '''
+    """
+    This function produces a probability distribution based on the normal distribution X
+
+    Parameters
+    ----------
+    X : scipy.stats._distn_infrastructure.rv_frozen
+        distribution function.
+
+    Returns
+    -------
+    prob : list
+        list with probabilities for each sparing factor.
+
+    """
     prob = np.zeros(130)
     idx=0
     for i in np.arange(0.01,1.31,0.01):
@@ -35,11 +78,25 @@ def probdist(X):
     return prob
     
 def std_calc(measured_data,alpha,beta):
-    '''calculates the most likely standard deviation for a list of k sparing factors and an inverse-gamma conjugate prior
+    """
+    calculates the most likely standard deviation for a list of k sparing factors and an inverse-gamma conjugate prior
     measured_data: list/array with k sparing factors
-    alpha: shape of inverse-gamma distribution
-    beta: scale of inverse-gamme distrinbution
-    return: most likely std based on the measured data and inverse-gamma prior'''
+
+    Parameters
+    ----------
+    measured_data : list/array
+        list/array with k sparing factors
+    alpha : float
+        shape of inverse-gamma distribution
+    beta : float
+        scale of inverse-gamme distrinbution
+
+    Returns
+    -------
+    std : float
+        most likely std based on the measured data and inverse-gamma prior
+
+    """
     n = len(measured_data)
     var_values = np.arange(0.00001,0.25,0.00001)
     likelihood_values = np.zeros(len(var_values))
@@ -49,44 +106,115 @@ def std_calc(measured_data,alpha,beta):
     return std
 
 def argfind(searched_list,value): 
-    """ This function is used to find the index of certain values.
+    """
+    This function is used to find the index of certain values.
     searched_list: list/array with values
     value: value that should be inside the list
-    return: index of value"""
+    return: index of value
+
+    Parameters
+    ----------
+    searched_list : list/array
+        list in which our searched value is.
+    value : float
+        item inside list.
+
+    Returns
+    -------
+    index : integer
+        index of value inside list.
+
+    """
     index = min(range(len(searched_list)), key=lambda i: abs(searched_list[i]-value))
     return  index
     
 
 
 def BED_calc0( dose, ab,sparing = 1):
-    '''calculates the BED for a specific dose'''
+    """
+    calculates the BED for a specific dose
+
+    Parameters
+    ----------
+    dose : float
+        physical dose to be delivered.
+    ab : float
+        alpha-beta ratio of tissue.
+    sparing : float, optional
+        sparing factor. The default is 1 (tumor).
+
+    Returns
+    -------
+    BED : float
+        BED to be delivered based on dose, sparing factor and alpha-beta ratio.
+
+    """
     BED = sparing*dose*(1+(sparing*dose)/ab)
     return BED
 
 def BED_calc_matrix(actionspace,ab,sf):
-    '''calculates the BED for an array of values'''
+    """
+    calculates the BED for an array of values
+
+    Parameters
+    ----------
+    sf : list/array
+        list of sparing factors to calculate the correspondent BED.
+    ab : float
+        alpha-beta ratio of tissue.
+    actionspace : list/array
+        doses to be delivered.
+
+    Returns
+    -------
+    BED : List/array
+        list of all future BEDs based on the delivered doses and sparing factors.
+
+    """
     BED = np.outer(sf,actionspace)*(1+np.outer(sf,actionspace)/ab) #produces a sparing factors x actions space array
     return BED
 
 
-    
-def value_eval(fraction,BED_OAR,BED_tumor,sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta): #there is still a mistake somewhere. Maybe try with only maximizing dose.
-    """Calculates the optimal dose for the desired fraction.
-    fraction: number of actual fraction (1 for first, 2 for second, etc.)
-    BED_OAR: accumulated BED in OAR (from previous fractions) zero in fraction 1
-    BED_tumor: accumulated BED in tumor (from previous fractions) zero in fraction 1
-    sparing_factors: list or array of all sparing factors that have been observed. e.g. list of 3 sparing factors in fraction 2 (planning,fx1,fx2)
-    abt: alpha-beta ratio of tumor
-    abn: alpha-beta ratio of OAR
-    bound_OAR: maximal BED of OAR
-    bound_tumor: prescribed tumor BED
-    alpha: alpha hyperparameter of std prior derived from previous patients
-    beta: beta hyperparameter of std prior derived from previous patients
-    return:
-    actual_policy: optimal physical dose for actual fraction
-    accumulated_tumor_dose: accumulated tumor BED
-    accumulated_OAR_dose: accumulated OAR BED
+
+def value_eval(fraction,BED_OAR,BED_tumor,sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta): 
     """
+    Calculates the optimal dose for the desired fraction.
+    fraction: number of actual fraction (1 for first, 2 for second, etc.)
+
+    Parameters
+    ----------
+    fraction : integer
+        number of actual fraction (1 for first, 2 for second, etc.).
+    BED_OAR : float
+        accumulated BED in OAR (from previous fractions) zero in fraction 1.
+    BED_tumor : float
+        accumulated BED in tumor (from previous fractions) zero in fraction 1.
+    sparing_factors : TYPE
+        list or array of all sparing factors that have been observed. e.g. list of 3 sparing factors in fraction 2 (planning,fx1,fx2).
+    abt : float
+        alpha-beta ratio of tumor.
+    abn : float
+        alpha-beta ratio of OAR.
+    bound_OAR : float
+        maximal BED of OAR
+    bound_tumor : float
+        prescribed tumor BED.
+    alpha : float
+        alpha hyperparameter of std prior derived from previous patients.
+    beta : float
+        beta hyperparameter of std prior derived from previous patients
+
+    Returns
+    -------
+    list
+        list with following arrays/values:
+        actual_policy: optimal physical dose for actual fraction
+        accumulated_tumor_dose: accumulated tumor BED
+        accumulated_OAR_dose: accumulated OAR BED
+
+    """
+    
+
     mean = np.mean(sparing_factors) #extract the mean and std to setup the sparingfactor distribution
     standard_deviation = std_calc(sparing_factors,alpha,beta)
     X = get_truncated_normal(mean= mean, sd=standard_deviation, low=0, upp=1.3)
@@ -194,14 +322,31 @@ def value_eval(fraction,BED_OAR,BED_tumor,sparing_factors,abt,abn,bound_OAR,boun
     return [actual_policy,accumulated_tumor_dose,accumulated_OAR_dose]
 
 def whole_plan(sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta):
-    """calculates all doses for a 5 fraction treatment (with 6 known sparing factors)
+    """
+    calculates all doses for a 5 fraction treatment (with 6 known sparing factors)
     sparing_factors: list or array of 6 sparing factors that have been observed.
-    abt: alpha-beta ratio of tumor
-    abn: alpha-beta ratio of OAR
-    bound_OAR: maximal BED of OAR
-    bound_tumor: prescribed tumor BED
-    alpha: alpha hyperparameter of std prior derived from previous patients
-    beta: beta hyperparameter of std prior derived from previous patients
+
+    Parameters
+    ----------
+    sparing_factors : list/array
+        list or array of 6 sparing factors that have been observed..
+    abt : float
+        alpha-beta ratio of tumor.
+    abn : float
+        alpha-beta ratio of OAR.
+    bound_OAR : float
+        maximal BED of OAR.
+    bound_tumor : float
+        prescribed tumor BED.
+    alpha : float
+        alpha hyperparameter of std prior derived from previous patients.
+    beta : float
+        beta hyperparameter of std prior derived from previous patients.
+
+    Returns
+    -------
+    None.
+
     """
     start = time.time()
     tumor_dose = 0
@@ -212,3 +357,4 @@ def whole_plan(sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta):
         OAR_dose = accumulated_OAR_dose
     end = time.time()
     print('time elapsed = ' +str(end - start))
+        
