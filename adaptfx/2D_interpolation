@@ -340,11 +340,22 @@ def whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta):
     """
     total_dose_delivered_OAR = 0
     total_tumor_dose = 0
+    tumor_doses = np.zeros(5)
+    OAR_doses = np.zeros(5)
+    physical_doses = np.zeros(5)
     for looper in range(0,5):
         [Values,policy,actual_value,actual_policy,dose_delivered_OAR,tumor_dose,total_dose_delivered_OAR,actual_dose_delivered] = value_eval(looper+1,total_dose_delivered_OAR,sparing_factors[:looper+2],alpha,beta,abt,abn,OAR_limit)
-        print('physical dose delivered  = ',actual_dose_delivered)
-        print('tumor dose = ', tumor_dose)
-        print('accumulated dose in normal tissue = ', total_dose_delivered_OAR)
-
+        tumor_doses[looper] = tumor_dose
+        physical_doses[looper] = actual_dose_delivered
+        OAR_doses[looper] = dose_delivered_OAR     
         total_tumor_dose += tumor_dose
-    print('total dose accumultated in tumor = ',total_tumor_dose)    
+    return [tumor_doses,OAR_doses,physical_doses]
+
+def whole_plan_print(sparing_factors,OAR_limit,abt,abn,alpha,beta):
+    [tumor_doses,OAR_doses,physical_doses] = whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta)
+    for i in range(0,5):
+        print('Fraction ',(i+1))
+        print('physical dose delivered  = ',physical_doses[i])
+        print('tumor dose in BED = ', tumor_doses[i])
+        print('OAR dose in BED = ', OAR_doses[i])
+    print('total tumor BED = ',np.sum(tumor_doses))
