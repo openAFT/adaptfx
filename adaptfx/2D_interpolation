@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-whole patient interpolation. This program computes the doses for a whole plan when all sparing factors are known.
+2D interpolation. In this program the optimal fraction doses are compueted based on a maximal OAR dose while maximizing tumor BED.
+single_fraction allows to compute single fraction doses, while whole_plan computes the doses for a whole treatment plan (when all sparing factors are known).
+whole_plan_print prints the doses in a well-aranged manner.
 
 """
 
@@ -359,3 +361,35 @@ def whole_plan_print(sparing_factors,OAR_limit,abt,abn,alpha,beta):
         print('tumor dose in BED = ', tumor_doses[i])
         print('OAR dose in BED = ', OAR_doses[i])
     print('total tumor BED = ',np.sum(tumor_doses))
+
+def single_fraction(sparing_factors,accumulated_OAR_BED, OAR_limit, abt, abn, alpha, beta):
+    """
+
+    Parameters
+    ----------
+    sparing_factors : list/array
+        list/array with all observed sparing factors (6 for a 5 fraction plan).
+    accumulated_OAR_BED : float
+        Total BE delivered to the OAR so far.        
+    OAR_limit : float
+        accumulated BED in OAR (from previous fractions) zero in fraction 1
+    abt : float
+        alpha-beta ratio of tumor.
+    abn : float
+        alpha-beta ratio of OAR.
+    alpha : float
+        shape of inverse-gamma distribution
+    beta : float
+        scale of inverse-gamme distrinbution    
+   
+    Returns
+    -------
+    None.
+
+    """
+    [Values,policy,actual_value,actual_policy,dose_delivered_OAR,tumor_dose,total_dose_delivered_OAR,actual_dose_delivered] = value_eval(len(sparing_factors)-1,0,sparing_factors,alpha,beta,abt,abn,OAR_limit)
+    print('fraction', (len(sparing_factors)-1))
+    print('physical dose delivered  = ',actual_dose_delivered)
+    print('tumor dose in BED = ', tumor_dose)
+    print('OAR dose in BED = ', dose_delivered_OAR)
+    
