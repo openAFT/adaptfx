@@ -3,6 +3,7 @@
 whole plan 3D interpolation. This algorithm tracks tumor and OAR BED. If the prescribed tumor dose can be reached, the OAR dose is minimized. If the prescribed tumor dose can not be reached while staying below
 maximum BED, the tumor dose is maximized. The value_eval function calculates the optimal dose for one sparing factor given a sparing factor list and the alpha and beta hyperparameter of previous data (can be calculated with data_fit).
 the whole_plan function calculates the whole plan given all sparing factors and the hyperparameters
+There is an option to fix the probability distribution instead of updating it whenever a new sparing factor is observed. To do so the fixed_prob variable has to be changed to 1 in each program. Alpha and beta are then to be chosen arbitrarily
 """
 
 import numpy as np
@@ -176,11 +177,12 @@ def BED_calc_matrix(actionspace,ab,sf):
 
 
 
-def value_eval(fraction,BED_OAR,BED_tumor,sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta, fixed_prob = 0, mean_fixed = 0, std_fixed = 0): 
+def value_eval(fraction,BED_OAR,BED_tumor,sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta, fixed_prob = 0, fixed_mean = 0, fixed_std = 0): 
     """
     Calculates the optimal dose for the desired fraction.
     fraction: number of actual fraction (1 for first, 2 for second, etc.)
-
+    To used a fixed probability distribution, change fixed_prob to 1 and add a fixed mean and std.
+    If a fixed probability distribution is chosen, alpha and beta are to be chosen arbitrarily as they will not be used
     Parameters
     ----------
     fraction : integer
@@ -223,8 +225,8 @@ def value_eval(fraction,BED_OAR,BED_tumor,sparing_factors,abt,abn,bound_OAR,boun
     mean = np.mean(sparing_factors) #extract the mean and std to setup the sparingfactor distribution
     standard_deviation = std_calc(sparing_factors,alpha,beta)
     if fixed_prob == 1:
-        mean = mean_fixed
-        standard_deviation = std_fixed
+        mean = fixed_mean
+        standard_deviation = fixed_std
     X = get_truncated_normal(mean= mean, sd=standard_deviation, low=0, upp=1.3)
     prob = np.array(probdist(X))
     sf= np.arange(0.01,1.31,0.01)
@@ -331,7 +333,8 @@ def whole_plan(sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta,fixed_pr
     """
     calculates all doses for a 5 fraction treatment (with 6 known sparing factors)
     sparing_factors: list or array of 6 sparing factors that have been observed.
-
+    To used a fixed probability distribution, change fixed_prob to 1 and add a fixed mean and std.
+    If a fixed probability distribution is chosen, alpha and beta are to be chosen arbitrarily as they will not be used
     Parameters
     ----------
     sparing_factors : list/array
@@ -376,7 +379,8 @@ def whole_plan_print(sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta,fi
     """
     calculates all doses for a 5 fraction treatment (with 6 known sparing factors)
     sparing_factors: list or array of 6 sparing factors that have been observed.
-
+    To used a fixed probability distribution, change fixed_prob to 1 and add a fixed mean and std.
+    If a fixed probability distribution is chosen, alpha and beta are to be chosen arbitrarily as they will not be used
     Parameters
     ----------
     sparing_factors : list/array
@@ -417,7 +421,8 @@ def single_fraction_print(sparing_factors,BED_OAR,BED_tumor,abt,abn,bound_OAR,bo
     """
     calculates all doses for a 5 fraction treatment (with 6 known sparing factors)
     sparing_factors: list or array of 6 sparing factors that have been observed.
-
+    To used a fixed probability distribution, change fixed_prob to 1 and add a fixed mean and std.
+    If a fixed probability distribution is chosen, alpha and beta are to be chosen arbitrarily as they will not be used
     Parameters
     ----------
     sparing_factors : list/array
