@@ -3,7 +3,6 @@
 2D interpolation. In this program the optimal fraction doses are compueted based on a maximal OAR dose while maximizing tumor BED.
 single_fraction allows to compute single fraction doses, while whole_plan computes the doses for a whole treatment plan (when all sparing factors are known).
 whole_plan_print prints the doses in a well-aranged manner.
-
 """
 
 
@@ -199,7 +198,7 @@ def distribution_update(sparing_factors,alpha,beta):
 
 
         
-def value_eval(fraction,BED,sparing_factors,alpha,beta,abt,abn,bound):
+def value_eval(fraction,BED,sparing_factors,alpha,beta,abt,abn,bound,fixed_prob = 0, fixed_mean = 0, fixed_std = 0):
     """
     calculates the optimal dose for the desired fraction.
 
@@ -209,18 +208,25 @@ def value_eval(fraction,BED,sparing_factors,alpha,beta,abt,abn,bound):
         number of actual fraction (1 for first, 2 for second, etc.)
     BED : float
         accumulated BED in OAR (from previous fractions) zero in fraction 1
-    actual_sparing : TYPE
-        sparing factor of actual fraction
-    sf : list/array
+
+    sparing_factors : list/array
         list of sparing factor distribution.
-    prob : list/array
-        probability for each possible sparing factor.
+    alpha : float
+        alpha hyperparameter of std prior derived from previous patients.
+    beta : float
+        beta hyperparameter of std prior derived from previous patients
     abt : float
         alpha-beta ratio of tumor.
     abn : float
         alpha-beta ratio of OAR.
     bound : float
         upper limit of OAR.
+    fixed_prob : int
+        this variable is to turn on a fixed probability distribution. If the variable is not used (0), then the probability will be updated. If the variable is turned to 1, the inserted mean and std will be used for a fixed sparing factor distribution
+    fixed_mean: float
+        mean of the fixed sparing factor normal distribution
+    fixed_std: float
+        standard deviation of the fixed sparing factor normal distribution
 
     Returns
     -------
@@ -229,8 +235,12 @@ def value_eval(fraction,BED,sparing_factors,alpha,beta,abt,abn,bound):
 
     """
     actual_sparing = sparing_factors[-1]
-    mean = np.mean(sparing_factors) #extract the mean and std to setup the sparingfactor distribution    
-    standard_deviation = std_calc(sparing_factors,alpha,beta)
+    if fixed_prob != 1:
+        mean = np.mean(sparing_factors) #extract the mean and std to setup the sparingfactor distribution    
+        standard_deviation = std_calc(sparing_factors,alpha,beta)
+    if fixed_prob == 1:
+        mean = fixed_mean
+        standard_deviation = fixed_std
     X = get_truncated_normal(mean= mean, sd=standard_deviation, low=0, upp=1.3)
     prob = np.array(probdist(X))
     sf= np.arange(0.01,1.31,0.01)
@@ -316,7 +326,7 @@ def value_eval(fraction,BED,sparing_factors,alpha,beta,abt,abn,bound):
     actual_dose_delivered = actual_policy[index_sf]/10
 
     return [Values,policy,actual_value,actual_policy,dose_delivered_OAR,dose_delivered_tumor,total_dose_delivered_OAR,actual_dose_delivered]
-def whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta):
+def whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta,fixed_prob= 0,fixed_mean = 0,fixed_std =0):
     """
     calculates whole plan given all sparing factors
 
@@ -334,6 +344,12 @@ def whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta):
         shape of inverse-gamma distribution
     beta : float
         scale of inverse-gamme distrinbution
+    fixed_prob : int
+        this variable is to turn on a fixed probability distribution. If the variable is not used (0), then the probability will be updated. If the variable is turned to 1, the inserted mean and std will be used for a fixed sparing factor distribution
+    fixed_mean: float
+        mean of the fixed sparing factor normal distribution
+    fixed_std: float
+        standard deviation of the fixed sparing factor normal distribution
 
     Returns
     -------
@@ -346,23 +362,23 @@ def whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta):
     OAR_doses = np.zeros(5)
     physical_doses = np.zeros(5)
     for looper in range(0,5):
-        [Values,policy,actual_value,actual_policy,dose_delivered_OAR,tumor_dose,total_dose_delivered_OAR,actual_dose_delivered] = value_eval(looper+1,total_dose_delivered_OAR,sparing_factors[:looper+2],alpha,beta,abt,abn,OAR_limit)
+        [Values,policy,actual_value,actual_policy,dose_delivered_OAR,tumor_dose,total_dose_delivered_OAR,actual_dose_delivered] = value_eval(looper+1,total_dose_delivered_OAR,sparing_factors[:looper+2],alpha,beta,abt,abn,OAR_limit,fixed_prob, fixed_mean, fixed_std)
         tumor_doses[looper] = tumor_dose
         physical_doses[looper] = actual_dose_delivered
         OAR_doses[looper] = dose_delivered_OAR     
         total_tumor_dose += tumor_dose
     return [tumor_doses,OAR_doses,physical_doses]
 
-def whole_plan_print(sparing_factors,OAR_limit,abt,abn,alpha,beta):
-    [tumor_doses,OAR_doses,physical_doses] = whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta)
+def whole_plan_print(sparing_factors,OAR_limit,abt,abn,alpha,beta, fixed_prob = 0, fixed_mean = 0, fixed_std = 0):
+    [tumor_doses,OAR_doses,physical_doses] = whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta,fixed_prob,fixed_mean,fixed_std)
     for i in range(0,5):
         print('Fraction ',(i+1))
         print('physical dose delivered  = ',physical_doses[i])
         print('tumor dose in BED = ', tumor_doses[i])
         print('OAR dose in BED = ', OAR_doses[i])
     print('total tumor BED = ',np.sum(tumor_doses))
-
-def single_fraction(sparing_factors,accumulated_OAR_BED, OAR_limit, abt, abn, alpha, beta):
+    
+def single_fraction(sparing_factors,accumulated_OAR_BED, OAR_limit, abt, abn, alpha, beta,fixed_prob = 0, fixed_mean = 0, fixed_std = 0):
     """
 
     Parameters
@@ -380,16 +396,21 @@ def single_fraction(sparing_factors,accumulated_OAR_BED, OAR_limit, abt, abn, al
     alpha : float
         shape of inverse-gamma distribution
     beta : float
-        scale of inverse-gamme distrinbution    
+        scale of inverse-gamme distrinbution 
+    fixed_prob : int
+        this variable is to turn on a fixed probability distribution. If the variable is not used (0), then the probability will be updated. If the variable is turned to 1, the inserted mean and std will be used for a fixed sparing factor distribution
+    fixed_mean: float
+        mean of the fixed sparing factor normal distribution
+    fixed_std: float
+        standard deviation of the fixed sparing factor normal distribution    
    
     Returns
     -------
     None.
 
     """
-    [Values,policy,actual_value,actual_policy,dose_delivered_OAR,tumor_dose,total_dose_delivered_OAR,actual_dose_delivered] = value_eval(len(sparing_factors)-1,0,sparing_factors,alpha,beta,abt,abn,OAR_limit)
+    [Values,policy,actual_value,actual_policy,dose_delivered_OAR,tumor_dose,total_dose_delivered_OAR,actual_dose_delivered] = value_eval(len(sparing_factors)-1,0,sparing_factors,alpha,beta,abt,abn,OAR_limit,fixed_prob, fixed_mean,fixed_std)
     print('fraction', (len(sparing_factors)-1))
     print('physical dose delivered  = ',actual_dose_delivered)
     print('tumor dose in BED = ', tumor_dose)
-    print('OAR dose in BED = ', dose_delivered_OAR)
-    
+    print('OAR dose in BED = ', dose_delivered_OAR)    
