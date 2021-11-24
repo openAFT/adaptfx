@@ -409,7 +409,7 @@ def single_fraction(sparing_factors,accumulated_OAR_BED, OAR_limit, abt, abn, al
     None.
 
     """
-    [Values,policy,actual_value,actual_policy,dose_delivered_OAR,tumor_dose,total_dose_delivered_OAR,actual_dose_delivered] = value_eval(len(sparing_factors)-1,0,sparing_factors,alpha,beta,abt,abn,OAR_limit,fixed_prob, fixed_mean,fixed_std)
+    [Values,policy,actual_value,actual_policy,dose_delivered_OAR,tumor_dose,total_dose_delivered_OAR,actual_dose_delivered] = value_eval(len(sparing_factors)-1,accumulated_OAR_BED,sparing_factors,alpha,beta,abt,abn,OAR_limit,fixed_prob, fixed_mean,fixed_std)
     print('fraction', (len(sparing_factors)-1))
     print('physical dose delivered  = ',actual_dose_delivered)
     print('tumor dose in BED = ', tumor_dose)
