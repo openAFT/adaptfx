@@ -220,9 +220,10 @@ if __name__=='__main__':
             fixed_mean = float(ent_mean.get())
             fixed_std = float(ent_std.get())
         try:
-            lbl_output.pack_forget()
+            global lbl_output
+            lbl_output.destroy()
         except:
-            pass
+            pass   
         if var.get() == 0:
             try:
                 sparing_factors_str = (ent_sf.get()).split()
@@ -232,7 +233,7 @@ if __name__=='__main__':
                 OAR_limit = float(ent_OARlimit.get())
                 tumor_limit = float(ent_tumorlimit.get())
                 [tumor_doses,OAR_doses,physical_doses] = intp3.whole_plan(sparing_factors,abt,abn,OAR_limit,tumor_limit,alpha,beta,fixed_prob,fixed_mean,fixed_std)
-              
+                lbl_output = tk.Frame()
                 lbl_output.pack()
                 frame = tk.Frame(master = lbl_output, relief = tk.RAISED, borderwidth = 1)
                 frame.grid(row = 0,column = 0)
