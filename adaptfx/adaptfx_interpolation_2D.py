@@ -302,9 +302,9 @@ def value_eval(fraction,BED,sparing_factors,alpha,beta,abt,abn,bound,fixed_prob 
                         best_action = (-sf+np.sqrt(sf**2+4*sf**2*(90-bed_value)/abn))/(2*sf**2/abn)
                         if bed_value > 90:
                             best_action = np.zeros(best_action.shape)
-                        Values[index][bed_index] = BED_calc0(best_action,abt)                        
                         best_action[best_action > 22.3] = 22.3
                         best_action[best_action<0] = 0
+                        Values[index][bed_index] = BED_calc0(best_action,abt)                        
                         policy[index][bed_index] = best_action*10 #this one can be pulled before values. in fact we dont want to deliver unlimited amounts of dose
                     else:
                         penalties = np.zeros(future_bed.shape)
