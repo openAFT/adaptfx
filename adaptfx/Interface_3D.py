@@ -1,14 +1,16 @@
+# -*- coding: utf-8 -*-
 """
-GUI for 2D adaptive fractionation
+3D adaptive fractionation interpolation
 """
 
 import tkinter as tk
 import numpy as np
-import adaptfx_interpolation_2D as int2
 from scipy.stats import invgamma
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 import pandas as pd
+from .adaptfx_interpolation_3D import *
+
 
 if __name__=='__main__':
     # Create a new window with the title "Address Entry Form"
@@ -17,9 +19,6 @@ if __name__=='__main__':
     frm_probdis = tk.Frame(relief=tk.SUNKEN, borderwidth=3)
     frm_probdis.pack()
     
-    frm_import_data = tk.Frame()
-
-    frm_import_data.pack()
     data = []
     def select_file():
         filetypes = (
@@ -65,7 +64,6 @@ if __name__=='__main__':
             ent_beta.configure(state = 'disabled')
             ent_mean.configure(state = 'disabled')
             ent_std.configure(state = 'disabled')
-            print(ent_file.get())
         elif var_radio.get() == 3:
             ent_mean.configure(state = 'normal')
             ent_std.configure(state = 'normal')
@@ -143,6 +141,8 @@ if __name__=='__main__':
     ent_beta.insert(0,"0.0004167968394550765")
     
     
+
+    
     # Create a new frame `frm_form` to contain the Label
     # and Entry widgets for entering variable values
     frm_form = tk.Frame(relief=tk.SUNKEN, borderwidth=3)
@@ -154,48 +154,46 @@ if __name__=='__main__':
     
     frm_output = tk.Frame(relief=tk.SUNKEN, borderwidth = 3)
     frm_output.pack(fill=tk.BOTH, ipadx = 10, ipady = 10)
-    
-    lbl_info = tk.Label(master = frm_output, text = "There are several default values set. Only the sparing factors have to been inserted.")
-    lbl_info.pack()
-    
+
+    #add label and entry for filename
+    label = tk.Label(master=frm_form, text='file path of prior patients')
+    ent_file = tk.Entry(master=frm_form, width=50)
+    label.grid(row=0, column=0, sticky="e")
+    ent_file.grid(row=0, column=1)
     
 #assign infobutton commands
 
-    def info3():
-        lbl_info["text"] = 'Insert the sparing factors that were observed so far.\n The sparing factor of the planning session must be included!.\nThe sparing factors must be separated by spaces e.g.:\n1.1 0.95 0.88 \nFor a whole plan, 6 sparing factors are needed.'
-    def info4():
+    def info10():
+        lbl_info["text"] = 'Insert the sparing factors that were observed so far.\n The sparing factor of the planning session must be included!.\nThe sparing factors must be separated by spaces e.g.:\n1.1 0.95 0.88\nFor a whole plan 6 sparing factors are needed.'
+    def info11():
         lbl_info["text"] = 'Insert the alpha-beta ratio of the tumor tissue.'
-    def info5():
-        lbl_info["text"] = 'Insert the alpha-beta ratio of the dose-limiting Organ at risk '
-    def info6():
-        lbl_info["text"] = 'Insert the maximum dose delivered to the dose-limiting OAR in BED'
-    def info7():
-        lbl_info["text"] = 'Insert the prescribed biological effectiv dose to be delivered to the tumor'
-    info_funcs = [info3,info4,info5,info6,info7]    
-
+    def info12():
+        lbl_info["text"] = 'Insert the alpha-beta ratio of the dose-limiting Organ at risk.'
+    def info13():
+        lbl_info["text"] = 'Insert the maximum dose delivered to the dose-limiting OAR in BED.'
+    def info14():
+        lbl_info["text"] = 'Insert the prescribed biological effectiv dose to be delivered to the tumor.'
+    def info15():
+        lbl_info["text"] = 'Insert the accumulated tumor BED so far. (If fraction one, it is zero).'
+    def info16():
+        lbl_info["text"] = 'Insert the accumulated OAR dose so far. (If fraction one, it is zero).'
+    info_funcs = [info10,info11,info12,info13,info14,info15,info16]    
+    info_buttons =["btn_sf","btn_abt","btn_abn","btn_OARlimit","btn_tumorlimit","btn_tumorBED","btn_OARBED"]
+    
     # List of field labels
     labels = [
         "sparing factors separated by spaces:",
         "alpha-beta ratio of tumor:",
         "alpha-beta ratio of OAR:", 
-        "OAR limit",
-        "accumulated tumor dose"
+        "OAR limit:",
+        "prescribed tumor dose:",
+        "accumulated tumor dose:",
+        "accumulated OAR dose:"
     ]
-    entries = ["ent_sf","ent_abt","ent_abn","ent_OARlimit","ent_BED"]
-    info_buttons =["btn_sf","btn_abt","btn_abn","btn_OARlimit","btn_BED"]
-    btn_sf, btn_abt, btn_abn, btn_OARlimit, btn_BED = 0,0,0,0,0
-    ent_sf, ent_abt, ent_abn, ent_OARlimit, ent_BED = 0,0,0,0,0
-    example_list = ["sparing factors separated by space",10,3,90,"only used if we calculate the dose for a single fraction"]
+    entries = ["ent_sf","ent_abt","ent_abn","ent_OARlimit","ent_tumorlimit","ent_BED_tumor","ent_BED_OAR"]
+    ent_sf, ent_abt, ent_abn, ent_OARlimit,ent_tumorlimit, ent_BED_tumor, ent_BED_OAR = 0,0,0,0,0,0,0
+    example_list = ["sparing factors separated by space",10,3,90,72,"only needed if we calculate the dose for a single fraction","only needed if we calculate the dose for a single fraction"]
     # Loop over the list of field labels
-    
-
- 
-    
-    
-    
-    
-    
-    
     for idx, text in enumerate(labels):
         # Create a Label widget with the text from the labels list
         label = tk.Label(master=frm_form, text=text)
@@ -204,40 +202,39 @@ if __name__=='__main__':
         
         # Use the grid geometry manager to place the Label and
         # Entry widgets in the row whose index is idx
-        label.grid(row=idx+1, column=0, sticky="e")
-        globals()[entries[idx]].grid(row=idx+1, column=1)
+        label.grid(row=idx, column=0, sticky="e")
+        globals()[entries[idx]].grid(row=idx, column=1)
         globals()[entries[idx]].insert(0,f"{example_list[idx]}")
         globals()[info_buttons[idx]] = tk.Button(master = frm_form,text = '?',command = info_funcs[idx])
-        globals()[info_buttons[idx]].grid(row=idx+1,column=2)
+        globals()[info_buttons[idx]].grid(row=idx,column=2)
         
-
+        
     def compute_plan():
         alpha = float(ent_alpha.get())
         beta = float(ent_beta.get())
-        try:
-            global lbl_output
-            lbl_output.destroy()
-        except:
-            pass      
         if var_radio.get() != 3:
             fixed_prob = 0
             fixed_mean = 0
             fixed_std = 0
-        if var_radio.get() == 3:
+        elif var_radio.get() == 3:
             fixed_prob = 1
             fixed_mean = float(ent_mean.get())
             fixed_std = float(ent_std.get())
+        try:
+            global lbl_output
+            lbl_output.destroy()
+        except:
+            pass   
         if var.get() == 0:
             try:
-                alpha = float(ent_alpha.get())
-                beta = float(ent_beta.get())
                 sparing_factors_str = (ent_sf.get()).split()
                 sparing_factors = [float(i) for i in sparing_factors_str]
                 abt = float(ent_abt.get())
                 abn = float(ent_abn.get())
                 OAR_limit = float(ent_OARlimit.get())
-                [tumor_doses,OAR_doses,physical_doses] = int2.whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta,fixed_prob,fixed_mean,fixed_std)
-              
+                tumor_limit = float(ent_tumorlimit.get())
+                [tumor_doses,OAR_doses,physical_doses] = whole_plan(sparing_factors,abt,abn,OAR_limit,tumor_limit,alpha,beta,fixed_prob,fixed_mean,fixed_std)
+                lbl_output = tk.Frame()
                 lbl_output.pack()
                 frame = tk.Frame(master = lbl_output, relief = tk.RAISED, borderwidth = 1)
                 frame.grid(row = 0,column = 0)
@@ -258,7 +255,6 @@ if __name__=='__main__':
                 frame = tk.Frame(master = lbl_output, relief = tk.RAISED, borderwidth = 1)
                 frame.grid(row = 0,column = 4)
                 label= tk.Label(master = frame, text = "BED delivered to OAR")
-                lbl_output = tk.Frame()
                 label.pack()
                 for i in range(1,6):
                     for j in range(5):
@@ -301,7 +297,7 @@ if __name__=='__main__':
                 label.pack()
                 
             except ValueError:
-                lbl_info["text"] = "please enter correct values\nsparing factors have to been inserted with space in between. No additional brackets needed."
+                lbl_info["text"] = "please enter correct values. Use the ? boxes for further information."
         else:
             try:
                 sparing_factors_str = (ent_sf.get()).split()
@@ -309,29 +305,44 @@ if __name__=='__main__':
                 abt = float(ent_abt.get())
                 abn = float(ent_abn.get())
                 OAR_limit = float(ent_OARlimit.get())
-                BED = float(ent_BED.get())
-                [Values,policy,actual_value,actual_policy,dose_delivered_OAR,dose_delivered_tumor,total_dose_delivered_OAR,actual_dose_delivered] =  int2.value_eval(len(sparing_factors)-1,BED,sparing_factors,alpha,beta,abt,abn,OAR_limit,fixed_prob,fixed_mean,fixed_std)
-                lbl_info["text"] = f"The optimal dose for fraction {len(sparing_factors)-1},  = {actual_dose_delivered}\naccumulated dose in tumor = {dose_delivered_tumor}\naccumulated dose OAR = {dose_delivered_OAR}"
+                tumor_limit = float(ent_tumorlimit.get())
+                BED_tumor = float(ent_BED_tumor.get())
+                BED_OAR = float(ent_BED_OAR.get())
+                [optimal_dose,total_dose_delivered_tumor,total_dose_delivered_OAR,tumor_dose,OAR_dose] =  value_eval(len(sparing_factors)-1,BED_OAR,BED_tumor,sparing_factors,abt,abn,OAR_limit,tumor_limit,alpha,beta,fixed_prob,fixed_mean,fixed_std)
+                lbl_info["text"] = f"The optimal dose for fraction {len(sparing_factors)-1},  = {optimal_dose}\naccumulated dose in tumor = {total_dose_delivered_tumor}\naccumulated dose OAR = {total_dose_delivered_OAR}"
             except ValueError:
-                lbl_info["text"] = "please enter correct values\nsparing factors have to been inserted with space in between. No additional brackets needed."        
-    ent_BED.configure(state = 'disabled') #the standard calculation is a whole plan calculation
+                lbl_info["text"] = "please enter correct values. Use the ? boxes for further information."        
+    ent_BED_OAR.configure(state = 'disabled') #the standard calculation is a whole plan calculation
+    ent_BED_tumor.configure(state = 'disabled')
     def checkbox():
         if var.get() == 0:
-            ent_BED.configure(state = 'disabled')
+            ent_BED_tumor.configure(state = 'disabled')
+            ent_BED_OAR.configure(state = 'disabled')
         else:
-            ent_BED.configure(state = 'normal')
+            ent_BED_tumor.configure(state = 'normal')
+            ent_BED_OAR.configure(state = 'normal')
     # Create a new frame `frm_buttons` to contain the compute button
     # whole window in the horizontal direction and has
     # 5 pixels of horizontal and vertical padding.
-
+    frm_buttons = tk.Frame()
+    frm_buttons.pack(fill=tk.X, ipadx=5, ipady=5)
             
     btn_compute = tk.Button(master=frm_buttons, text="compute plan", command = compute_plan)
     btn_compute.pack(side=tk.BOTTOM, ipadx=10)
     var = tk.IntVar()
     chk_single_fraction = tk.Checkbutton(master = frm_buttons,text = "Calculate dose only for actual fraction",variable = var,onvalue = 1,offvalue = 0, command=checkbox)
     chk_single_fraction.pack(side = tk.BOTTOM, padx = 10, ipadx = 10)
+    # frm_output = tk.Frame(relief=tk.SUNKEN, borderwidth = 3)
+    # frm_output.pack(fill=tk.BOTH, ipadx = 10, ipady = 10)
     
+
+    
+    
+    lbl_info = tk.Label(master = frm_output, text = "There are several default values set. Only the sparing factors have to been inserted.\nThis program might take some minutes to calculate")
+    lbl_info.pack()
     lbl_output = tk.Frame()
-   
+
+    
+    
     # Start the application
     window.mainloop()

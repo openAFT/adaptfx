@@ -141,7 +141,7 @@ def argfind(searched_list,value): #this function is only needed as long as the B
     return  index
     
 def result_calc_BEDNT(pol4,pol,sf,sparing_factors,abt = 10,abn = 3): #this function calculates the fractionation plan according to the reinforcement learning
-     '''in this function gives the treatment plan for a set of sparing factors based on the sparing factors that have been used to calculate the optimal policy
+    '''in this function gives the treatment plan for a set of sparing factors based on the sparing factors that have been used to calculate the optimal policy
     the pol4 and pol matrices are the ones that are returnedin the value_eval function
     pol4: first fraction policy
     pol: second - fifth fraction policy
