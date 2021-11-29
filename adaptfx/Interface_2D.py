@@ -236,7 +236,7 @@ if __name__=='__main__':
                 abt = float(ent_abt.get())
                 abn = float(ent_abn.get())
                 OAR_limit = float(ent_OARlimit.get())
-                [tumor_doses,OAR_doses,physical_doses] = int2.whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta,fixed_prob,fixed_mean,fixed_std)
+                [tumor_doses,OAR_doses,physical_doses] = whole_plan(sparing_factors,OAR_limit,abt,abn,alpha,beta,fixed_prob,fixed_mean,fixed_std)
                 lbl_output = tk.Frame()
                 lbl_output.pack()
                 frame = tk.Frame(master = lbl_output, relief = tk.RAISED, borderwidth = 1)
