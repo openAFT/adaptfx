@@ -4,7 +4,7 @@ GUI for 2D adaptive fractionation
 
 import tkinter as tk
 import numpy as np
-import adaptfx_interpolation_2D as int2
+from .adaptfx_interpolation_2D import *
 from scipy.stats import invgamma
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
@@ -310,7 +310,7 @@ if __name__=='__main__':
                 abn = float(ent_abn.get())
                 OAR_limit = float(ent_OARlimit.get())
                 BED = float(ent_BED.get())
-                [Values,policy,actual_value,actual_policy,dose_delivered_OAR,dose_delivered_tumor,total_dose_delivered_OAR,actual_dose_delivered] =  int2.value_eval(len(sparing_factors)-1,BED,sparing_factors,alpha,beta,abt,abn,OAR_limit,fixed_prob,fixed_mean,fixed_std)
+                [Values,policy,actual_value,actual_policy,dose_delivered_OAR,dose_delivered_tumor,total_dose_delivered_OAR,actual_dose_delivered] =  value_eval(len(sparing_factors)-1,BED,sparing_factors,alpha,beta,abt,abn,OAR_limit,fixed_prob,fixed_mean,fixed_std)
                 lbl_info["text"] = f"The optimal dose for fraction {len(sparing_factors)-1},  = {actual_dose_delivered}\naccumulated dose in tumor = {dose_delivered_tumor}\naccumulated dose OAR = {dose_delivered_OAR}"
             except ValueError:
                 lbl_info["text"] = "please enter correct values\nsparing factors have to been inserted with space in between. No additional brackets needed."        

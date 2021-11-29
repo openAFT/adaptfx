@@ -9,7 +9,8 @@ from scipy.stats import invgamma
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 import pandas as pd
-import adaptfx_interpolation_3D as intp3
+from .adaptfx_interpolation_3D import *
+
 
 if __name__=='__main__':
     # Create a new window with the title "Address Entry Form"
@@ -232,7 +233,7 @@ if __name__=='__main__':
                 abn = float(ent_abn.get())
                 OAR_limit = float(ent_OARlimit.get())
                 tumor_limit = float(ent_tumorlimit.get())
-                [tumor_doses,OAR_doses,physical_doses] = intp3.whole_plan(sparing_factors,abt,abn,OAR_limit,tumor_limit,alpha,beta,fixed_prob,fixed_mean,fixed_std)
+                [tumor_doses,OAR_doses,physical_doses] = whole_plan(sparing_factors,abt,abn,OAR_limit,tumor_limit,alpha,beta,fixed_prob,fixed_mean,fixed_std)
                 lbl_output = tk.Frame()
                 lbl_output.pack()
                 frame = tk.Frame(master = lbl_output, relief = tk.RAISED, borderwidth = 1)
@@ -307,7 +308,7 @@ if __name__=='__main__':
                 tumor_limit = float(ent_tumorlimit.get())
                 BED_tumor = float(ent_BED_tumor.get())
                 BED_OAR = float(ent_BED_OAR.get())
-                [optimal_dose,total_dose_delivered_tumor,total_dose_delivered_OAR,tumor_dose,OAR_dose] =  intp3.value_eval(len(sparing_factors)-1,BED_OAR,BED_tumor,sparing_factors,abt,abn,OAR_limit,tumor_limit,alpha,beta,fixed_prob,fixed_mean,fixed_std)
+                [optimal_dose,total_dose_delivered_tumor,total_dose_delivered_OAR,tumor_dose,OAR_dose] =  value_eval(len(sparing_factors)-1,BED_OAR,BED_tumor,sparing_factors,abt,abn,OAR_limit,tumor_limit,alpha,beta,fixed_prob,fixed_mean,fixed_std)
                 lbl_info["text"] = f"The optimal dose for fraction {len(sparing_factors)-1},  = {optimal_dose}\naccumulated dose in tumor = {total_dose_delivered_tumor}\naccumulated dose OAR = {total_dose_delivered_OAR}"
             except ValueError:
                 lbl_info["text"] = "please enter correct values. Use the ? boxes for further information."        
