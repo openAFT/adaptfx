@@ -366,9 +366,7 @@ class GUIextended3D:
                     physical_doses[looper] = actual_policy
                     tumor_doses[looper] = tumor_dose
                     OAR_doses[looper] = OAR_dose
-                    self.pb['value'] += 100/number_of_fractions
-                    print(looper)
-                    
+                    self.pb['value'] += 100/number_of_fractions                    
                 self.lbl_output = tk.Frame()
                 self.lbl_output.pack()
                 frame = tk.Frame(master = self.lbl_output, relief = tk.RAISED, borderwidth = 1)
