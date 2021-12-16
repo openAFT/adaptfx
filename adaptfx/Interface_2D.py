@@ -4,7 +4,7 @@ GUI for 2D adaptive fractionation
 
 import tkinter as tk
 import numpy as np
-from .adaptfx_interpolation_2D import *
+from adaptfx_interpolation_2D import *
 from scipy.stats import invgamma
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
@@ -258,7 +258,6 @@ if __name__=='__main__':
                 frame = tk.Frame(master = lbl_output, relief = tk.RAISED, borderwidth = 1)
                 frame.grid(row = 0,column = 4)
                 label= tk.Label(master = frame, text = "BED delivered to OAR")
-                lbl_output = tk.Frame()
                 label.pack()
                 for i in range(1,6):
                     for j in range(5):
