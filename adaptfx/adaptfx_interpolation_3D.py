@@ -71,7 +71,7 @@ def probdist(X):
     """
     prob = np.zeros(130)
     idx=0
-    for i in np.arange(0.01,1.31,0.01):
+    for i in np.arange(0.01,1.71,0.01):
         prob[idx] = X.cdf(i+0.004999999999999999999)-X.cdf(i-0.005)
         idx +=1
     return prob
@@ -97,7 +97,7 @@ def std_calc(measured_data,alpha,beta):
 
     """
     n = len(measured_data)
-    var_values = np.arange(0.00001,0.25,0.00001)
+    var_values = np.arange(0.00001,0.4,0.00001)
     likelihood_values = np.zeros(len(var_values))
     for index,value in enumerate(var_values):
         likelihood_values[index] = value**(-alpha-1)/value**(n/2)*np.exp(-beta/value)*np.exp(-np.var(measured_data)*n/(2*value))
@@ -227,7 +227,7 @@ def value_eval(fraction,BED_OAR,BED_tumor,sparing_factors,abt,abn,bound_OAR,boun
         standard_deviation = fixed_std
     X = get_truncated_normal(mean= mean, sd=standard_deviation, low=0, upp=1.3)
     prob = np.array(probdist(X))
-    sf= np.arange(0.01,1.31,0.01)
+    sf= np.arange(0.01,1.71,0.01)
     sf = sf[prob>0.00001] #get rid of all probabilities below 10^-5
     prob = prob[prob>0.00001]
     underdosepenalty = 10

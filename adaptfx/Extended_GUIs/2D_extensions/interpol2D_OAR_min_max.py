@@ -49,9 +49,9 @@ def probdist(X):
         list with probabilities for each sparing factor.
 
     """
-    prob = np.zeros(130)
+    prob = np.zeros(170)
     idx=0
-    for i in np.arange(0.01,1.31,0.01):
+    for i in np.arange(0.01,1.71,0.01):
         prob[idx] = X.cdf(i+0.004999999999999999999)-X.cdf(i-0.005)
         idx +=1
     return prob
@@ -76,7 +76,7 @@ def std_calc(measured_data,alpha,beta):
 
     """  
     n = len(measured_data)
-    var_values = np.arange(0.00001,0.25,0.00001)
+    var_values = np.arange(0.00001,0.4,0.00001)
     likelihood_values = np.zeros(len(var_values))
     for index,value in enumerate(var_values):
         likelihood_values[index] = value**(-alpha-1)/value**(n/2)*np.exp(-beta/value)*np.exp(-np.var(measured_data)*n/(2*value))
@@ -225,7 +225,7 @@ def value_eval(fraction,number_of_fractions,accumulated_dose,sparing_factors,alp
     BEDT = np.arange(accumulated_dose,goal,1)
     BEDT = np.concatenate((BEDT,[goal,goal+1])) #add an extra step outside of our prescribed tumor dose which will be penalized to make sure that we aim at the prescribe tumor dose
     prob = np.array(probdist(X))
-    sf= np.arange(0.01,1.31,0.01)
+    sf= np.arange(0.01,1.71,0.01)
     sf = sf[prob>0.00001]
     prob = prob[prob>0.00001]
     #we prepare an empty values list and open an action space which is equal to all the dose numbers that can be given in one fraction 
