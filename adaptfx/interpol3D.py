@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Extended 3D interpolator
+whole plan 3D interpolation. This algorithm tracks tumor and OAR BED. If the prescribed tumor dose can be reached, the OAR dose is minimized. If the prescribed tumor dose can not be reached while staying below
+maximum BED, the tumor dose is maximized. The value_eval function calculates the optimal dose for one sparing factor given a sparing factor list and the alpha and beta hyperparameter of previous data (can be calculated with data_fit).
+the whole_plan function calculates the whole plan given all sparing factors and the hyperparameters.
+For extended functions inspect value_eval or whole_plan. Also read the extended function in the readme file.
 """
 
 import numpy as np

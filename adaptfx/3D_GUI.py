@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-whole plan 3D interpolation. This algorithm tracks tumor and OAR BED. If the prescribed tumor dose can be reached, the OAR dose is minimized. If the prescribed tumor dose can not be reached while staying below
-maximum BED, the tumor dose is maximized. The value_eval function calculates the optimal dose for one sparing factor given a sparing factor list and the alpha and beta hyperparameter of previous data (can be calculated with data_fit).
-the whole_plan function calculates the whole plan given all sparing factors and the hyperparameters
+GUI for 3D adaptive fractionation with minimum and maximum dose
 """
 
 import tkinter as tk
