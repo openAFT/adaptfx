@@ -4,7 +4,7 @@ GUI for 2D adaptive fractionation with minimum and maximum dose
 # The whole GUI needs to be class like to have a working scrollbar. Update coming soon!
 import tkinter as tk
 import numpy as np
-import interpol2D as inttumor
+import interpol2D_tumor as inttumor
 import interpol2D_OAR as intOAR
 from scipy.stats import invgamma
 from tkinter import filedialog as fd
