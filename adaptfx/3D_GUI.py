@@ -12,7 +12,7 @@ from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 import tkinter.ttk as ttk
 import pandas as pd
-import interpol3 as intp3
+import interpol3D as intp3
 import threading
 
 class VerticalScrolledFrame(tk.Frame):
