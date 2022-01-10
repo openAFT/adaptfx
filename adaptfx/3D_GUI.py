@@ -345,7 +345,7 @@ class GUIextended3D:
         
         
     def infomin(self):
-        self.lbl_info["text"] = 'Insert the minimal physical dose that shall be delivered to the PTV95 in one fraction.'
+        self.lbl_info["text"] = 'Insert the minimal physical dose that shall be delivered to the PTV95 in one fraction.\nIt is recommended to not put too high minimum dose constraints to allow adaptation'
         
         
     def infomax(self):

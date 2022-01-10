@@ -298,7 +298,9 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
                     actual_policy = Vs.argmax(axis=1)
                     actual_value = Vs.max(axis=1)  
                 else:
-                    best_action = (-sf+np.sqrt(sf**2+4*sf**2*(90-BED)/abn))/(2*sf**2/abn)
+                    best_action = (-sf+np.sqrt(sf**2+4*sf**2*(bound-BED)/abn))/(2*sf**2/abn)
+                    if BED > bound:
+                        best_action = np.ones(best_action.shape)*min_dose
                     best_action[best_action<min_dose] = min_dose
                     best_action[best_action>max_dose] = max_dose
                     actual_policy = best_action*10
@@ -308,7 +310,7 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
                     future_bed = delivered_doses + bed_value
                     future_bed[future_bed > bound] = upperbound #any dose surpassing 90.1 is set to 90.1
                     if index == 0: #last state no more further values to add                    
-                        best_action = (-sf+np.sqrt(sf**2+4*sf**2*(90-bed_value)/abn))/(2*sf**2/abn)
+                        best_action = (-sf+np.sqrt(sf**2+4*sf**2*(bound-bed_value)/abn))/(2*sf**2/abn)
                         if bed_value > bound:
                             best_action = np.zeros(best_action.shape)
                         best_action[best_action < min_dose] = min_dose
