@@ -315,11 +315,10 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
                         best_action_BED = (-sf+np.sqrt(sf**2+4*sf**2*(bound_OAR-OAR_value)/abn))/(2*sf**2/abn) #calculate maximal dose that can be delivered to OAR and tumor
                         best_action_tumor = (-np.ones(len(sf))+np.sqrt(np.ones(len(sf))+4*np.ones(len(sf))*(bound_tumor-tumor_value)/abt))/(2*np.ones(len(sf))**2/abt)
                         best_action = np.min([best_action_BED,best_action_tumor],axis=0) #take the smaller of both doses to not surpass the limit                
-                        best_action[best_action > max_dose] = max_dose #here seems to be a problem!
+                        best_action[best_action > max_dose] = max_dose 
                         best_action[best_action < min_dose] = min_dose
                         if OAR_value > bound_OAR or tumor_value > bound_tumor: #if the limit is already surpassed we add a penaltsy
                             best_action = np.ones(best_action.shape)*min_dose
-                            # penalty = -100000000000 #-inf doesnt work properly as sometimes instead of -inf, a nan value is assigned which messes up the results
                         future_OAR = OAR_value + BED_calc0(best_action,abn,sf)
                         future_tumor = tumor_value + BED_calc0(best_action,abt,1)
                         overdose_penalty2 = np.zeros(best_action.shape) #we need a second penalty if we overdose in the last fraction

@@ -309,14 +309,14 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
                     future_bed[future_bed > bound] = upperbound #any dose surpassing 90.1 is set to 90.1
                     if index == 0: #last state no more further values to add                    
                         best_action = (-sf+np.sqrt(sf**2+4*sf**2*(90-bed_value)/abn))/(2*sf**2/abn)
-                        if bed_value > 90:
+                        if bed_value > bound:
                             best_action = np.zeros(best_action.shape)
                         best_action[best_action < min_dose] = min_dose
                         best_action[best_action > max_dose] = max_dose
                         future_bed = BED_calc0(sf,abn,best_action) + bed_value
                         future_bed[future_bed > bound+0.0001] = upperbound #0.0001 is added due to some rounding problems
                         penalties = np.zeros(future_bed.shape)
-                        if bed_value < 90:
+                        if bed_value < bound:
                             penalties[future_bed == upperbound] = -1000 
                         Values[index][bed_index] = BED_calc0(best_action,abt) + penalties
                         policy[index][bed_index] = (best_action-min_dose)*10 
@@ -395,7 +395,7 @@ def whole_plan(number_of_fractions,sparing_factors,abt,abn,alpha,beta,OAR_limit,
         total_tumor_dose += tumor_dose
     return [tumor_doses,OAR_doses,physical_doses]
 
-def whole_plan_print(number_of_fractions,sparing_factors,OAR_limit,abt,abn,alpha,beta,min_dose = 0, max_dose = 22.3, fixed_prob = 0, fixed_mean = 0, fixed_std = 0):
+def whole_plan_print(number_of_fractions,sparing_factors,abt,abn,alpha,beta,OAR_limit,min_dose = 0, max_dose = 22.3, fixed_prob = 0, fixed_mean = 0, fixed_std = 0):
     """    
     calculates whole plan given all sparing factors and prints the results
 
