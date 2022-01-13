@@ -5,6 +5,7 @@ maximum BED, the tumor dose is maximized. The value_eval function calculates the
 the whole_plan function calculates the whole plan given all sparing factors and the hyperparameters.
 For extended functions inspect value_eval or whole_plan. Also read the extended function in the readme file.
 The value eval function is build by assigning a penalty depending on how much dose has been delivered to the OAR (in each fraction) and by how far we are from the prescribed dose after the last fractions.
+
 """
 
 import numpy as np
@@ -12,7 +13,7 @@ from scipy.stats import truncnorm
 from scipy.stats import invgamma
 from scipy.interpolate import RegularGridInterpolator
 
-
+#right now once 90 is hit it doesnt seem to matter how much is overdosed. somehow this must be fixed
 
 def data_fit(data):
     """
@@ -277,15 +278,15 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
         elif frac_state == fraction: #if we are in the actual fraction we do not need to check all possible BED states but only the one we are in
             if fraction != number_of_fractions: 
                 future_OAR = BED_OAR + OAR_dose[actual_fraction_sf]
+                overdosing = (future_OAR - bound_OAR).clip(min = 0)
                 future_OAR[future_OAR > bound_OAR] = upperbound_normal_tissue #any dose surpassing the upper bound will be set to the upper bound which will be penalized strongly
                 future_tumor = BED_tumor + tumor_dose
                 future_tumor[future_tumor > bound_tumor] = upperbound_tumor
                 future_values_prob = (Values[index-1]*prob).sum(axis=2) #future values of tumor and oar state
                 value_interpolation = RegularGridInterpolator((BEDT,BEDNT),future_values_prob)
-                penalty_OAR_overdose = np.zeros(future_OAR.shape) #an additional penalty that needs to be defined when putting in a minimum dose
-                penalty_OAR_overdose[future_OAR > bound_OAR] = -100000000000
+                penalties = overdosing * -10000000000 #additional penalty when overdosing is needed when choosing a minimum dose to be delivered
                 future_value_actual = value_interpolation(np.array([future_tumor,future_OAR]).T) 
-                Vs = future_value_actual - OAR_dose[actual_fraction_sf] + penalty_OAR_overdose
+                Vs = future_value_actual - OAR_dose[actual_fraction_sf] + penalties
                 actual_policy = Vs.argmax(axis=0)
             else:
                 sf_end = sparing_factors[-1]
@@ -308,6 +309,7 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
             for tumor_index, tumor_value in enumerate(BEDT):
                 for OAR_index, OAR_value in enumerate(BEDNT): #this and the next for loop allow us to loop through all states
                     future_OAR = OAR_dose + OAR_value
+                    overdosing = (future_OAR - bound_OAR).clip(min = 0)
                     future_OAR[future_OAR > bound_OAR] = upperbound_normal_tissue #any dose surpassing 90.1 is set to 90.1
                     future_tumor = tumor_value + tumor_dose
                     future_tumor[future_tumor > bound_tumor] = upperbound_tumor #any dose surpassing the tumor bound is set to tumor_bound + 0.1
@@ -335,7 +337,8 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
                         future_value = np.zeros([len(sf),len(actionspace)])
                         for actual_sf in range(0,len(sf)):
                             future_value[actual_sf] = value_interpolation(np.array([future_tumor,future_OAR[actual_sf]]).T)
-                        Vs = future_value - OAR_dose
+                        penalties = overdosing * -10000000000 #additional penalty when overdosing is needed when choosing a minimum dose to be delivered
+                        Vs = future_value - OAR_dose + penalties 
                         best_action = Vs.argmax(axis=1)
                         valer = Vs.max(axis=1)
                         policy[index][tumor_index][OAR_index] = best_action

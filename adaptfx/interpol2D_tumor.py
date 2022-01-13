@@ -286,6 +286,8 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
             if index == number_of_fractions-fraction: #if we are in the actual fraction we do not need to check all possible BED states but only the one we are in
                 if fraction != number_of_fractions:
                     future_bed = BED + delivered_doses
+                    overdosing = (future_bed - bound).clip(min = 0)
+                    penalties_overdose = overdosing * -1000 #additional penalty when overdosing is needed when choosing a minimum dose to be delivered
                     future_bed[future_bed > bound] = upperbound #any dose surpassing the upper bound will be set to the upper bound which will be penalized strongly
                     value_interpolation = sc.interpolate.interp2d(sf,BEDT,Values[index-1])
                     future_value = np.zeros(len(sf)*len(actionspace)*len(sf)).reshape(len(sf),len(actionspace),len(sf))
@@ -294,7 +296,7 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
                     future_values_prob = (future_value*prob).sum(axis = 2) #in this array are all future values multiplied with the probability of getting there. shape = sparing factors x actionspace
                     penalties = np.zeros(future_bed.shape)
                     penalties[future_bed > bound] = -1000 #penalizing in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
-                    Vs = future_values_prob + BEDT_transformed + penalties
+                    Vs = future_values_prob + BEDT_transformed + penalties + penalties_overdose
                     actual_policy = Vs.argmax(axis=1)
                     actual_value = Vs.max(axis=1)  
                 else:
@@ -308,6 +310,7 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
             else:                    
                 for bed_index, bed_value in enumerate(BEDT): #this and the next for loop allow us to loop through all states
                     future_bed = delivered_doses + bed_value
+                    overdosing = (future_bed - bound).clip(min = 0)
                     future_bed[future_bed > bound] = upperbound #any dose surpassing 90.1 is set to 90.1
                     if index == 0: #last state no more further values to add                    
                         best_action = (-sf+np.sqrt(sf**2+4*sf**2*(bound-bed_value)/abn))/(2*sf**2/abn)
@@ -316,21 +319,24 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
                         best_action[best_action < min_dose] = min_dose
                         best_action[best_action > max_dose] = max_dose
                         future_bed = BED_calc0(sf,abn,best_action) + bed_value
+                        overdosing = (future_bed - bound).clip(min = 0)
+                        penalties_overdose = overdosing * -1000 #additional penalty when overdosing is needed when choosing a minimum dose to be delivered
                         future_bed[future_bed > bound+0.0001] = upperbound #0.0001 is added due to some rounding problems
                         penalties = np.zeros(future_bed.shape)
                         if bed_value < bound:
                             penalties[future_bed == upperbound] = -1000 
-                        Values[index][bed_index] = BED_calc0(best_action,abt) + penalties
+                        Values[index][bed_index] = BED_calc0(best_action,abt) + penalties + penalties_overdose
                         policy[index][bed_index] = (best_action-min_dose)*10 
                     else:
                         penalties = np.zeros(future_bed.shape)
                         penalties[future_bed == upperbound] = -1000 
+                        penalties_overdose = overdosing * -1000 #additional penalty when overdosing is needed when choosing a minimum dose to be delivered
                         value_interpolation = sc.interpolate.interp2d(sf,BEDT,Values[index-1])
                         future_value = np.zeros((len(sf),len(actionspace),len(sf)))
                         for actual_sf in range(0,len(sf)):
                             future_value[actual_sf] = value_interpolation(sf,future_bed[actual_sf])
                         future_values_prob = (future_value*prob).sum(axis = 2)                        
-                        Vs = future_values_prob + BEDT_transformed + penalties
+                        Vs = future_values_prob + BEDT_transformed + penalties + penalties_overdose
                         best_action = Vs.argmax(axis=1)
                         valer = Vs.max(axis=1)
                         policy[index][bed_index] = best_action
