@@ -32,3 +32,7 @@ The algorithms allow to chose some extra parameters to specify extra constraints
 - Chose the amount of fractions. Instead of just calculating for the case of a 5 fractions SBRT treatment, the amount of fractions can be chosen freely (e.g. 30 fractions)
 - Fix a minimum and maximum dose: Limits the action space by forcing a minimum and maximum dose for each fraction. (e.g. 4-16Gy)
 - Calculate optimal fraction size by tracking tumor BED: The 2D GUI has an additional extension, where one can optimize the optimal dose based on the prescribed tumor dose. (E.g. the clinician prescribes a tumor BED of 72 BED. The program will try to minimize the OAR BED while aiming on the 72 BED prescribed dose.)
+
+## Additional Data
+The two additional folders (DVH_figures, Patientdata_paper) contain the DVH data and figures of the 10 patients that were included in the paper.
+
