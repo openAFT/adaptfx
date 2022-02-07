@@ -1,4 +1,4 @@
-Absolute Dose in Gy,PTV,GTV,Bowel 1360ml
+Absolute Dose in Gy,PTV 10ml,GTV 3ml,Bowel 1360ml
 0,100,100,100
 0.1,100,100,99.99998
 0.2,100,100,95.0185

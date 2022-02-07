@@ -1,4 +1,4 @@
-Absolute Dose in Gy,PTV,GTV,Duodenum 23ml,Bowel 294ml,Stomach 157ml
+Absolute Dose in Gy,PTV 32ml,GTV 4ml,Duodenum 23ml,Bowel 294ml,Stomach 157ml
 0,100,100,100,100,100
 0.1,100,100,100,100,100
 0.2,100,100,100,99.86144,100
