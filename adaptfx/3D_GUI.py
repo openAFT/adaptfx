@@ -484,7 +484,7 @@ class GUIextended3D:
                 BED_tumor = float(self.ent_BED_tumor.get())
                 BED_OAR = float(self.ent_BED_OAR.get())
                 [optimal_dose,total_dose_delivered_tumor,total_dose_delivered_OAR,tumor_dose,OAR_dose] =  intp3.value_eval(len(sparing_factors)-1,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,abt,abn,OAR_limit,tumor_limit,alpha,beta,min_dose,max_dose,fixed_prob,fixed_mean,fixed_std)
-                self.lbl_info["text"] = f"The optimal dose for fraction {len(sparing_factors)-1},  = {optimal_dose}\naccumulated dose in tumor = {total_dose_delivered_tumor}\naccumulated dose OAR = {total_dose_delivered_OAR}"
+                self.lbl_info["text"] = f"The optimal dose for fraction {len(sparing_factors)-1}  = {optimal_dose}\naccumulated dose in tumor = {total_dose_delivered_tumor}\naccumulated dose OAR = {total_dose_delivered_OAR}"
             except ValueError:
                 self.lbl_info["text"] = "please enter correct values. Use the ? boxes for further information."        
         self.btn_compute.configure(state = 'normal')

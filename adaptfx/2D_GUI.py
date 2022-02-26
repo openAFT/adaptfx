@@ -57,7 +57,7 @@ class VerticalScrolledFrame(tk.Frame):
 class GUI2Dextended:
     def __init__(self, master):
         self.master = master
-        master.title("3Adaptive fractionation calculator extended")
+        master.title("2D adaptive fractionation calculator extended")
         self.frame = VerticalScrolledFrame(master)
         self.frame.pack()
         self.frm_probdis = tk.Frame(master = self.frame.interior,relief=tk.SUNKEN, borderwidth=3)
@@ -521,7 +521,7 @@ class GUI2Dextended:
                 BED = float(self.ent_BED.get())
                 if self.var_OAR.get() == 0:
                     [Values,policy,actual_value,actual_policy,dose_delivered_OAR,dose_delivered_tumor,total_dose_delivered_OAR,actual_dose_delivered] =  inttumor.value_eval(len(sparing_factors)-1,number_of_fractions,BED,sparing_factors,alpha,beta,abt,abn,OAR_limit,min_dose,max_dose,fixed_prob,fixed_mean,fixed_std)
-                    self.lbl_info["text"] = f"Optimal dose for fraction {len(sparing_factors)-1} = {actual_dose_delivered}\naccumulated dose in tumor = {dose_delivered_tumor}\naccumulated dose OAR = {dose_delivered_OAR}"
+                    self.lbl_info["text"] = f"Optimal dose for fraction {len(sparing_factors)-1} = {actual_dose_delivered}\ndelivered tumor BED = {dose_delivered_tumor}\ndelivered OAR BED = {dose_delivered_OAR}"
                 elif self.var_OAR.get() == 1:
                     prescribed_tumor_dose = float(self.ent_tumorlimit.get())
                     [policy,sf,physical_dose,tumor_dose,OAR_dose] = intOAR.value_eval(len(sparing_factors)-1,number_of_fractions,BED,sparing_factors,alpha,beta,prescribed_tumor_dose,abt, abn,min_dose, max_dose,fixed_prob, fixed_mean, fixed_std)
