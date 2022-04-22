@@ -9,11 +9,12 @@ whole_plan_print prints the doses in a well-aranged manner.
 import numpy as np
 from scipy.stats import truncnorm
 import scipy as sc
-from scipy.stats import gamma
+from scipy.stats import invgamma
+from scipy.stats import t
 
 def data_fit(data):
     """
-    This function fits the alpha and beta value for the prior
+    This function fits the alpha and beta value for the conjugate prior
 
     Parameters
     ----------
@@ -25,8 +26,8 @@ def data_fit(data):
     list
         alpha and beta hyperparameter.
     """
-    standard_devs = data.std(axis = 1)
-    alpha,loc,beta = gamma.fit(standard_devs, floc = 0)
+    variances = data.var(axis = 1)
+    alpha,loc,beta = invgamma.fit(variances, floc = 0)
     return[alpha,beta]
 
 def get_truncated_normal(mean=0, sd=1, low=0.01, upp=10):
@@ -52,6 +53,32 @@ def get_truncated_normal(mean=0, sd=1, low=0.01, upp=10):
     """
     return truncnorm((low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
 
+def std_calc(measured_data,alpha,beta): #this isnt used at this point, but could be applied. In general it gives lower std values.
+    """
+    calculates the most likely standard deviation for a list of k sparing factors and an inverse-gamma conjugate prior
+    measured_data: list/array with k sparing factors
+    Parameters
+    ----------
+    measured_data : list/array
+        list/array with k sparing factors
+    alpha : float
+        shape of inverse-gamma distribution
+    beta : float
+        scale of inverse-gamme distrinbution
+    Returns
+    -------
+    std : float
+        most likely std based on the measured data and inverse-gamma prior
+    """  
+    n = len(measured_data)
+    var_values = np.arange(0.00001,0.4,0.00001)
+    likelihood_values = np.zeros(len(var_values))
+    for index,value in enumerate(var_values):
+        likelihood_values[index] = value**(-alpha-1)/value**(n/2)*np.exp(-beta/value)*np.exp(-np.var(measured_data)*n/(2*value))
+    std = (np.sqrt(var_values[np.argmax(likelihood_values)]))
+    return std
+
+
 def probdist(X):
     """
     This function produces a probability distribution based on the normal distribution X
@@ -73,6 +100,31 @@ def probdist(X):
         prob[idx] = X.cdf(i+0.004999999999999999999)-X.cdf(i-0.005)
         idx +=1
     return prob
+ 
+def t_dist(data,alpha,beta):
+    """
+    This function computes the probability distribution given sparing factors and the hyperparameter
+
+    Parameters
+    ----------
+    data : list/array
+        list of observed sparing factors
+    alpha : float
+        shape of gamma distribution
+    beta : float
+        scale of gamma distrinbution
+
+    Returns
+    -------
+    list
+        probability distribution of all sparing factors.
+
+    """
+    alpha_up = alpha + len(data)/2
+    beta_up = beta + data.var(axis = 0)*len(data)/2
+    mean_data = np.mean(data)
+    prob_dist = t.pdf(np.arange(0.01,1.71,0.01),df = 2*alpha_up, loc = mean_data,scale = np.sqrt(beta_up/alpha_up))
+    return prob_dist/np.sum(prob_dist)
 
 def argfind(searched_list,value): 
     """
@@ -141,61 +193,6 @@ def BED_calc_matrix( sf, ab,actionspace):
     BED = np.outer(sf,actionspace)*(1+np.outer(sf,actionspace)/ab) #produces a sparing factors x actions space array
     return BED
 
-def std_calc(measured_data,alpha,beta):
-    """
-    calculates the most likely standard deviation for a list of k sparing factors and a gamma conjugate prior
-    measured_data: list/array with k sparing factors
-
-    Parameters
-    ----------
-    measured_data : list/array
-        list/array with k sparing factors
-    alpha : float
-        shape of gamma distribution
-    beta : float
-        scale of gamma distrinbution
-
-    Returns
-    -------
-    std : float
-        most likely std based on the measured data and gamma prior
-
-    """  
-    n = len(measured_data)
-    std_values = np.arange(0.00001,0.5,0.00001)
-    likelihood_values = np.zeros(len(std_values))
-    for index,value in enumerate(std_values):
-        likelihood_values[index] = value**(alpha-1)/value**(n-1)*np.exp(-1/beta*value)*np.exp(-np.var(measured_data)/(2*(value**2/n))) #here i have to check whether it is good.
-    std = std_values[np.argmax(likelihood_values)]
-    return std
-
-def distribution_update(sparing_factors,alpha,beta):
-    """
-    Calculates the probability distributions for all fractions based on a 6 sparing factor list
-    Parameters
-    ----------
-    sparing_factors : array/list
-        list/array with 6 sparing factors
-    alpha : float
-        shape of inverse-gamma distribution
-    beta : float
-        scale of inverse-gamme distrinbution
-
-    Returns
-    -------
-    list
-        means and stds of all 5 fractions.
-
-    """
-    means = np.zeros(len(sparing_factors))
-    stds = np.zeros(len(sparing_factors))
-    for i in range(len(sparing_factors)):
-        means[i] = np.mean(sparing_factors[:(i+1)])
-        stds[i] = std_calc(sparing_factors[:(i+1)],alpha,beta)
-    means = np.delete(means,0)
-    stds = np.delete(stds,0) #we get rid of the first value as it is only the planning value and not used in a fraction
-    return [means,stds]
-
 
         
 def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,abn,bound,min_dose = 0,max_dose = 22.3,fixed_prob = 0, fixed_mean = 0, fixed_std = 0):
@@ -241,13 +238,12 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
     """
     actual_sparing = sparing_factors[-1]
     if fixed_prob != 1:
-        mean = np.mean(sparing_factors) #extract the mean and std to setup the sparingfactor distribution    
-        standard_deviation = std_calc(sparing_factors,alpha,beta)
+        prob = t_dist(np.array(sparing_factors),alpha,beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
-    X = get_truncated_normal(mean= mean, sd=standard_deviation, low=0, upp=1.7)
-    prob = np.array(probdist(X))
+        X = get_truncated_normal(mean= mean, sd=standard_deviation, low=0, upp=1.7)
+        prob = np.array(probdist(X))
     sf= np.arange(0.01,1.71,0.01)
     sf = sf[prob>0.00001] #get rid of all probabilities below 10^-5
     prob = prob[prob>0.00001]

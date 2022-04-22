@@ -10,14 +10,15 @@ The value eval function is build by assigning a penalty depending on how much do
 
 import numpy as np
 from scipy.stats import truncnorm
-from scipy.stats import gamma
+from scipy.stats import invgamma
 from scipy.interpolate import RegularGridInterpolator
+from scipy.stats import t
 
 #right now once 90 is hit it doesnt seem to matter how much is overdosed. somehow this must be fixed
 
 def data_fit(data):
     """
-    This function fits the alpha and beta value for the prior
+    This function fits the alpha and beta value for the conjugate prior
 
     Parameters
     ----------
@@ -29,9 +30,35 @@ def data_fit(data):
     list
         alpha and beta hyperparameter.
     """
-    std = data.std(axis = 1)
-    alpha,loc,beta = gamma.fit(std, floc = 0)
+    variances = data.var(axis = 1)
+    alpha,loc,beta = invgamma.fit(variances, floc = 0)
     return[alpha,beta]
+
+
+def std_calc(measured_data,alpha,beta): #this isnt used at this point, but could be applied. In general it gives lower std values.
+    """
+    calculates the most likely standard deviation for a list of k sparing factors and an inverse-gamma conjugate prior
+    measured_data: list/array with k sparing factors
+    Parameters
+    ----------
+    measured_data : list/array
+        list/array with k sparing factors
+    alpha : float
+        shape of inverse-gamma distribution
+    beta : float
+        scale of inverse-gamme distrinbution
+    Returns
+    -------
+    std : float
+        most likely std based on the measured data and inverse-gamma prior
+    """  
+    n = len(measured_data)
+    var_values = np.arange(0.00001,0.4,0.00001)
+    likelihood_values = np.zeros(len(var_values))
+    for index,value in enumerate(var_values):
+        likelihood_values[index] = value**(-alpha-1)/value**(n/2)*np.exp(-beta/value)*np.exp(-np.var(measured_data)*n/(2*value))
+    std = (np.sqrt(var_values[np.argmax(likelihood_values)]))
+    return std
 
 def get_truncated_normal(mean=0, sd=1, low=0.01, upp=10):
     """
@@ -77,16 +104,15 @@ def probdist(X):
         prob[idx] = X.cdf(i+0.004999999999999999999)-X.cdf(i-0.005)
         idx +=1
     return prob
-    
-def std_calc(measured_data,alpha,beta):
+
+def t_dist(data,alpha,beta):
     """
-    calculates the most likely standard deviation for a list of k sparing factors and a gamma prior
-    measured_data: list/array with k sparing factors
+    This function computes the probability distribution given sparing factors and the hyperparameter
 
     Parameters
     ----------
-    measured_data : list/array
-        list/array with k sparing factors
+    data : list/array
+        list of observed sparing factors
     alpha : float
         shape of gamma distribution
     beta : float
@@ -94,17 +120,18 @@ def std_calc(measured_data,alpha,beta):
 
     Returns
     -------
-    std : float
-        most likely std based on the measured data and gamma prior
+    list
+        probability distribution of all sparing factors.
 
-    """  
-    n = len(measured_data)
-    std_values = np.arange(0.00001,0.5,0.00001)
-    likelihood_values = np.zeros(len(std_values))
-    for index,value in enumerate(std_values):
-        likelihood_values[index] = value**(alpha-1)/value**(n-1)*np.exp(-1/beta*value)*np.exp(-np.var(measured_data)/(2*(value**2/n))) 
-    std = std_values[np.argmax(likelihood_values)]
-    return std
+    """
+    alpha_up = alpha + len(data)/2
+    beta_up = beta + data.var(axis = 0)*len(data)/2
+    mean_data = np.mean(data)
+    prob_dist = t.pdf(np.arange(0.01,1.71,0.01),df = 2*alpha_up, loc = mean_data,scale = np.sqrt(beta_up/alpha_up))
+    return prob_dist/np.sum(prob_dist)
+    
+
+
 def argfind(searched_list,value): 
     """
     This function is used to find the index of certain values.
@@ -229,16 +256,16 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
     """
     
     if fixed_prob != 1:
-        mean = np.mean(sparing_factors) #extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_calc(sparing_factors,alpha,beta)
+        prob = t_dist(np.array(sparing_factors),alpha,beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
-    X = get_truncated_normal(mean= mean, sd=standard_deviation, low=0, upp=1.3)
-    prob = np.array(probdist(X))
+        X = get_truncated_normal(mean= mean, sd=standard_deviation, low=0, upp=1.7)
+        prob = np.array(probdist(X))
     sf= np.arange(0.01,1.71,0.01)
-    sf = sf[prob>0.00001] #get rid of all probabilities below 10^-5
-    prob = prob[prob>0.00001]
+    sf = sf[prob>0.0001] #get rid of all probabilities below 10^-4
+    prob = prob[prob>0.0001]
+   
     underdosepenalty = 10
     BEDT = np.arange(BED_tumor, bound_tumor,1) #tumordose 
     BEDNT = np.arange(BED_OAR,bound_OAR,1) #OAR dose

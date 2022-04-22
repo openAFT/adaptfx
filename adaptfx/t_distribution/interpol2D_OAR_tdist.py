@@ -9,25 +9,9 @@ whole_plan_print prints the doses in a well-aranged manner.
 import numpy as np
 from scipy.stats import truncnorm
 from scipy.interpolate import interp1d
-from scipy.stats import gamma
+from scipy.stats import t
 
-def data_fit(data):
-    """
-    This function fits the alpha and beta value for the prior
 
-    Parameters
-    ----------
-    data : array
-        a nxk matrix with n the amount of patints and k the amount of sparing factors per patient.
-
-    Returns
-    -------
-    list
-        alpha and beta hyperparameter.
-    """
-    standard_devs = data.std(axis = 1)
-    alpha,loc,beta = gamma.fit(standard_devs, floc = 0)
-    return[alpha,beta]
 
     
 def get_truncated_normal(mean=0, sd=1, low=0.01, upp=10):
@@ -74,15 +58,41 @@ def probdist(X):
         prob[idx] = X.cdf(i+0.004999999999999999999)-X.cdf(i-0.005)
         idx +=1
     return prob
-def std_calc(measured_data,alpha,beta):
-    """
-    calculates the most likely standard deviation for a list of k sparing factors and a gamma conjugate prior
-    measured_data: list/array with k sparing factors
 
+def std_calc(measured_data,alpha,beta): #this isnt used at this point, but could be applied. In general it gives lower std values.
+    """
+    calculates the most likely standard deviation for a list of k sparing factors and an inverse-gamma conjugate prior
+    measured_data: list/array with k sparing factors
     Parameters
     ----------
     measured_data : list/array
         list/array with k sparing factors
+    alpha : float
+        shape of inverse-gamma distribution
+    beta : float
+        scale of inverse-gamme distrinbution
+    Returns
+    -------
+    std : float
+        most likely std based on the measured data and inverse-gamma prior
+    """  
+    n = len(measured_data)
+    var_values = np.arange(0.00001,0.4,0.00001)
+    likelihood_values = np.zeros(len(var_values))
+    for index,value in enumerate(var_values):
+        likelihood_values[index] = value**(-alpha-1)/value**(n/2)*np.exp(-beta/value)*np.exp(-np.var(measured_data)*n/(2*value))
+    std = (np.sqrt(var_values[np.argmax(likelihood_values)]))
+    return std
+
+
+def t_dist(data,alpha,beta):
+    """
+    This function computes the probability distribution given sparing factors and the hyperparameter
+
+    Parameters
+    ----------
+    data : list/array
+        list of observed sparing factors
     alpha : float
         shape of gamma distribution
     beta : float
@@ -90,17 +100,17 @@ def std_calc(measured_data,alpha,beta):
 
     Returns
     -------
-    std : float
-        most likely std based on the measured data and gamma prior
+    list
+        probability distribution of all sparing factors.
 
-    """  
-    n = len(measured_data)
-    std_values = np.arange(0.00001,0.5,0.00001)
-    likelihood_values = np.zeros(len(std_values))
-    for index,value in enumerate(std_values):
-        likelihood_values[index] = value**(alpha-1)/value**(n-1)*np.exp(-1/beta*value)*np.exp(-np.var(measured_data)/(2*(value**2/n))) #here i have to check whether it is good.
-    std = std_values[np.argmax(likelihood_values)]
-    return std
+    """
+    alpha_up = alpha + len(data)/2
+    beta_up = beta + data.var(axis = 0)*len(data)/2
+    mean_data = np.mean(data)
+    prob_dist = t.pdf(np.arange(0.01,1.71,0.01),df = 2*alpha_up, loc = mean_data,scale = np.sqrt(beta_up/alpha_up))
+    return prob_dist/np.sum(prob_dist)
+
+
 def BED_calc0( dose, ab,sparing = 1):
     """
     calculates the BED for a specific dose
@@ -235,18 +245,18 @@ def value_eval(fraction,number_of_fractions,accumulated_dose,sparing_factors,alp
 
     """
     if fixed_prob != 1:
-        mean = np.mean(sparing_factors) #extract the mean and std to setup the sparingfactor distribution    
-        standard_deviation = std_calc(sparing_factors,alpha,beta)
+        prob = t_dist(np.array(sparing_factors),alpha,beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
-    X = get_truncated_normal(mean=mean, sd=standard_deviation, low=0.01, upp=1.3)
+        X = get_truncated_normal(mean= mean, sd=standard_deviation, low=0, upp=1.7)
+        prob = np.array(probdist(X))
+    sf= np.arange(0.01,1.71,0.01)
+    sf = sf[prob>0.00001] #get rid of all probabilities below 10^-5
+    prob = prob[prob>0.00001]
+    
     BEDT = np.arange(accumulated_dose,goal,1)
     BEDT = np.concatenate((BEDT,[goal,goal+1])) #add an extra step outside of our prescribed tumor dose which will be penalized to make sure that we aim at the prescribe tumor dose
-    prob = np.array(probdist(X))
-    sf= np.arange(0.01,1.71,0.01)
-    sf = sf[prob>0.00001]
-    prob = prob[prob>0.00001]
     #we prepare an empty values list and open an action space which is equal to all the dose numbers that can be given in one fraction 
     Values = np.zeros((number_of_fractions-fraction,len(BEDT),len(sf))) #2d values list with first indice being the BED and second being the sf
     if max_dose > (-1+np.sqrt(1**2+4*1**2*(goal)/abt))/(2*1**2/abt): #if the max dose is too large we lower it, so we dont needlessly check too many actions

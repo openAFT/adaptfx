@@ -6,7 +6,7 @@ import tkinter as tk
 import numpy as np
 import interpol2D_tumor as inttumor
 import interpol2D_OAR as intOAR
-from scipy.stats import invgamma
+from scipy.stats import gamma
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 import pandas as pd
@@ -101,12 +101,12 @@ class GUI2Dextended:
         self.ent_std = tk.Entry(master = self.frm_probdis, width = 30)
         self.ent_std.grid(row = 3, column = 1,columnspan = 2)
         
-        self.lbl_alpha = tk.Label(master = self.frm_probdis, text = "shape of inverse-gamma distribution (alpha):")
+        self.lbl_alpha = tk.Label(master = self.frm_probdis, text = "shape of gamma distribution (alpha):")
         self.lbl_alpha.grid(row=4,column = 0)
         self.ent_alpha = tk.Entry(master = self.frm_probdis, width = 30)
         self.ent_alpha.grid(row = 4, column = 1,columnspan = 2)
         
-        self.lbl_beta = tk.Label(master = self.frm_probdis, text = "scale of inverse-gamma distribution (beta):")
+        self.lbl_beta = tk.Label(master = self.frm_probdis, text = "scale of gamma distribution (beta):")
         self.lbl_beta.grid(row=5,column = 0)
         self.ent_beta = tk.Entry(master = self.frm_probdis, width = 30)
         self.ent_beta.grid(row = 5, column = 1,columnspan = 2)
@@ -117,8 +117,8 @@ class GUI2Dextended:
         self.ent_file.configure(state = 'disabled')
         self.ent_mean.configure(state = 'disabled')
         self.ent_std.configure(state = 'disabled')
-        self.ent_alpha.insert(0,"0.6133124926763415")
-        self.ent_beta.insert(0,"0.0004167968394550765")
+        self.ent_alpha.insert(0,"2.468531215126044")
+        self.ent_beta.insert(0,"0.02584178910588476")
 
         #produce master with extra option like number of fractions.    
         self.frm_extras = tk.Frame(master = self.frame.interior,relief = tk.SUNKEN, borderwidth = 3)
@@ -260,8 +260,8 @@ class GUI2Dextended:
 
         self.ent_file.insert(0,filename)
         self.data = np.array(pd.read_csv(self.ent_file.get(),sep = ';'))
-        self.variances = self.data.var(axis = 1)
-        self.alpha,self.loc,self.beta = invgamma.fit(self.variances,floc = 0)
+        self.stds = self.data.std(axis = 1)
+        self.alpha,self.loc,self.beta = gamma.fit(self.stds,floc = 0)
         self.ent_alpha.configure(state = 'normal')
         self.ent_beta.configure(state = 'normal')
         self.ent_alpha.delete(0, 'end')
