@@ -36,3 +36,7 @@ The algorithms allow to chose some extra parameters to specify extra constraints
 ## Additional Data
 The two additional folders (DVH_figures, Patientdata_paper) contain the DVH data and figures of the 10 patients that were included in the paper.
 
+## T-distribution folder
+Apart from using a gamma prior for the standard deviation, a full bayesian approach can be done with a conjugate prior for the variance. 
+In the t-distribution folder the same algorithms as in the paper are applied, but instead of using the gamma prior, the probability distribution is estimated from an updated t-distribution by using a inverse-gamma prior for the variance.
+The results are slightly different when alternative priors are applied. Since the t-distribution estimates larger standrad deviations, more sparing factors are relevant and thus the state space is increased which results in a longer computation time.
