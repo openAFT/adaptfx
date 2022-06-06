@@ -3,15 +3,17 @@
 GUI for 3D adaptive fractionation with minimum and maximum dose
 """
 
+import threading
 import tkinter as tk
-import numpy as np
-from scipy.stats import gamma
+import tkinter.ttk as ttk
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
-import tkinter.ttk as ttk
-import pandas as pd
+
 import interpol3D as intp3
-import threading
+import numpy as np
+import pandas as pd
+from scipy.stats import gamma
+
 
 class VerticalScrolledFrame(tk.Frame):
     """A pure Tkinter scrollable frame that actually works!
@@ -21,7 +23,7 @@ class VerticalScrolledFrame(tk.Frame):
 
     """
     def __init__(self, parent, *args, **kw):
-        tk.Frame.__init__(self, parent, *args, **kw)            
+        tk.Frame.__init__(self, parent, *args, **kw)
 
         # create a canvas object and a vertical scrollbar for scrolling it
         vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
@@ -75,7 +77,7 @@ class GUIextended3D:
         self.frm_probdis = tk.Frame(master = self.frame.interior,relief=tk.SUNKEN, borderwidth=3)
         self.frm_probdis.pack()
         self.data = []
-        self.info_funcs = [self.info1,self.info2,self.info3,self.info4,self.info5]   
+        self.info_funcs = [self.info1,self.info2,self.info3,self.info4,self.info5]
         self.info_buttons =["btn_path","btn_mean","btn_std","btn_shae","btn_scale"]
         for idx in range(len(self.info_funcs)):
             globals()[self.info_buttons[idx]] = tk.Button(master = self.frm_probdis,text = '?',command = self.info_funcs[idx])
@@ -83,7 +85,7 @@ class GUIextended3D:
         for idx in range(len(self.info_funcs)):
             globals()[self.info_buttons[idx]] = tk.Button(master = self.frm_probdis,text = '?',command = self.info_funcs[idx])
             globals()[self.info_buttons[idx]].grid(row=idx+1,column=4)
-    
+
         self.var_radio = tk.IntVar()
         self.var_radio.set(1)
         self.hyper_insert = tk.Radiobutton(master = self.frm_probdis,text = 'hyperparameters',justify = "left",variable = self.var_radio, value = 1, command = self.checkbox1)
@@ -92,8 +94,8 @@ class GUIextended3D:
         self.file_insert.grid(row= 0, column = 1)
         self.fixed_insert = tk.Radiobutton(master = self.frm_probdis, text = 'define normal distribution',justify= "left",variable = self.var_radio,value = 3, command = self.checkbox1)
         self.fixed_insert.grid(row= 0, column = 2)
-    
-        
+
+
         # open button
         self.lbl_open = tk.Label(master = self.frm_probdis, text = 'load patient data for prior')
         self.lbl_open.grid(row = 1, column = 0)
@@ -103,27 +105,27 @@ class GUIextended3D:
             command=self.select_file)
         self.ent_file = tk.Entry(master=self.frm_probdis, width=20)
         self.btn_open.grid(row = 1, column = 1)
-        
+
         self.lbl_mean = tk.Label(master = self.frm_probdis, text = 'mean of normal distribution:')
         self.lbl_mean.grid(row=2,column = 0)
         self.ent_mean = tk.Entry(master = self.frm_probdis, width = 30)
         self.ent_mean.grid(row = 2, column = 1,columnspan = 2)
-        
+
         self.lbl_std = tk.Label(master = self.frm_probdis, text = 'std of normal distribution:')
         self.lbl_std.grid(row=3,column = 0)
         self.ent_std = tk.Entry(master = self.frm_probdis, width = 30)
         self.ent_std.grid(row = 3, column = 1,columnspan = 2)
-        
+
         self.lbl_alpha = tk.Label(master = self.frm_probdis, text = "shape of gamma distribution (alpha):")
         self.lbl_alpha.grid(row=4,column = 0)
         self.ent_alpha = tk.Entry(master = self.frm_probdis, width = 30)
         self.ent_alpha.grid(row = 4, column = 1,columnspan = 2)
-        
+
         self.lbl_beta = tk.Label(master = self.frm_probdis, text = "scale of gamma distribution (beta):")
         self.lbl_beta.grid(row=5,column = 0)
         self.ent_beta = tk.Entry(master = self.frm_probdis, width = 30)
         self.ent_beta.grid(row = 5, column = 1,columnspan = 2)
-        
+
         self.btn_open.configure(state = 'disabled')
         self.ent_alpha.configure(state = 'normal')
         self.ent_beta.configure(state = 'normal')
@@ -132,12 +134,12 @@ class GUIextended3D:
         self.ent_std.configure(state = 'disabled')
         self.ent_alpha.insert(0,"2.468531215126044")
         self.ent_beta.insert(0,"0.02584178910588476")
-        
-        
-        #produce master with extra option like number of fractions.    
+
+
+        #produce master with extra option like number of fractions.
         self.frm_extras = tk.Frame(master = self.frame.interior,relief = tk.SUNKEN, borderwidth = 3)
         self.frm_extras.pack()
-        
+
         self.lbl_fractions = tk.Label(master = self.frm_extras, text = 'Total number of fractions')
         self.lbl_fractions.grid(row=0,column = 0)
         self.ent_fractions = tk.Entry(master = self.frm_extras, width = 30)
@@ -145,7 +147,7 @@ class GUIextended3D:
         self.ent_fractions.insert(0,"5")
         self.btn_infofrac = tk.Button(master = self.frm_extras, text = '?', command = self.infofrac)
         self.btn_infofrac.grid(row=0,column = 3)
-        
+
         self.lbl_mindose = tk.Label(master = self.frm_extras, text = 'minimum dose')
         self.lbl_mindose.grid(row = 1, column = 0)
         self.ent_mindose = tk.Entry(master = self.frm_extras, width = 30)
@@ -153,7 +155,7 @@ class GUIextended3D:
         self.ent_mindose.insert(0,"0")
         self.btn_mindose = tk.Button(master = self.frm_extras, text = '?', command = self.infomin)
         self.btn_mindose.grid(row=1,column = 3)
-        
+
         self.lbl_maxdose = tk.Label(master = self.frm_extras, text = 'maximum dose')
         self.lbl_maxdose.grid(row = 2, column = 0)
         self.ent_maxdose = tk.Entry(master = self.frm_extras, width = 30)
@@ -161,30 +163,30 @@ class GUIextended3D:
         self.ent_maxdose.insert(0,"22.3")
         self.btn_maxdose = tk.Button(master = self.frm_extras, text = '?', command = self.infomin)
         self.btn_maxdose.grid(row=2,column = 3)
-        
+
         # Create a new frame `frm_form` to contain the Label
         # and Entry widgets for entering variable values
         self.frm_form = tk.Frame(master = self.frame.interior, relief=tk.SUNKEN, borderwidth=3)
         # Pack the frame into the master
         self.frm_form.pack()
-        
+
         self.frm_buttons = tk.Frame()
         self.frm_buttons.pack(fill=tk.X, ipadx=5, ipady=5)
-        
+
         self.frm_output = tk.Frame(master = self.frame.interior,relief=tk.SUNKEN, borderwidth = 3)
-    
+
         #add label and entry for filename
         self.label = tk.Label(master=self.frm_form, text='file path of prior patients')
         self.ent_file = tk.Entry(master=self.frm_form, width=50)
         self.label.grid(row=0, column=0, sticky="e")
         self.ent_file.grid(row=0, column=1)
-        self.info_funcs = [self.info10,self.info11,self.info12,self.info13,self.info14,self.info15,self.info16]    
+        self.info_funcs = [self.info10,self.info11,self.info12,self.info13,self.info14,self.info15,self.info16]
         self.info_buttons =["self.btn_sf","self.btn_abt","self.btn_abn","self.btn_OARlimit","self.btn_tumorlimit","self.btn_tumorBED","self.btn_OARBED"]
         # List of field labels
         self.labels = [
             "sparing factors separated by spaces:",
             "alpha-beta ratio of tumor:",
-            "alpha-beta ratio of OAR:", 
+            "alpha-beta ratio of OAR:",
             "OAR limit:",
             "prescribed tumor dose:",
             "accumulated tumor dose:",
@@ -198,7 +200,7 @@ class GUIextended3D:
         self.ent_sf.insert(0,f"{self.example_list[0]}")
         self.btn_sf = tk.Button(master = self.frm_form,text = '?',command = self.info_funcs[0])
         self.btn_sf.grid(row=0,column=2)
-        
+
         self.ent_abt = tk.Entry(master=self.frm_form, width=50)
         self.lbl_abt = tk.Label(master = self.frm_form, text = self.labels[1])
         self.lbl_abt.grid(row=1, column=0, sticky="e")
@@ -206,7 +208,7 @@ class GUIextended3D:
         self.ent_abt.insert(0,f"{self.example_list[1]}")
         self.btn_abt = tk.Button(master = self.frm_form,text = '?',command = self.info_funcs[1])
         self.btn_abt.grid(row=1,column=2)
-        
+
         self.ent_abn = tk.Entry(master=self.frm_form, width=50)
         self.lbl_abn = tk.Label(master = self.frm_form, text = self.labels[2])
         self.lbl_abn.grid(row=2, column=0, sticky="e")
@@ -214,7 +216,7 @@ class GUIextended3D:
         self.ent_abn.insert(0,f"{self.example_list[2]}")
         self.btn_abn = tk.Button(master = self.frm_form,text = '?',command = self.info_funcs[2])
         self.btn_abn.grid(row=2,column=2)
-        
+
         self.ent_OARlimit = tk.Entry(master=self.frm_form, width=50)
         self.lbl_OARlimit = tk.Label(master = self.frm_form, text = self.labels[3])
         self.lbl_OARlimit.grid(row=3, column=0, sticky="e")
@@ -222,7 +224,7 @@ class GUIextended3D:
         self.ent_OARlimit.insert(0,f"{self.example_list[3]}")
         self.btn_OARlimit = tk.Button(master = self.frm_form,text = '?',command = self.info_funcs[3])
         self.btn_OARlimit.grid(row=3,column=2)
-        
+
         self.ent_tumorlimit = tk.Entry(master=self.frm_form, width=50)
         self.lbl_tumorlimit = tk.Label(master = self.frm_form, text = self.labels[4])
         self.lbl_tumorlimit.grid(row=4, column=0, sticky="e")
@@ -230,7 +232,7 @@ class GUIextended3D:
         self.ent_tumorlimit.insert(0,f"{self.example_list[4]}")
         self.btn_tumorlimit = tk.Button(master = self.frm_form,text = '?',command = self.info_funcs[4])
         self.btn_tumorlimit.grid(row=4,column=2)
-        
+
         self.ent_BED_tumor = tk.Entry(master=self.frm_form, width=50)
         self.lbl_BED_tumor = tk.Label(master = self.frm_form, text = self.labels[5])
         self.lbl_BED_tumor.grid(row=5, column=0, sticky="e")
@@ -238,7 +240,7 @@ class GUIextended3D:
         self.ent_BED_tumor.insert(0,f"{self.example_list[5]}")
         self.btn_BED_tumor = tk.Button(master = self.frm_form,text = '?',command = self.info_funcs[5])
         self.btn_BED_tumor.grid(row=5,column=2)
-        
+
         self.ent_BED_OAR = tk.Entry(master=self.frm_form, width=50)
         self.lbl_BED_OAR = tk.Label(master = self.frm_form, text = self.labels[6])
         self.lbl_BED_OAR.grid(row=6, column=0, sticky="e")
@@ -246,10 +248,10 @@ class GUIextended3D:
         self.ent_BED_OAR.insert(0,f"{self.example_list[6]}")
         self.btn_BED_OAR = tk.Button(master = self.frm_form,text = '?',command = self.info_funcs[6])
         self.btn_BED_OAR.grid(row=6,column=2)
-        
+
         self.ent_BED_OAR.configure(state = 'disabled')
         self.ent_BED_tumor.configure(state = 'disabled')
-        
+
         # Create a new frame `frm_buttons` to contain the compute button
         self.frm_buttons = tk.Frame(master = self.frame.interior)
         self.frm_buttons.pack(fill=tk.X, ipadx=5, ipady=5)
@@ -260,11 +262,11 @@ class GUIextended3D:
         self.chk_single_fraction.pack(side = tk.BOTTOM, padx = 10, ipadx = 10)
         self.lbl_info = tk.Label(master = self.frm_output, text = "There are several default values set. Only the sparing factors have to been inserted.\nThis program might take some minutes to calculate")
         self.lbl_info.pack()
-            
-   
+
+
         self.frm_output.pack(fill=tk.BOTH, ipadx = 10, ipady = 10)
-        
-    
+
+
             # progressbar
         self.pb = ttk.Progressbar(
             master = self.frm_output,
@@ -273,18 +275,18 @@ class GUIextended3D:
             length=500
         )
         # place the progressbar
-        self.pb.pack(pady = 10)    
+        self.pb.pack(pady = 10)
     def select_file(self):
         filetypes = (
             ('csv files', '*.csv'),
             ('All files', '*.*')
         )
-    
+
         filename = fd.askopenfilename(
             title='Open a file',
             initialdir='/',
             filetypes=filetypes)
-    
+
         showinfo(
             title='Selected File',
             message=self.filename
@@ -302,7 +304,7 @@ class GUIextended3D:
         self.ent_beta.insert(0,self.beta)
         self.ent_alpha.configure(state = 'disabled')
         self.ent_beta.configure(state = 'disabled')
-        
+
     def checkbox1(self):
         if self.var_radio.get() == 1:
             self.btn_open.configure(state = 'disabled')
@@ -325,7 +327,7 @@ class GUIextended3D:
             self.ent_beta.configure(state = 'disabled')
             self.btn_open.configure(state = 'disabled')
             self.ent_file.configure(state = 'disabled')
-            
+
     #assign infobutton commands
     def info1(self):
         self.lbl_info["text"] = 'Insert the path of your prior patient data in here. \nThis is only needed, if the checkbox for prior data is marked. \nIf not, one can directly insert the hyperparameters below. \nThe file with the prior data must be of the shape n x k,\nwhere each new patient n is on a row and each fraction for patient n is in column k'
@@ -336,23 +338,23 @@ class GUIextended3D:
     def info4(self):
         self.lbl_info["text"] = 'Insert the shape parameter for the inverse-gamme distribution.'
     def info5(self):
-        self.lbl_info["text"] = 'Insert the scale parameter for the inverse-gamme distribution.'    
-    
-    
+        self.lbl_info["text"] = 'Insert the scale parameter for the inverse-gamme distribution.'
+
+
     def infofrac(self):
         self.lbl_info["text"] = 'Insert the number of fractions to be delivered to the patient. \n5 fractions is set a standard SBRT treatment.'
-        
-        
-        
+
+
+
     def infomin(self):
         self.lbl_info["text"] = 'Insert the minimal physical dose that shall be delivered to the PTV95 in one fraction.\nIt is recommended to not put too high minimum dose constraints to allow adaptation'
-        
-        
+
+
     def infomax(self):
         self.lbl_info["text"] = 'Insert the maximal physical dose that shall be delivered to the PTV95 in one fraction.'
-        
-        
-        
+
+
+
 #assign infobutton commands
 
     def info10(self):
@@ -447,7 +449,7 @@ class GUIextended3D:
                             frame = tk.Frame(master = self.lbl_output)
                             frame.grid(row = i,column = 2)
                             label = tk.Label(master= frame, text = f" {np.round(physical_doses[i-1],2)}")
-                            label.pack()    
+                            label.pack()
                         elif j == 3:
                             frame = tk.Frame(master = self.lbl_output)
                             frame.grid(row = i,column = 3)
@@ -470,7 +472,7 @@ class GUIextended3D:
                 frame.grid(row = number_of_fractions + 1,column = 4)
                 label = tk.Label(master= frame, text = f" {np.sum(OAR_doses)}")
                 label.pack()
-                
+
             except ValueError:
                 self.lbl_info["text"] = "please enter correct values. Use the ? boxes for further information."
         else:
@@ -486,7 +488,7 @@ class GUIextended3D:
                 [optimal_dose,total_dose_delivered_tumor,total_dose_delivered_OAR,tumor_dose,OAR_dose] =  intp3.value_eval(len(sparing_factors)-1,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,abt,abn,OAR_limit,tumor_limit,alpha,beta,min_dose,max_dose,fixed_prob,fixed_mean,fixed_std)
                 self.lbl_info["text"] = f"The optimal dose for fraction {len(sparing_factors)-1}  = {optimal_dose}\naccumulated dose in tumor = {total_dose_delivered_tumor}\naccumulated dose OAR = {total_dose_delivered_OAR}"
             except ValueError:
-                self.lbl_info["text"] = "please enter correct values. Use the ? boxes for further information."        
+                self.lbl_info["text"] = "please enter correct values. Use the ? boxes for further information."
         self.btn_compute.configure(state = 'normal')
 
     def checkbox(self):
@@ -497,16 +499,13 @@ class GUIextended3D:
             self.ent_BED_tumor.configure(state = 'normal')
             self.ent_BED_OAR.configure(state = 'normal')
 
-    
-    
-        
-        
-    
+
+
+
+
+
 if __name__=='__main__':
     root = tk.Tk()
     GUI = GUIextended3D(root)
     # Start the application
     root.mainloop()
-    
-    
-   

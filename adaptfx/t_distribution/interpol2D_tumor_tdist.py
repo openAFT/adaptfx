@@ -7,10 +7,9 @@ whole_plan_print prints the doses in a well-aranged manner.
 
 
 import numpy as np
-from scipy.stats import truncnorm
 import scipy as sc
-from scipy.stats import invgamma
-from scipy.stats import t
+from scipy.stats import invgamma, t, truncnorm
+
 
 def data_fit(data):
     """
@@ -69,7 +68,7 @@ def std_calc(measured_data,alpha,beta): #this isnt used at this point, but could
     -------
     std : float
         most likely std based on the measured data and inverse-gamma prior
-    """  
+    """
     n = len(measured_data)
     var_values = np.arange(0.00001,0.4,0.00001)
     likelihood_values = np.zeros(len(var_values))
@@ -100,7 +99,7 @@ def probdist(X):
         prob[idx] = X.cdf(i+0.004999999999999999999)-X.cdf(i-0.005)
         idx +=1
     return prob
- 
+
 def t_dist(data,alpha,beta):
     """
     This function computes the probability distribution given sparing factors and the hyperparameter
@@ -126,7 +125,7 @@ def t_dist(data,alpha,beta):
     prob_dist = t.pdf(np.arange(0.01,1.71,0.01),df = 2*alpha_up, loc = mean_data,scale = np.sqrt(beta_up/alpha_up))
     return prob_dist/np.sum(prob_dist)
 
-def argfind(searched_list,value): 
+def argfind(searched_list,value):
     """
     This function is used to find the index of certain values.
     searched_list: list/array with values
@@ -194,7 +193,7 @@ def BED_calc_matrix( sf, ab,actionspace):
     return BED
 
 
-        
+
 def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,abn,bound,min_dose = 0,max_dose = 22.3,fixed_prob = 0, fixed_mean = 0, fixed_std = 0):
     """
     calculates the optimal dose for the desired fraction.
@@ -204,7 +203,7 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
     fraction : integer
         number of actual fraction (1 for first, 2 for second, etc.)
     number_of_fractions : integer
-        number of fractions that will be delivered.    
+        number of fractions that will be delivered.
     BED : float
         accumulated BED in OAR (from previous fractions) zero in fraction 1
     sparing_factors : list/array
@@ -222,7 +221,7 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
     min_dose : float
         minimal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.
     max_dose : float
-        maximal physical doses to be delivered in one fraction. The doses are aimed at PTV 95 .         
+        maximal physical doses to be delivered in one fraction. The doses are aimed at PTV 95 .
     fixed_prob : int
         this variable is to turn on a fixed probability distribution. If the variable is not used (0), then the probability will be updated. If the variable is turned to 1, the inserted mean and std will be used for a fixed sparing factor distribution
     fixed_mean: float
@@ -247,7 +246,7 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
     sf= np.arange(0.01,1.71,0.01)
     sf = sf[prob>0.00001] #get rid of all probabilities below 10^-5
     prob = prob[prob>0.00001]
-    
+
     BEDT = BEDT = np.arange(BED,bound+1.6,1)
     Values = np.zeros(((number_of_fractions-fraction),len(BEDT),len(sf)))#2d values list with first indice being the BED and second being the sf
     if max_dose > 22.3: #if the chosen maximum dose is too large, it gets reduced. So the algorithm doesn't needlessly check too many actions
@@ -258,10 +257,10 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
     policy = np.zeros(((number_of_fractions-fraction),len(BEDT),len(sf)))
     upperbound = bound+1
 
-    delivered_doses = BED_calc_matrix(sf,abn,actionspace)            
-    BEDT_rew = BED_calc_matrix(1, abt,actionspace) #this is the reward for the dose deposited inside the tumor. 
+    delivered_doses = BED_calc_matrix(sf,abn,actionspace)
+    BEDT_rew = BED_calc_matrix(1, abt,actionspace) #this is the reward for the dose deposited inside the tumor.
     BEDT_transformed, meaningless = np.meshgrid(BEDT_rew,np.zeros(len(sf)))
-    
+
     for index,frac_state in enumerate(np.arange(fraction,number_of_fractions+1)): #We have number_of fraction fractionations with 2 special cases 0 and number_of_fractions-1 (last first fraction)
         if index == number_of_fractions-1: #first state with no prior dose delivered so we dont loop through BEDT
             future_bed = BED + delivered_doses
@@ -274,10 +273,10 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
             penalties = np.zeros(future_bed.shape)
             penalties[future_bed > bound] = -1000 #penalizing in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
             Vs = future_values_prob + BEDT_transformed + penalties
-            
+
             actual_policy = Vs.argmax(axis=1)
             actual_value = Vs.max(axis=1)
-        
+
         else:
             if index == number_of_fractions-fraction: #if we are in the actual fraction we do not need to check all possible BED states but only the one we are in
                 if fraction != number_of_fractions:
@@ -294,7 +293,7 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
                     penalties[future_bed > bound] = -1000 #penalizing in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
                     Vs = future_values_prob + BEDT_transformed + penalties + penalties_overdose
                     actual_policy = Vs.argmax(axis=1)
-                    actual_value = Vs.max(axis=1)  
+                    actual_value = Vs.max(axis=1)
                 else:
                     best_action = (-sf+np.sqrt(sf**2+4*sf**2*(bound-BED)/abn))/(2*sf**2/abn)
                     if BED > bound:
@@ -303,12 +302,12 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
                     best_action[best_action>max_dose] = max_dose
                     actual_policy = best_action*10
                     actual_value = BED_calc0(best_action,abt) #we do not need to penalize, as this value is not relevant.
-            else:                    
+            else:
                 for bed_index, bed_value in enumerate(BEDT): #this and the next for loop allow us to loop through all states
                     future_bed = delivered_doses + bed_value
                     overdosing = (future_bed - bound).clip(min = 0)
                     future_bed[future_bed > bound] = upperbound #any dose surpassing 90.1 is set to 90.1
-                    if index == 0: #last state no more further values to add                    
+                    if index == 0: #last state no more further values to add
                         best_action = (-sf+np.sqrt(sf**2+4*sf**2*(bound-bed_value)/abn))/(2*sf**2/abn)
                         if bed_value > bound:
                             best_action = np.zeros(best_action.shape)
@@ -320,18 +319,18 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
                         future_bed[future_bed > bound+0.0001] = upperbound #0.0001 is added due to some rounding problems
                         penalties = np.zeros(future_bed.shape)
                         if bed_value < bound:
-                            penalties[future_bed == upperbound] = -1000 
+                            penalties[future_bed == upperbound] = -1000
                         Values[index][bed_index] = BED_calc0(best_action,abt) + penalties + penalties_overdose
-                        policy[index][bed_index] = (best_action-min_dose)*10 
+                        policy[index][bed_index] = (best_action-min_dose)*10
                     else:
                         penalties = np.zeros(future_bed.shape)
-                        penalties[future_bed == upperbound] = -1000 
+                        penalties[future_bed == upperbound] = -1000
                         penalties_overdose = overdosing * -1000 #additional penalty when overdosing is needed when choosing a minimum dose to be delivered
                         value_interpolation = sc.interpolate.interp2d(sf,BEDT,Values[index-1])
                         future_value = np.zeros((len(sf),len(actionspace),len(sf)))
                         for actual_sf in range(0,len(sf)):
                             future_value[actual_sf] = value_interpolation(sf,future_bed[actual_sf])
-                        future_values_prob = (future_value*prob).sum(axis = 2)                        
+                        future_values_prob = (future_value*prob).sum(axis = 2)
                         Vs = future_values_prob + BEDT_transformed + penalties + penalties_overdose
                         best_action = Vs.argmax(axis=1)
                         valer = Vs.max(axis=1)
@@ -347,7 +346,7 @@ def value_eval(fraction,number_of_fractions,BED,sparing_factors,alpha,beta,abt,a
         dose_delivered_tumor = BED_calc0(actual_policy[index_sf]/10,abt)
         dose_delivered_OAR = BED_calc0(actual_policy[index_sf]/10,abn,actual_sparing)
         total_dose_delivered_OAR = dose_delivered_OAR + BED
-        actual_dose_delivered = actual_policy[index_sf]/10        
+        actual_dose_delivered = actual_policy[index_sf]/10
 
     return [Values,policy,actual_value,actual_policy,dose_delivered_OAR,dose_delivered_tumor,total_dose_delivered_OAR,actual_dose_delivered]
 def whole_plan(number_of_fractions,sparing_factors,abt,abn,alpha,beta,OAR_limit,min_dose = 0, max_dose = 22.3,fixed_prob= 0,fixed_mean = 0,fixed_std =0):
@@ -357,7 +356,7 @@ def whole_plan(number_of_fractions,sparing_factors,abt,abn,alpha,beta,OAR_limit,
     Parameters
     ----------
     number_of_fractions : integer
-        number of fractions that will be delivered.   
+        number of fractions that will be delivered.
     sparing_factors : list/array
         list/array with all observed sparing factors (6 for a 5 fraction plan).
     abt : float
@@ -373,7 +372,7 @@ def whole_plan(number_of_fractions,sparing_factors,abt,abn,alpha,beta,OAR_limit,
     min_dose : float
         minimal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.
     max_dose : float
-        maximal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.     
+        maximal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.
     fixed_prob : int
         this variable is to turn on a fixed probability distribution. If the variable is not used (0), then the probability will be updated. If the variable is turned to 1, the inserted mean and std will be used for a fixed sparing factor distribution
     fixed_mean: float
@@ -395,18 +394,18 @@ def whole_plan(number_of_fractions,sparing_factors,abt,abn,alpha,beta,OAR_limit,
         [Values,policy,actual_value,actual_policy,dose_delivered_OAR,tumor_dose,total_dose_delivered_OAR,actual_dose_delivered] = value_eval(looper+1,number_of_fractions,total_dose_delivered_OAR,sparing_factors[:looper+2],alpha,beta,abt,abn,OAR_limit,min_dose,max_dose,fixed_prob, fixed_mean, fixed_std)
         tumor_doses[looper] = tumor_dose
         physical_doses[looper] = actual_dose_delivered
-        OAR_doses[looper] = dose_delivered_OAR     
+        OAR_doses[looper] = dose_delivered_OAR
         total_tumor_dose += tumor_dose
     return [tumor_doses,OAR_doses,physical_doses]
 
 def whole_plan_print(number_of_fractions,sparing_factors,abt,abn,alpha,beta,OAR_limit,min_dose = 0, max_dose = 22.3, fixed_prob = 0, fixed_mean = 0, fixed_std = 0):
-    """    
+    """
     calculates whole plan given all sparing factors and prints the results
 
     Parameters
     ----------
     number_of_fractions : integer
-        number of fractions that will be delivered.   
+        number of fractions that will be delivered.
     sparing_factors : list/array
         list/array with all observed sparing factors (6 for a 5 fraction plan).
     abt : float
@@ -422,7 +421,7 @@ def whole_plan_print(number_of_fractions,sparing_factors,abt,abn,alpha,beta,OAR_
     min_dose : float
         minimal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.
     max_dose : float
-        maximal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.     
+        maximal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.
     fixed_prob : int
         this variable is to turn on a fixed probability distribution. If the variable is not used (0), then the probability will be updated. If the variable is turned to 1, the inserted mean and std will be used for a fixed sparing factor distribution
     fixed_mean: float
@@ -448,11 +447,11 @@ def single_fraction(number_of_fractions,sparing_factors,accumulated_OAR_BED, OAR
     Parameters
     ----------
     number_of_fractions : integer
-        number of fractions that will be delivered.   
+        number of fractions that will be delivered.
     sparing_factors : list/array
         list/array with all observed sparing factors (6 for a 5 fraction plan).
     accumulated_OAR_BED : float
-        Total BE delivered to the OAR so far.        
+        Total BE delivered to the OAR so far.
     OAR_limit : float
         accumulated BED in OAR (from previous fractions) zero in fraction 1
     abt : float
@@ -466,14 +465,14 @@ def single_fraction(number_of_fractions,sparing_factors,accumulated_OAR_BED, OAR
     min_dose : float
         minimal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.
     max_dose : float
-        maximal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.         
+        maximal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.
     fixed_prob : int
         this variable is to turn on a fixed probability distribution. If the variable is not used (0), then the probability will be updated. If the variable is turned to 1, the inserted mean and std will be used for a fixed sparing factor distribution
     fixed_mean: float
         mean of the fixed sparing factor normal distribution
     fixed_std: float
-        standard deviation of the fixed sparing factor normal distribution    
-   
+        standard deviation of the fixed sparing factor normal distribution
+
     Returns
     -------
     None.

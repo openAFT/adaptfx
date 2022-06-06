@@ -9,9 +9,8 @@ The value eval function is build by assigning a penalty depending on how much do
 """
 
 import numpy as np
-from scipy.stats import truncnorm
-from scipy.stats import gamma
 from scipy.interpolate import RegularGridInterpolator
+from scipy.stats import gamma, truncnorm
 
 #right now once 90 is hit it doesnt seem to matter how much is overdosed. somehow this must be fixed
 
@@ -77,7 +76,7 @@ def probdist(X):
         prob[idx] = X.cdf(i+0.004999999999999999999)-X.cdf(i-0.005)
         idx +=1
     return prob
-    
+
 def std_calc(measured_data,alpha,beta):
     """
     calculates the most likely standard deviation for a list of k sparing factors and a gamma prior
@@ -97,15 +96,15 @@ def std_calc(measured_data,alpha,beta):
     std : float
         most likely std based on the measured data and gamma prior
 
-    """  
+    """
     n = len(measured_data)
     std_values = np.arange(0.00001,0.5,0.00001)
     likelihood_values = np.zeros(len(std_values))
     for index,value in enumerate(std_values):
-        likelihood_values[index] = value**(alpha-1)/value**(n-1)*np.exp(-1/beta*value)*np.exp(-np.var(measured_data)/(2*(value**2/n))) 
+        likelihood_values[index] = value**(alpha-1)/value**(n-1)*np.exp(-1/beta*value)*np.exp(-np.var(measured_data)/(2*(value**2/n)))
     std = std_values[np.argmax(likelihood_values)]
     return std
-def argfind(searched_list,value): 
+def argfind(searched_list,value):
     """
     This function is used to find the index of certain values.
     searched_list: list/array with values
@@ -127,7 +126,7 @@ def argfind(searched_list,value):
     """
     index = min(range(len(searched_list)), key=lambda i: abs(searched_list[i]-value))
     return  index
-    
+
 
 
 def BED_calc0( dose, ab,sparing = 1):
@@ -176,7 +175,7 @@ def BED_calc_matrix(actionspace,ab,sf):
 
 
 
-def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta,min_dose = 0, max_dose = 22.3, fixed_prob = 0, fixed_mean = 0, fixed_std = 0): 
+def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta,min_dose = 0, max_dose = 22.3, fixed_prob = 0, fixed_mean = 0, fixed_std = 0):
     """
     Calculates the optimal dose for the desired fraction.
     fraction: number of actual fraction (1 for first, 2 for second, etc.)
@@ -227,7 +226,7 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
         OAR_dose: OAR BED to be delivered
 
     """
-    
+
     if fixed_prob != 1:
         mean = np.mean(sparing_factors) #extract the mean and std to setup the sparingfactor distribution
         standard_deviation = std_calc(sparing_factors,alpha,beta)
@@ -240,7 +239,7 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
     sf = sf[prob>0.00001] #get rid of all probabilities below 10^-5
     prob = prob[prob>0.00001]
     underdosepenalty = 10
-    BEDT = np.arange(BED_tumor, bound_tumor,1) #tumordose 
+    BEDT = np.arange(BED_tumor, bound_tumor,1) #tumordose
     BEDNT = np.arange(BED_OAR,bound_OAR,1) #OAR dose
     BEDNT = np.concatenate((BEDNT,[bound_OAR,bound_OAR + 1]))
     BEDT = np.concatenate((BEDT,[bound_tumor, bound_tumor + 1]))
@@ -251,15 +250,15 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
         min_dose = max_dose-0.1
     actionspace = np.arange(min_dose,max_dose+0.1,0.1)
     policy = np.zeros(((number_of_fractions-fraction),len(BEDT),len(BEDNT),len(sf)))
-    upperbound_normal_tissue = bound_OAR + 1 
+    upperbound_normal_tissue = bound_OAR + 1
     upperbound_tumor = bound_tumor + 1
 
-    OAR_dose = BED_calc_matrix(actionspace,abn,sf) #calculates the dose that is deposited into the normal tissue for all sparing factors            
-    tumor_dose = BED_calc_matrix(actionspace,abt,1)[0] #this is the dose delivered to the tumor 
+    OAR_dose = BED_calc_matrix(actionspace,abn,sf) #calculates the dose that is deposited into the normal tissue for all sparing factors
+    tumor_dose = BED_calc_matrix(actionspace,abt,1)[0] #this is the dose delivered to the tumor
     actual_fraction_sf = argfind(sf,np.round(sparing_factors[-1],2))
 
 
-    
+
     for index,frac_state_plus in enumerate(np.arange(number_of_fractions+1,fraction,-1)): #We have five fractionations with 2 special cases 0 and 4
         frac_state = frac_state_plus-1
         if frac_state == 1: #first state with no prior dose delivered so we dont loop through BEDNT
@@ -269,12 +268,12 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
             future_tumor[future_tumor > bound_tumor] = upperbound_tumor
             future_values_prob = (Values[index-1]*prob).sum(axis=2) #future values of tumor and oar state
             value_interpolation = RegularGridInterpolator((BEDT,BEDNT),future_values_prob)
-            future_value_actual = value_interpolation(np.array([future_tumor,future_OAR]).T) 
+            future_value_actual = value_interpolation(np.array([future_tumor,future_OAR]).T)
             Vs = future_value_actual - OAR_dose[actual_fraction_sf]
-            actual_policy = Vs.argmax(axis=0)            
-        
+            actual_policy = Vs.argmax(axis=0)
+
         elif frac_state == fraction: #if we are in the actual fraction we do not need to check all possible BED states but only the one we are in
-            if fraction != number_of_fractions: 
+            if fraction != number_of_fractions:
                 future_OAR = BED_OAR + OAR_dose[actual_fraction_sf]
                 overdosing = (future_OAR - bound_OAR).clip(min = 0)
                 future_OAR[future_OAR > bound_OAR] = upperbound_normal_tissue #any dose surpassing the upper bound will be set to the upper bound which will be penalized strongly
@@ -283,7 +282,7 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
                 future_values_prob = (Values[index-1]*prob).sum(axis=2) #future values of tumor and oar state
                 value_interpolation = RegularGridInterpolator((BEDT,BEDNT),future_values_prob)
                 penalties = overdosing * -10000000000 #additional penalty when overdosing is needed when choosing a minimum dose to be delivered
-                future_value_actual = value_interpolation(np.array([future_tumor,future_OAR]).T) 
+                future_value_actual = value_interpolation(np.array([future_tumor,future_OAR]).T)
                 Vs = future_value_actual - OAR_dose[actual_fraction_sf] + penalties
                 actual_policy = Vs.argmax(axis=0)
             else:
@@ -301,7 +300,7 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
                 future_tumor = BED_tumor+BED_calc0(best_action,abt)
                 future_OAR = BED_OAR + BED_calc0(best_action,abn,sf_end)
                 actual_policy = best_action*10
-        else: 
+        else:
             future_values_prob = (Values[index-1]*prob).sum(axis=2) #future values of tumor and oar state
             value_interpolation = RegularGridInterpolator((BEDT,BEDNT),future_values_prob) #interpolation function
             for tumor_index, tumor_value in enumerate(BEDT):
@@ -312,12 +311,12 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
                     future_tumor = tumor_value + tumor_dose
                     future_tumor[future_tumor > bound_tumor] = upperbound_tumor #any dose surpassing the tumor bound is set to tumor_bound + 0.1
 
-                   
-                    if frac_state == number_of_fractions: #last state no more further values to add 
+
+                    if frac_state == number_of_fractions: #last state no more further values to add
                         best_action_BED = (-sf+np.sqrt(sf**2+4*sf**2*(bound_OAR-OAR_value)/abn))/(2*sf**2/abn) #calculate maximal dose that can be delivered to OAR and tumor
                         best_action_tumor = (-np.ones(len(sf))+np.sqrt(np.ones(len(sf))+4*np.ones(len(sf))*(bound_tumor-tumor_value)/abt))/(2*np.ones(len(sf))**2/abt)
-                        best_action = np.min([best_action_BED,best_action_tumor],axis=0) #take the smaller of both doses to not surpass the limit    
-                        best_action[best_action > max_dose] = max_dose 
+                        best_action = np.min([best_action_BED,best_action_tumor],axis=0) #take the smaller of both doses to not surpass the limit
+                        best_action[best_action > max_dose] = max_dose
                         best_action[best_action < min_dose] = min_dose
                         if OAR_value > bound_OAR or tumor_value > bound_tumor: #if the limit is already surpassed we add a penaltsy
                             best_action = np.ones(best_action.shape)*min_dose
@@ -330,13 +329,13 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
                         end_penalty = -abs(future_tumor-bound_tumor)*underdosepenalty #the farther we are away from the prescribed dose, the higher the penalty. Under- and overdosing is punished
                         end_penalty_OAR = -(future_OAR-bound_OAR).clip(min = 0)*1000 #if overdosing the OAR is not preventable, the overdosing should stay as low as possible
                         Values[index][tumor_index][OAR_index] = end_penalty - BED_calc0(best_action,abn,sf) + overdose_penalty2 + overdose_penalty3 +end_penalty_OAR #we also substract all the dose delivered to the OAR so the algorithm tries to minimize it
-                        policy[index][tumor_index][OAR_index] = best_action*10 
-                    else: 
+                        policy[index][tumor_index][OAR_index] = best_action*10
+                    else:
                         future_value = np.zeros([len(sf),len(actionspace)])
                         for actual_sf in range(0,len(sf)):
                             future_value[actual_sf] = value_interpolation(np.array([future_tumor,future_OAR[actual_sf]]).T)
                         penalties = overdosing * -10000000000 #additional penalty when overdosing is needed when choosing a minimum dose to be delivered
-                        Vs = future_value - OAR_dose + penalties 
+                        Vs = future_value - OAR_dose + penalties
                         best_action = Vs.argmax(axis=1)
                         valer = Vs.max(axis=1)
                         policy[index][tumor_index][OAR_index] = best_action
@@ -346,7 +345,7 @@ def value_eval(fraction,number_of_fractions,BED_OAR,BED_tumor,sparing_factors,ab
     else:
         physical_dose = actual_policy/10
     tumor_dose = BED_calc0(physical_dose,abt)
-    OAR_dose = BED_calc0(physical_dose,abn,sparing_factors[-1])                    
+    OAR_dose = BED_calc0(physical_dose,abn,sparing_factors[-1])
     accumulated_tumor_dose = BED_calc0(physical_dose,abt)+BED_tumor
     accumulated_OAR_dose = BED_calc0(physical_dose,abn,sparing_factors[-1]) + BED_OAR
     return [physical_dose,accumulated_tumor_dose,accumulated_OAR_dose,tumor_dose,OAR_dose]
@@ -402,7 +401,7 @@ def whole_plan(number_of_fractions,sparing_factors,abt,abn,bound_OAR,bound_tumor
         OAR_doses[looper] = OAR_dose
         print('calcultions fraction ', looper +1,' done')
     return [tumor_doses, OAR_doses, physical_doses]
-    
+
 
 def whole_plan_print(number_of_fractions,sparing_factors,abt,abn,bound_OAR,bound_tumor,alpha,beta,min_dose = 0, max_dose = 22.2,fixed_prob = 0,fixed_mean = 0, fixed_std = 0):
     """
@@ -451,7 +450,7 @@ def whole_plan_print(number_of_fractions,sparing_factors,abt,abn,bound_OAR,bound
         print('OAR BED delivered = ', np.round(OAR_doses[i],2))
     print('total tumor BED = ',np.sum(tumor_doses))
     print('total OAR BED = ', np.sum(OAR_doses))
-    
+
 def single_fraction_print(number_of_fractions,sparing_factors,BED_OAR,BED_tumor,abt,abn,bound_OAR,bound_tumor,alpha,beta,min_dose,max_dose,fixed_prob = 0,fixed_mean= 0,fixed_std= 0):
     """
     calculates the actual dose for a number_of_fractions fraction treatment
@@ -483,7 +482,7 @@ def single_fraction_print(number_of_fractions,sparing_factors,BED_OAR,BED_tumor,
     min_dose : float
         minimal physical doses to be delivered in one fraction. The doses are aimed at PTV 95.
     max_dose : float
-        maximal physical doses to be delivered in one fraction. The doses are aimed at PTV 95 .   
+        maximal physical doses to be delivered in one fraction. The doses are aimed at PTV 95 .
     fixed_prob : int
         this variable is to turn on a fixed probability distribution. If the variable is not used (0), then the probability will be updated. If the variable is turned to 1, the inserted mean and std will be used for a fixed sparing factor distribution
     fixed_mean: float

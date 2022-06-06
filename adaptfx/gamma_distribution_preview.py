@@ -3,15 +3,13 @@
 This script opens a GUI to check the resulting gamma distribution. with the slide-bars one can directly adapt the distribution and check how the shape of the distribution changes
 """
 
-from scipy.stats import gamma
-import numpy as np
 import tkinter as tk
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from scipy.stats import gamma
 
-
-    
-    
 if __name__=='__main__':
 
     window = tk.Tk()
@@ -40,7 +38,7 @@ if __name__=='__main__':
         canvas.draw()
 
 
-    
+
     var_alpha = tk.DoubleVar()
     scl_alpha = tk.Scale(frm_scale, label='alpha value', from_=0.001, to=10.00, orient=tk.HORIZONTAL, length=400, showvalue=1,tickinterval=1, resolution=0.1, variable = var_alpha, command = gamma_plot)
     scl_alpha.grid(row = 0, column = 2)
@@ -48,8 +46,6 @@ if __name__=='__main__':
     scl_beta = tk.Scale(master = frm_scale, label = 'beta value', from_= 0.000001, to = 0.0500,variable = var_beta, orient = tk.HORIZONTAL, length = 400, tickinterval=0.00999, showvalue = 1, resolution = 0.001,command = gamma_plot)
     scl_beta.grid(row = 1, column = 2)
 
-    
-    
+
+
 window.mainloop()
-    
-    

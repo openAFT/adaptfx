@@ -8,10 +8,11 @@ Note: This file does not assume all sparing factors to be known at the start, bu
 This program uses a discrete state space and does not interpolate between states. Therefore, it is less precise than the interpolation programs
 """
 
-import numpy as np
-from scipy.stats import truncnorm
 import time
-from scipy.stats import invgamma
+
+import numpy as np
+from scipy.stats import invgamma, truncnorm
+
 
 def get_truncated_normal(mean=0, sd=1, low=0, upp=10):
     '''produces a truncated normal distribution'''
@@ -51,7 +52,7 @@ def distribution_update(sparing_factors, alpha, beta):
 def updated_distribution_calc(data,sparing_factors):
     '''calculates the updated distribution based on prior data that is used to setup an inverse gamma distribution
        data shape: nxk where n is the amount of patients and k the amount of sparingfactors per patient
-       sparing_factors shape: list/array with k entries with the first sparing factor being the planning sparing factor, therefore not being included in the treatment   
+       sparing_factors shape: list/array with k entries with the first sparing factor being the planning sparing factor, therefore not being included in the treatment
        return: updated means and stds for k-1 fractions.'''
     variances = data.var(axis = 1)
     alpha,loc,beta = invgamma.fit(variances, floc = 0) #here beta is the scale parameter
@@ -96,21 +97,21 @@ def value_eval(sparing_factors,data,abt = 10,abn = 3,bound = 90,riskfactor = 0):
     Values = np.zeros(len(BEDT)*len(sf)*4).reshape(4,len(BEDT),len(sf)) #2d values list with first indice being the BED and second being the sf
     actionspace = np.arange(0,22.4,0.1) #list of all possible dose actions
     [means,stds] =updated_distribution_calc(data,sparing_factors)
-    distributions = probdistributions(means,stds) 
+    distributions = probdistributions(means,stds)
     policy = np.zeros((4,len(BEDT),len(sf)))
     upperbound = 90.2
     start = time.time()
-    
+
     #here we add the calculation of the distance to the standard treatment
     useless,calculator = np.meshgrid(np.zeros(len(actionspace)),sf) #calculator is matrix that has the correct sparing factors
     actionspace_expand,useless = np.meshgrid(actionspace,sf)
     risk_penalty = abs(6/calculator-actionspace_expand)
     delivered_doses = np.round(BED_calc(sf,abn,actionspace),1)
-    BEDT_rew = BED_calc(1, abt,actionspace) #this is the reward for the dose deposited inside the normal tissue. 
+    BEDT_rew = BED_calc(1, abt,actionspace) #this is the reward for the dose deposited inside the normal tissue.
     BEDT_transformed, meaningless = np.meshgrid(BEDT_rew,np.zeros(len(sf)))
     risk_penalty[0] = risk_penalty[1]
     for update_loop in range (0,5):
-        prob = distributions[update_loop] 
+        prob = distributions[update_loop]
         for state in range(0,5-update_loop): #We have five fractionations with 2 special cases 0 and 4
             print(str(state+1) +' loop done')
             if state == 4: #first state with no prior dose delivered so we dont loop through BEDT
@@ -120,27 +121,27 @@ def value_eval(sparing_factors,data,abt = 10,abn = 3,bound = 90,riskfactor = 0):
                 penalties = np.zeros(future_bed.shape)
                 penalties[future_bed > bound] = -(future_bed[future_bed > bound]-bound)*5
                 Vs = future_values_prob + BEDT_transformed + penalties - risk_penalty*riskfactor
-                
+
                 policy4 = Vs.argmax(axis=1)
                 Values4 = Vs.max(axis=1)
-            
+
             else:
                 future_values_prob_all = (Values[state-1]*prob).sum(axis = 1)
                 for bed in range(len(BEDT)): #this and the next for loop allow us to loop through all states
                     future_bed = delivered_doses + bed/10
                     future_bed[future_bed > upperbound] = upperbound #any dose surpassing 95 is set to 95.
-                    if state == 0: #last state no more further values to add                    
+                    if state == 0: #last state no more further values to add
                         penalties = np.zeros(future_bed.shape)
                         penalties[future_bed > bound] = -(future_bed[future_bed > bound]-bound)*5
                         penalties[future_bed == upperbound] = -10000  #here we produced the penalties for all the values surpassing the limit
                         Vs = BEDT_transformed + penalties# Value of each sparing factor for each action
                     else:
                         penalties = np.zeros(future_bed.shape)
-                        penalties[future_bed == upperbound] = -100 
+                        penalties[future_bed == upperbound] = -100
                         future_values_prob = (future_values_prob_all[(future_bed*10).astype(int)])#in this array are all future values multiplied with the probability of getting there. shape = sparing factors x actionspace
                         Vs = future_values_prob + BEDT_transformed + penalties - risk_penalty*riskfactor
-    
-    
+
+
                     best_action = Vs.argmax(axis=1)
                     valer = Vs.max(axis=1)
                     policy[state][bed] = best_action
@@ -154,7 +155,7 @@ def result_calc_BEDNT(pol4,pol,sparing_factors,abt = 10,abn = 3): #this function
 the pol4 and pol matrices are the ones that are returnedin the value_eval function
     pol4: first fraction policy
     pol: second - fifth fraction policy
-    sparing_factors: sparing factors that should be used to make a plan. list starting from first fraction''' 
+    sparing_factors: sparing factors that should be used to make a plan. list starting from first fraction'''
     actionspace = np.arange(0,22.4,0.1) #list of all possible dose actions
     total_bedt = BED_calc0(actionspace[pol4[round(sparing_factors[0]*100)]],abt)
     total_bednt = BED_calc0(actionspace[pol4[round(sparing_factors[0]*100)]],abn,sparing_factors[0])
@@ -163,8 +164,8 @@ the pol4 and pol matrices are the ones that are returnedin the value_eval functi
     print('total accumulated  biological effective dose in normal tissue; fraction 1 = ',round(total_bednt,1))
     for index,fraction in enumerate(range(3,-1,-1)):
         if fraction == 0:
-            dose_action = (-sparing_factors[index+1]+np.sqrt(sparing_factors[index+1]**2+4*sparing_factors[index+1]**2*(90-total_bednt)/abn))/(2*sparing_factors[index+1]**2/abn) 
-        else:   
+            dose_action = (-sparing_factors[index+1]+np.sqrt(sparing_factors[index+1]**2+4*sparing_factors[index+1]**2*(90-total_bednt)/abn))/(2*sparing_factors[index+1]**2/abn)
+        else:
             dose_action = actionspace[pol[fraction][(round(total_bednt,1)*10).astype(int)][round(sparing_factors[index+1]*100)].astype(int)]
         dose_delivered = BED_calc0(dose_action,abt)
         total_bedt += dose_delivered
