@@ -220,12 +220,12 @@ def value_eval(
     goal,
     abt,
     abn,
+    C,
     min_dose=0,
     max_dose=22.3,
     fixed_prob=0,
     fixed_mean=0,
     fixed_std=0,
-    C = 1,
 ):
     """
     calculates the optimal dose for the desired fraction.
@@ -250,6 +250,8 @@ def value_eval(
         alpha beta ratio of the tumor. The default is 10.
     abn : float, optional
         alpha beta ratio of the organ at risk. The default is 3.
+    C: float
+        fixed constant to penalize for each additional fraction that is used
     min_dose : float
         minimal physical doses to be delivered in one fraction. The doses are aimed at PTV 95
     max_dose : float
@@ -260,8 +262,6 @@ def value_eval(
         mean of the fixed sparing factor normal distribution
     std_fixed: float
         standard deviation of the fixed sparing factor normal distribution
-    C: float
-        fixed constant to penalize for each additional fraction that is used
 
     Returns
     -------
@@ -415,6 +415,7 @@ def whole_plan(
     alpha,
     beta,
     goal,
+    C,
     abt=10,
     abn=3,
     min_dose=0,
@@ -440,6 +441,8 @@ def whole_plan(
         beta hyperparameter of std prior derived from previous patients.
     goal : float
         prescribed tumor BED
+    C: float
+        fixed constant to penalize for each additional fraction that is used
     abt : float
         alpha-beta ratio of tumor. default is 10
     abn : float
@@ -475,6 +478,7 @@ def whole_plan(
             goal,
             abt,
             abn,
+            C,
             min_dose,
             max_dose,
             fixed_prob,
