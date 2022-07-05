@@ -306,7 +306,7 @@ def value_eval(
         np.arange(number_of_fractions, fraction -1, -1)
     ):  #
         if (
-            state == number_of_fractions - 1
+            fraction_state == 1 #state == number_of_fractions - 1
         ):  # first state with no prior dose delivered so we dont loop through BEDT
             BEDN = BED_calc_matrix(
                 sparing_factors[-1], abn, actionspace
@@ -361,7 +361,7 @@ def value_eval(
                     sf, abn, actionspace_clipped
                 )  # this one could be done outside of the loop and only the clipping would happen inside the loop.
                 BED = BED_calc_matrix(np.ones(len(sf)), abt, actionspace_clipped)
-                if state != 0:
+                if state != 0 and tumor_value<goal:
                     future_BEDT = tumor_value + BED
                     future_BEDT[future_BEDT > goal] = goal + 1
                     future_values = future_values_func(
@@ -376,6 +376,18 @@ def value_eval(
                     else:
                         best_action = Vs.argmax(axis=1)
                         valer = Vs.max(axis=1)
+                # elif tumor_value>=goal: #calculate value for terminal case
+                #     best_action = 0
+                #     last_BEDN = 0
+                #     future_BEDT = tumor_value
+                #     overdose_penalty = 0
+                #     if future_BEDT > goal:
+                #         overdose_penalty = -10000
+                #     valer = (
+                #         -last_BEDN
+                #         -C
+                #         + overdose_penalty * np.ones(sf.shape)
+                #     )  
                 else:  # last state no more further values to add
                     best_action = (
                         -1 + np.sqrt(1 + 4 * 1 * (goal - tumor_value) / abt)
@@ -394,6 +406,7 @@ def value_eval(
                         overdose_penalty = -10000
                     valer = (
                         -last_BEDN
+                        -C
                         + underdose_penalty * np.ones(sf.shape)
                         + overdose_penalty * np.ones(sf.shape)
                     )  # gives the value of each action for all sparing factors. elements 0-len(sparingfactors) are the Values for
