@@ -304,9 +304,9 @@ def value_eval(
 
     for state, fraction_state in enumerate(
         np.arange(number_of_fractions, fraction -1, -1)
-    ):  #
+    ):
         if (
-            fraction_state == 1 #state == number_of_fractions - 1
+            state == number_of_fractions - 1 #fraction_state == 1
         ):  # first state with no prior dose delivered so we dont loop through BEDT
             BEDN = BED_calc_matrix(
                 sparing_factors[-1], abn, actionspace
@@ -321,6 +321,13 @@ def value_eval(
             Vs = -BEDN + C_penalties + future_values
             policy4 = Vs.argmax(axis=1)
         elif (
+            accumulated_dose >= goal
+        ):
+            best_action = 0
+            last_BEDN = BED_calc0(best_action, abn, sparing_factors[-1])
+            policy4 = 0
+            break
+        elif (
             fraction_state == fraction and fraction != number_of_fractions
         ):  # actual fraction is first state to calculate
             actionspace_clipped = actionspace[
@@ -330,7 +337,7 @@ def value_eval(
             future_BEDT = accumulated_dose + BED_calc0(actionspace_clipped, abt)
             future_BEDT[future_BEDT > goal] = goal + 1
             penalties = np.zeros(future_BEDT.shape)
-            C_penalties = np.copy(penalties)
+            C_penalties = np.zeros(future_BEDT.shape)
             penalties[future_BEDT > goal] = -10000
             C_penalties[future_BEDT < goal] = -C
             future_values_func = interp1d(BEDT, (Values[state - 1] * prob).sum(axis=1))
@@ -353,12 +360,6 @@ def value_eval(
                 best_action = max_dose
             last_BEDN = BED_calc0(best_action, abn, sparing_factors[-1])
             policy4 = best_action * 10
-        # elif (
-        #     accumulated_dose >= goal
-        # ):
-        #     best_action = 0
-        #     last_BEDN = BED_calc0(best_action, abn, sparing_factors[-1])
-        #     policy4 = best_action
         else:
             future_value_prob = (Values[state - 1] * prob).sum(axis=1)
             future_values_func = interp1d(BEDT, future_value_prob)
@@ -372,14 +373,14 @@ def value_eval(
                     sf, abn, actionspace_clipped
                 )  # this one could be done outside of the loop and only the clipping would happen inside the loop.
                 BED = BED_calc_matrix(np.ones(len(sf)), abt, actionspace_clipped)
-                if state != 0:
+                if state != 0 and accumulated_dose < goal:
                     future_BEDT = tumor_value + BED
                     future_BEDT[future_BEDT > goal] = goal + 1
                     future_values = future_values_func(
                         future_BEDT
                     )  # for each action and sparing factor calculate the penalty of the action and add the future value we will only have as many future values as we have actions (not sparing dependent)
                     penalties = np.zeros(future_BEDT.shape)
-                    C_penalties = np.copy(penalties)
+                    C_penalties = np.zeros(future_BEDT.shape)
                     penalties[future_BEDT > goal] = -10000
                     C_penalties[future_BEDT < goal] = -C
                     Vs = -BEDN + C_penalties + future_values + penalties
@@ -389,18 +390,15 @@ def value_eval(
                     else:
                         best_action = Vs.argmax(axis=1)
                         valer = Vs.max(axis=1)
-                # elif tumor_value>=goal: #calculate value for terminal case
-                #     best_action = 0
-                #     last_BEDN = 0
-                #     future_BEDT = tumor_value
-                #     overdose_penalty = 0
-                #     if future_BEDT > goal:
-                #         overdose_penalty = -10000
-                #     valer = (
-                #         -last_BEDN
-                #         -C
-                #         + overdose_penalty * np.ones(sf.shape)
-                #     )  
+                elif accumulated_dose>=goal: #calculate value for terminal case
+                    best_action = 0
+                    future_BEDT = tumor_value
+                    overdose_penalty = 0
+                    if future_BEDT > goal:
+                        overdose_penalty = -10000
+                    valer = (
+                        + overdose_penalty * np.ones(sf.shape)
+                    )  
                 else:  # last state no more further values to add
                     best_action = (
                         -1 + np.sqrt(1 + 4 * 1 * (goal - tumor_value) / abt)
@@ -414,7 +412,7 @@ def value_eval(
                     underdose_penalty = 0
                     overdose_penalty = 0
                     if future_BEDT < goal:
-                        underdose_penalty = -C + (future_BEDT - goal) * 10
+                        underdose_penalty = (future_BEDT - goal) * 10
                     if future_BEDT > goal:
                         overdose_penalty = -10000
                     valer = (
