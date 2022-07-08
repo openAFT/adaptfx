@@ -9,9 +9,8 @@ typ = 1
 
 
 if typ:
-    n_frac = 4
+    n_frac = 8
     [a, b] = intmin.data_fit(np.array([[0.99, 0.95, 0.98], [0.95, 0.9, 0.8]]))
-    print(a,b)
     sf = np.linspace(1, 1.1, n_frac)
     c_list = np.linspace(0, 8000, 5)
     dose_delivery = np.zeros((len(c_list),n_frac))
