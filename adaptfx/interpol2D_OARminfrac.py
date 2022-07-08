@@ -180,9 +180,10 @@ def max_action(bed, actionspace, goal, abt=10):
         gives the size of the resized actionspace to reach the prescribed tumor dose.
 
     """
-    max_action = min(max(BED_calc0(actionspace, abt)), goal - bed)
-    sizer = np.argmin(np.abs(BED_calc0(actionspace, abt) - max_action))
-
+    BED_action = BED_calc0(actionspace, abt)
+    max_action = min(max(BED_action), goal - bed)
+    sizer = np.argmin(np.abs(BED_action - max_action))
+    sizer += 1 #ensure that larger action is choosen
     return sizer
 
 
@@ -373,7 +374,7 @@ def value_eval(
                     sf, abn, actionspace_clipped
                 )  # this one could be done outside of the loop and only the clipping would happen inside the loop.
                 BED = BED_calc_matrix(np.ones(len(sf)), abt, actionspace_clipped)
-                if state != 0 and accumulated_dose < goal:
+                if state != 0 and tumor_value < goal:
                     future_BEDT = tumor_value + BED
                     future_BEDT[future_BEDT > goal] = goal + 1
                     future_values = future_values_func(
@@ -390,7 +391,7 @@ def value_eval(
                     else:
                         best_action = Vs.argmax(axis=1)
                         valer = Vs.max(axis=1)
-                elif accumulated_dose>=goal: #calculate value for terminal case
+                elif tumor_value >= goal: #calculate value for terminal case
                     best_action = 0
                     future_BEDT = tumor_value
                     overdose_penalty = 0
