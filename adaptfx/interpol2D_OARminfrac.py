@@ -339,7 +339,7 @@ def value_eval(
             future_BEDT[future_BEDT > goal] = goal + 1
             penalties = np.zeros(future_BEDT.shape)
             C_penalties = np.zeros(future_BEDT.shape)
-            penalties[future_BEDT > goal] = -10000
+            penalties[future_BEDT > goal] = 0 #overdosing is indirectly penalised with BEDN
             C_penalties[future_BEDT < goal] = -C
             future_values_func = interp1d(BEDT, (Values[state - 1] * prob).sum(axis=1))
             future_values = future_values_func(
@@ -380,25 +380,20 @@ def value_eval(
                     future_values = future_values_func(
                         future_BEDT
                     )  # for each action and sparing factor calculate the penalty of the action and add the future value we will only have as many future values as we have actions (not sparing dependent)
-                    penalties = np.zeros(future_BEDT.shape)
                     C_penalties = np.zeros(future_BEDT.shape)
-                    penalties[future_BEDT > goal] = -10000
                     C_penalties[future_BEDT < goal] = -C
-                    Vs = -BEDN + C_penalties + future_values + penalties
+                    Vs = -BEDN + C_penalties + future_values
                     if Vs.size == 0:
                         best_action = np.zeros(len(sf))
                         valer = np.zeros(len(sf))
                     else:
                         best_action = Vs.argmax(axis=1)
                         valer = Vs.max(axis=1)
-                elif tumor_value >= goal: #calculate value for terminal case
+                elif tumor_value > goal: #calculate value for terminal case
                     best_action = 0
                     future_BEDT = tumor_value
-                    overdose_penalty = 0
-                    if future_BEDT > goal:
-                        overdose_penalty = -10000
                     valer = (
-                        + overdose_penalty * np.ones(sf.shape)
+                        + np.zeros(sf.shape)
                     )  
                 else:  # last state no more further values to add
                     best_action = (
@@ -413,9 +408,9 @@ def value_eval(
                     underdose_penalty = 0
                     overdose_penalty = 0
                     if future_BEDT < goal:
-                        underdose_penalty = (future_BEDT - goal) * 10
+                        underdose_penalty = -10000
                     if future_BEDT > goal:
-                        overdose_penalty = -10000
+                        overdose_penalty = 0
                     valer = (
                         -last_BEDN
                         + underdose_penalty * np.ones(sf.shape)
