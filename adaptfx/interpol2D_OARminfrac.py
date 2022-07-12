@@ -183,7 +183,6 @@ def max_action(bed, actionspace, goal, abt=10):
     BED_action = BED_calc0(actionspace, abt)
     max_action = min(max(BED_action), goal - bed)
     sizer = np.argmin(np.abs(BED_action - max_action))
-    sizer += 1 #ensure that larger action is choosen
     return sizer
 
 
@@ -295,11 +294,11 @@ def value_eval(
         2 * 1**2 / abt
     ):  # if the max dose is too large we lower it, so we dont needlessly check too many actions
         max_dose = np.round(
-            (-1 + np.sqrt(1**2 + 4 * 1**2 * (goal) / abt)) / (2 * 1**2 / abt), 1
+            (-1 + np.sqrt(1**2 + 4 * 1**2 * (goal) / abt)) / (2 * 1**2 / abt), 2
         )
     if min_dose > max_dose:
         min_dose = max_dose - 0.1
-    actionspace = np.arange(min_dose, max_dose + 0.01, 0.1)
+    actionspace = np.arange(min_dose, max_dose + 0.11, 0.1) #set +0.11 to ensure at least max_dose is covered
     # now we set up the policy array which has len(BEDT)*len(sf)*len(actionspace) entries. We give each action the same probability to start with
     policy = np.zeros((number_of_fractions - fraction, len(BEDT), len(sf)))
 
