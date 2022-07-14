@@ -3,8 +3,7 @@ from scipy.interpolate import interp1d
 from scipy.stats import gamma, truncnorm
 
 
-def BED_calc0(
-        dose, ab, sparing=1):
+def BED_calc0(dose, ab, sparing=1):
     """
     calculates the BED for a specific dose
 
@@ -24,13 +23,11 @@ def BED_calc0(
         and alpha-beta ratio.
 
     """
-    BED = sparing * dose * (
-        1 + (sparing * dose) / ab)
+    BED = sparing * dose * (1 + (sparing * dose) / ab)
     return BED
 
 
-def BED_calc_matrix(
-        sf, ab, actionspace):
+def BED_calc_matrix(sf, ab, actionspace):
     """
     calculates the BED for an array of values
 
@@ -56,9 +53,7 @@ def BED_calc_matrix(
     return BED
 
 
-def max_action(
-    bed, actionspace,
-        goal, abt=10):
+def max_action(bed, actionspace, goal, abt=10):
     """
     Computes the maximal dose that can be delivered to the tumor
     in each fraction depending on the actual accumulated dose
@@ -81,14 +76,8 @@ def max_action(
         the prescribed tumor dose.
 
     """
-    max_action = min(max(BED_calc0(
-        actionspace, abt)), goal - bed)
-    sizer = np.argmin(
-        np.abs(
-            BED_calc0(
-                actionspace,
-                abt) -
-            max_action))
+    max_action = min(max(BED_calc0(actionspace, abt)), goal - bed)
+    sizer = np.argmin(np.abs(BED_calc0(actionspace, abt) - max_action))
 
     return sizer
 
@@ -110,9 +99,5 @@ def argfind(BEDT, value):
         index of value inside list.
 
     """
-    index = min(
-        range(len(BEDT)),
-        key=lambda
-        i:
-        abs(BEDT[i] - value))
+    index = min(range(len(BEDT)), key=lambda i: abs(BEDT[i] - value))
     return index
