@@ -22,9 +22,9 @@ def value_eval(
     sparing_factors,
     alpha,
     beta,
-    abt,
-    abn,
     bound,
+    abt=10,
+    abn=3,
     min_dose=0,
     max_dose=22.3,
     fixed_prob=0,
@@ -48,12 +48,12 @@ def value_eval(
         alpha hyperparameter of std prior derived from previous patients.
     beta : float
         beta hyperparameter of std prior derived from previous patients.
+    bound : float
+        upper limit of OAR.
     abt : float
         alpha-beta ratio of tumor.
     abn : float
         alpha-beta ratio of OAR.
-    bound : float
-        upper limit of OAR.
     min_dose : float
         minimal physical doses to be delivered in one fraction.
         The doses are aimed at PTV 95.
@@ -286,11 +286,11 @@ def value_eval(
 def whole_plan(
     number_of_fractions,
     sparing_factors,
-    abt,
-    abn,
     alpha,
     beta,
     OAR_limit,
+    abt=10,
+    abn=3,
     min_dose=0,
     max_dose=22.3,
     fixed_prob=0,
@@ -306,16 +306,16 @@ def whole_plan(
         number of fractions that will be delivered.
     sparing_factors : list/array
         list/array with all observed sparing factors.
-    abt : float
-        alpha-beta ratio of tumor.
-    abn : float
-        alpha-beta ratio of OAR.
     alpha : float
         shape of inverse-gamma distribution.
     beta : float
         scale of inverse-gamme distrinbution.
     OAR_limit : float
         accumulated BED in OAR (from previous fractions)
+    abt : float
+        alpha-beta ratio of tumor.
+    abn : float
+        alpha-beta ratio of OAR.
     min_dose : float
         minimal physical doses to be delivered in one fraction.
         The doses are aimed at PTV 95.
