@@ -64,19 +64,19 @@ def value_eval(
         fixed constant to penalize for each additional fraction that is used
     min_dose : float
         minimal physical doses to be delivered in one fraction.
-        The doses are aimed at PTV 95
+        The doses are aimed at PTV 95.
     max_dose : float
         maximal physical doses to be delivered in one fraction.
-        The doses are aimed at PTV 95
+        The doses are aimed at PTV 95.
     fixed_prob : int
         this variable is to turn on a fixed probability distribution.
         If the variable is not used (0), then the probability will be updated.
         If the variable is turned to (1), the inserted mean and std will be used
         for a fixed sparing factor distribution. Then alpha and beta are unused.
     fixed_mean: float
-        mean of the fixed sparing factor normal distribution
+        mean of the fixed sparing factor normal distribution.
     std_fixed: float
-        standard deviation of the fixed sparing factor normal distribution
+        standard deviation of the fixed sparing factor normal distribution.
 
     Returns
     -------

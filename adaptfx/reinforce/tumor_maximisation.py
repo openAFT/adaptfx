@@ -47,7 +47,7 @@ def value_eval(
     alpha : float
         alpha hyperparameter of std prior derived from previous patients.
     beta : float
-        beta hyperparameter of std prior derived from previous patients
+        beta hyperparameter of std prior derived from previous patients.
     abt : float
         alpha-beta ratio of tumor.
     abn : float
@@ -67,9 +67,9 @@ def value_eval(
         and std will be used for a fixed sparing factor distribution.
         Then alpha and beta are unused.
     fixed_mean: float
-        mean of the fixed sparing factor normal distribution
+        mean of the fixed sparing factor normal distribution.
     fixed_std: float
-        standard deviation of the fixed sparing factor normal distribution
+        standard deviation of the fixed sparing factor normal distribution.
 
     Returns
     -------
@@ -79,6 +79,7 @@ def value_eval(
         accumulated OAR BED and accumulated tumor BED.
 
     """
+    
     actual_sparing = sparing_factors[-1]
     if fixed_prob != 1:
         mean = np.mean(
@@ -310,9 +311,9 @@ def whole_plan(
     abn : float
         alpha-beta ratio of OAR.
     alpha : float
-        shape of inverse-gamma distribution
+        shape of inverse-gamma distribution.
     beta : float
-        scale of inverse-gamme distrinbution
+        scale of inverse-gamme distrinbution.
     OAR_limit : float
         accumulated BED in OAR (from previous fractions)
     min_dose : float
@@ -327,9 +328,9 @@ def whole_plan(
         If the variable is turned to 1, the inserted mean and std will be used
         for a fixed sparing factor distribution. Then alpha and beta are unused.
     fixed_mean: float
-        mean of the fixed sparing factor normal distribution
+        mean of the fixed sparing factor normal distribution.
     fixed_std: float
-        standard deviation of the fixed sparing factor normal distribution
+        standard deviation of the fixed sparing factor normal distribution.
 
     Returns
     -------
