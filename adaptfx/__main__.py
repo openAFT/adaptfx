@@ -1,4 +1,3 @@
-from logging.config import dictConfig
 import numpy as np
 from reinforce import fraction_minimisation as frac
 from reinforce import oar_minimisation as oar
