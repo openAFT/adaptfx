@@ -110,10 +110,10 @@ def value_eval(
     max_physical_dose = convert_to_physical(goal, abt)
     if max_dose > max_physical_dose:  
         # if the max dose is too large we lower it, so we dont needlessly check too many actions
-        max_dose = np.round(max_physical_dose, 2)
+        max_dose = max_physical_dose
     if min_dose > max_dose:
         min_dose = max_dose - 0.1
-    actionspace = np.arange(min_dose, max_dose + 0.11, 0.1) #set +0.11 to ensure at least max_dose is covered
+    actionspace = np.arange(min_dose, max_dose + 0.1, 0.1)
     # now we set up the policy array which has len(BEDT)*len(sf)*len(actionspace) entries. We give each action the same probability to start with
     policy = np.zeros((number_of_fractions - fraction, len(BEDT), len(sf)))
 
