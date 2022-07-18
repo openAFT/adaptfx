@@ -117,6 +117,9 @@ def convert_to_physical(bed, ab, sf=1):
     dose : positive values float/array
         physical dose
     """
-    dose = (-sf + np.sqrt(sf**2 + 4 * sf**2 * bed / ab)) / (
-        2 * sf**2 / ab)
+    if bed > 0:
+        dose = (-sf + np.sqrt(sf**2 + 4 * sf**2 * bed / ab)) / (
+            2 * sf**2 / ab)
+    else:
+        dose = 0
     return dose
