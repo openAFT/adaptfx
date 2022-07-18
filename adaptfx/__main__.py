@@ -38,7 +38,7 @@ class RL_object():
     def optimise(self):
         params = self.parameters
         if self.algorithm == 'oar':
-            relay = oar.whole_plan(number_of_fractions=params['number_of_fraction'],
+            relay = oar.whole_plan(number_of_fractions=params['number_of_fractions'],
                                    sparing_factors=params['sparing_factors'],
                                    alpha=params['alpha'],
                                    beta=params['beta'],
@@ -52,7 +52,7 @@ class RL_object():
                                    fixed_std=params['fixed_std'],
             )
         elif self.algorithm == 'tumor':
-            relay = tumor.whole_plan(number_of_fractions=params['number_of_fraction'],
+            relay = tumor.whole_plan(number_of_fractions=params['number_of_fractions'],
                                     sparing_factors=params['sparing_factors'],
                                     alpha=params['alpha'],
                                     beta=params['beta'],
@@ -66,7 +66,7 @@ class RL_object():
                                     fixed_std=params['fixed_std'],
             )
         elif self.algorithm == 'frac':
-            relay = frac.whole_plan(number_of_fractions=params['number_of_fraction'],
+            relay = frac.whole_plan(number_of_fractions=params['number_of_fractions'],
                                     sparing_factors=params['sparing_factors'],
                                     alpha=params['alpha'],
                                     beta=params['beta'],
@@ -92,7 +92,7 @@ if __name__ == '__main__':
                         alpha=2.7,
                         beta=0.014,
                         goal=30,
-                        C=3,
-                        p=2
+                        C=3
     )
-    # rl_test.optimise()
+    
+    rl_test.optimise()
