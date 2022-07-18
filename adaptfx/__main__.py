@@ -2,6 +2,7 @@ import numpy as np
 from reinforce import fraction_minimisation as frac
 from reinforce import oar_minimisation as oar
 from reinforce import tumor_maximisation as tumor
+from reinforce import track_tumor_oar as tumor_oar
 
 class RL_object():
     def __init__(self, algorithm, **params):
@@ -80,10 +81,30 @@ class RL_object():
                                     fixed_mean=params['fixed_mean'],
                                     fixed_std=params['fixed_std'],
             )
+
+        elif self.algorithm == 'tumor_oar':
+            relay = tumor_oar.whole_plan(number_of_fractions=params['number_of_fractions'],
+                                        BED_OAR=['BED_OAR'],
+                                        BED_tumor=['BED_tumor'],
+                                        sparing_factors=params['sparing_factors'],
+                                        alpha=params['alpha'],
+                                        beta=params['beta'],
+                                        goal=params['goal'],
+                                        bound_OAR=params['bound_OAR'],
+                                        bound_tumor=['bound_tumor'],
+                                        abt=params['abt'],
+                                        abn=params['abn'],
+                                        min_dose=params['min_dose'],
+                                        max_dose=params['max_dose'],
+                                        fixed_prob=params['fixed_prob'],
+                                        fixed_mean=params['fixed_mean'],
+                                        fixed_std=params['fixed_std'],
+            )
+
         else:
             print("algorithm", self.algorithm, "not known")
 
-        return relay
+        return relay[0][:]
 
 if __name__ == '__main__':
     rl_test = RL_object(algorithm='frac',
@@ -95,4 +116,4 @@ if __name__ == '__main__':
                         C=3
     )
     
-    rl_test.optimise()
+    print(rl_test.optimise())
