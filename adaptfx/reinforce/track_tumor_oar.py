@@ -130,7 +130,7 @@ def value_eval(
     tumor_dose = BED_calc_matrix(actionspace, abt, 1)[
         0
     ]  # this is the dose delivered to the tumor
-    actual_fraction_sf = argfind(sf, np.round(sparing_factors[-1], 2))
+    actual_fraction_sf = argfind(sf, sparing_factors[-1])
 
     for index, frac_state_plus in enumerate(
         np.arange(number_of_fractions + 1, fraction, -1)
