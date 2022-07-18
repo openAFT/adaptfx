@@ -105,7 +105,7 @@ def value_eval(
         max_dose = 22.3
     if min_dose > max_dose:
         min_dose = max_dose - 0.1
-    actionspace = np.arange(min_dose, max_dose + 0.01, 0.1)
+    actionspace = np.arange(min_dose, max_dose + 0.1, 0.1)
     policy = np.zeros(((number_of_fractions - fraction), len(BEDT), len(sf)))
     upperbound = bound + 1
 
