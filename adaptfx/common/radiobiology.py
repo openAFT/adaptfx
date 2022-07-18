@@ -79,13 +79,13 @@ def max_action(bed, actionspace, goal, abt=10):
     return sizer
 
 
-def argfind(BEDT, value):
+def argfind(bedt, value):
     """
     This function is used to find the index of certain values
 
     Parameters
     ----------
-    BEDT : list/array
+    bedt : list/array
         list of tumor BED in which value is searched.
     value : float
         item inside list.
@@ -99,23 +99,24 @@ def argfind(BEDT, value):
     index = min(range(len(BEDT)), key=lambda i: abs(BEDT[i] - value))
     return index
 
-def physical_dose(BED, ab):
+def converted_dose(bed, ab, sf=1):
     """
-    Calculates the physical dose given a BED
+    Converts given BED to the physical dose
 
     Parameters
     ----------
-    BED : float
+    BED : float/array
         tumor or OAR BED for which physical dose has to be calculated.
     ab : float
         alpha beta ratio.
+    sf : float/array
+        sparing factor, only specify when OAR BED
 
     Returns
     -------
-    dose : positive float
+    dose : positive values float/array
         physical dose
     """
-    dose = (-1 + np.sqrt(1 + 4 * (BED) / ab)) / (
-        2 / ab
-    )
+    dose = (-sf + np.sqrt(sf**2 + 4 * sf**2 * bed / ab)) / (
+        2 * sf**2 / ab)
     return dose

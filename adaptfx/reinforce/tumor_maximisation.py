@@ -13,7 +13,7 @@ treatment plan (when all sparing factors are known).
 import numpy as np
 from scipy.interpolate import interp2d
 from common.maths import std_calc, get_truncated_normal, probdist
-from common.radiobiology import argfind, BED_calc_matrix, BED_calc0
+from common.radiobiology import argfind, BED_calc_matrix, BED_calc0, converted_dose
 
 def value_eval(
     fraction,
@@ -186,9 +186,7 @@ def value_eval(
                     actual_policy = Vs.argmax(axis=1)
                     actual_value = Vs.max(axis=1)
                 else:
-                    best_action = (
-                        -sf + np.sqrt(sf**2 + 4 * sf**2 * (bound - BED) / abn)
-                    ) / (2 * sf**2 / abn)
+                    best_action = converted_dose(bound-BED, abn, sf)
                     if BED > bound:
                         best_action = np.ones(best_action.shape) * min_dose
                     best_action[best_action < min_dose] = min_dose
@@ -207,10 +205,7 @@ def value_eval(
                         future_bed > bound
                     ] = upperbound  # any dose surpassing 90.1 is set to 90.1
                     if index == 0:  # last state no more further values to add
-                        best_action = (
-                            -sf
-                            + np.sqrt(sf**2 + 4 * sf**2 * (bound - bed_value) / abn)
-                        ) / (2 * sf**2 / abn)
+                        best_action = converted_dose(bound-bed_value, abn, sf)
                         if bed_value > bound:
                             best_action = np.zeros(best_action.shape)
                         best_action[best_action < min_dose] = min_dose

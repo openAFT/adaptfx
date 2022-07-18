@@ -13,7 +13,7 @@ treatment plan (when all sparing factors are known).
 import numpy as np
 from scipy.interpolate import interp1d
 from common.maths import std_calc, get_truncated_normal, probdist
-from common.radiobiology import BED_calc_matrix, BED_calc0, max_action
+from common.radiobiology import BED_calc_matrix, BED_calc0, max_action, convert_to_physical
 
 def value_eval(
     fraction,
@@ -100,12 +100,10 @@ def value_eval(
     Values = np.zeros(
         (number_of_fractions - fraction, len(BEDT), len(sf))
     )  # 2d values list with first indice being the BED and second being the sf
-    if max_dose > (-1 + np.sqrt(1**2 + 4 * 1**2 * (goal) / abt)) / (
-        2 * 1**2 / abt
-    ):  # if the max dose is too large we lower it, so we dont needlessly check too many actions
-        max_dose = np.round(
-            (-1 + np.sqrt(1**2 + 4 * 1**2 * (goal) / abt)) / (2 * 1**2 / abt), 1
-        )
+    max_physical_dose = convert_to_physical(goal, abt)
+    if max_dose > max_physical_dose:
+        # if the max dose is too large we lower it, so we dont needlessly check too many actions
+        max_dose = np.round(max_physical_dose, 1)
     if min_dose > max_dose:
         min_dose = max_dose - 0.1
     actionspace = np.arange(min_dose, max_dose + 0.01, 0.1)
@@ -148,9 +146,7 @@ def value_eval(
         elif (
             fraction == number_of_fractions
         ):  # in this state no penalty has to be defined as the value is not relevant
-            best_action = (
-                -1 + np.sqrt(1 + 4 * 1 * (goal - accumulated_dose) / abt)
-            ) / (2 * 1**2 / abt)
+            best_action = convert_to_physical(goal-accumulated_dose, abt)
             if accumulated_dose > goal:
                 best_action = 0
             if best_action < min_dose:
@@ -188,9 +184,7 @@ def value_eval(
                         best_action = Vs.argmax(axis=1)
                         valer = Vs.max(axis=1)
                 else:  # last state no more further values to add
-                    best_action = (
-                        -1 + np.sqrt(1 + 4 * 1 * (goal - tumor_value) / abt)
-                    ) / (2 * 1**2 / abt)
+                    best_action = convert_to_physical(goal-tumor_value, abt)
                     if best_action > max_dose:
                         best_action = max_dose
                     if best_action < min_dose:

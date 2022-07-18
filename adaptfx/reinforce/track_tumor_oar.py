@@ -10,7 +10,7 @@ maximum BED, the tumor dose is maximized.
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 from common.maths import std_calc, get_truncated_normal, probdist
-from common.radiobiology import argfind, BED_calc_matrix, BED_calc0
+from common.radiobiology import argfind, BED_calc_matrix, BED_calc0, convert_to_physical
 
 # right now once 90 is hit it doesnt seem to matter how much
 # is overdosed. Somehow this must be fixed
@@ -111,10 +111,10 @@ def value_eval(
     Values = np.zeros(
         [(number_of_fractions - fraction), len(BEDT), len(BEDNT), len(sf)]
     )  # 2d values list with first indice being the BED and second being the sf
-    if max_dose > (-1 + np.sqrt(1 + 4 * 1 * (bound_tumor) / abt)) / (
-        2 * 1**2 / abt
-    ):  # we constrain the maximum dose so that no more dose than what is needed would be checked in the actionspace
-        max_dose = (-1 + np.sqrt(1 + 4 * 1 * (bound_tumor) / abt)) / (2 * 1**2 / abt)
+    max_physical_dose = convert_to_physical(bound_tumor, abt)
+    if max_dose > max_physical_dose:  
+        # we constrain the maximum dose so that no more dose than what is needed would be checked in the actionspace
+        max_dose = max_physical_dose
     if min_dose > max_dose:
         min_dose = max_dose - 0.1
     actionspace = np.arange(min_dose, max_dose + 0.1, 0.1)
@@ -184,15 +184,8 @@ def value_eval(
                 actual_policy = Vs.argmax(axis=0)
             else:
                 sf_end = sparing_factors[-1]
-                best_action_BED = (
-                    -sf_end
-                    + np.sqrt(
-                        sf_end**2 + 4 * sf_end**2 * (bound_OAR - BED_OAR) / abn
-                    )
-                ) / (2 * sf_end**2 / abn)
-                best_action_tumor = (
-                    -1 + np.sqrt(1 + 4 * 1 * (bound_tumor - BED_tumor) / abt)
-                ) / (2 * 1**2 / abt)
+                best_action_BED = convert_to_physical(bound_OAR-BED_OAR, abn, sf_end)
+                best_action_tumor = convert_to_physical(bound_tumor-BED_tumor, abt)
                 best_action = np.min([best_action_BED, best_action_tumor], axis=0)
                 if BED_OAR > bound_OAR or BED_tumor > bound_tumor:
                     best_action = np.ones(best_action.shape) * min_dose
@@ -228,24 +221,9 @@ def value_eval(
                     if (
                         frac_state == number_of_fractions
                     ):  # last state no more further values to add
-                        best_action_BED = (
-                            -sf
-                            + np.sqrt(
-                                sf**2 + 4 * sf**2 * (bound_OAR - OAR_value) / abn
-                            )
-                        ) / (
-                            2 * sf**2 / abn
-                        )  # calculate maximal dose that can be delivered to OAR and tumor
-                        best_action_tumor = (
-                            -np.ones(len(sf))
-                            + np.sqrt(
-                                np.ones(len(sf))
-                                + 4
-                                * np.ones(len(sf))
-                                * (bound_tumor - tumor_value)
-                                / abt
-                            )
-                        ) / (2 * np.ones(len(sf)) ** 2 / abt)
+                        best_action_BED = convert_to_physical(bound_OAR-OAR_value, abn, sf) 
+                        # calculate maximal dose that can be delivered to OAR and tumor
+                        best_action_tumor = convert_to_physical(bound_tumor-tumor_value, abt)
                         best_action = np.min(
                             [best_action_BED, best_action_tumor], axis=0
                         )  # take the smaller of both doses to not surpass the limit
