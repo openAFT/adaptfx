@@ -96,10 +96,10 @@ def argfind(bedt, value):
         index of value inside list.
 
     """
-    index = min(range(len(BEDT)), key=lambda i: abs(BEDT[i] - value))
+    index = min(range(len(bedt)), key=lambda i: abs(bedt[i] - value))
     return index
 
-def converted_dose(bed, ab, sf=1):
+def convert_to_physical(bed, ab, sf=1):
     """
     Converts given BED to the physical dose
 
