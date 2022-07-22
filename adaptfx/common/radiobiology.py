@@ -73,8 +73,13 @@ def max_action(bed, actionspace, goal, abt=10):
         the prescribed tumor dose.
 
     """
-    max_action = min(max(BED_calc0(actionspace, abt)), goal - bed)
-    sizer = np.argmin(np.abs(BED_calc0(actionspace, abt) - max_action))
+    bed_actionspace = BED_calc0(actionspace, abt)
+    max_action = min(max(bed_actionspace), goal - bed)
+    sizer = np.argmin(np.abs(bed_actionspace - max_action))
+    if bed_actionspace[sizer] < max_action:
+        # make sure that with prescribing max_action
+        # reached dose is not below goal
+        sizer += 1
 
     return sizer
 
