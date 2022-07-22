@@ -106,7 +106,7 @@ class RL_object():
 
         return relay[0][:]
 
-if __name__ == '__main__':
+def main():
     rl_test = RL_object(algorithm='frac',
                         number_of_fractions=8,
                         sparing_factors=np.linspace(1,1.1,9),
@@ -117,3 +117,6 @@ if __name__ == '__main__':
     )
     
     print(rl_test.optimise())
+
+if __name__ == '__main__':
+    main()
