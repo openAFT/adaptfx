@@ -1,4 +1,3 @@
-
 # Created by https://www.toptal.com/developers/gitignore/api/python,venv
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,venv
 
@@ -60,6 +59,9 @@ cover/
 # Translations
 *.mo
 *.pot
+
+# OS
+.DS_Store
 
 # Django stuff:
 *.log
