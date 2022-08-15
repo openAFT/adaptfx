@@ -3,38 +3,37 @@ from reinforce import fraction_minimisation as frac
 from reinforce import oar_minimisation as oar
 from reinforce import tumor_maximisation as tumor
 from reinforce import track_tumor_oar as tumor_oar
+from common import constants as C
 
 class RL_object():
-    def __init__(self, algorithm, **params):
+    def __init__(self, input_dict):
+        algorithm = input_dict['algorithm']
+        parameters = input_dict['parameters']
+        full_dict = C.FULL_DICT
+        key_dict = C.KEY_DICT
+        whole_dict = {}
+
+        for key in key_dict[algorithm]:
+            if key in parameters:
+                whole_dict[key] = parameters[key]
+            elif key not in parameters and key in full_dict:
+                if full_dict[key] == None:
+                    print(f'mandatory key "{key}" is missing')
+                else:
+                    whole_dict[key] = full_dict[key]
+
+        for key in parameters:
+            if key not in key_dict[algorithm] and key in full_dict:
+                print(f'key "{key}" is not allowed for "{algorithm}", is not passed')
+            elif key not in full_dict:
+                print(f'key "{key}" is invalid, is not passed')
+
+        print(whole_dict)
+
+        print("Successfully loaded keys")
+
+        self.parameters = whole_dict
         self.algorithm = algorithm
-
-        dict = {'number_of_fractions':None,
-                'sparing_factors':None,
-                'alpha':None,
-                'beta':None,
-                'goal':None,
-                'C':None,
-                'bound_OAR':None,
-                'bound_tumor':None,
-                'BED_OAR':None,
-                'BED_tumor':None,
-                'OAR_limit':None,
-                'abt':10,
-                'abn':3,
-                'min_dose':0,
-                'max_dose':22.3,
-                'fixed_prob':0,
-                'fixed_mean':0,
-                'fixed_std':0,
-        }
-
-        for key, value in params.items():
-            if key in dict:
-                dict[key] = value
-            else:
-                print("key '",key,"' is not allowed")
-
-        self.parameters = dict
 
     def optimise(self):
         params = self.parameters
@@ -84,12 +83,9 @@ class RL_object():
 
         elif self.algorithm == 'tumor_oar':
             relay = tumor_oar.whole_plan(number_of_fractions=params['number_of_fractions'],
-                                        BED_OAR=['BED_OAR'],
-                                        BED_tumor=['BED_tumor'],
                                         sparing_factors=params['sparing_factors'],
                                         alpha=params['alpha'],
                                         beta=params['beta'],
-                                        goal=params['goal'],
                                         bound_OAR=params['bound_OAR'],
                                         bound_tumor=['bound_tumor'],
                                         abt=params['abt'],
@@ -102,21 +98,28 @@ class RL_object():
             )
 
         else:
-            print("algorithm", self.algorithm, "not known")
+            print(f'algorithm "{self.algorithm}" not known')
 
-        return relay[0][:]
+        return np.array(relay,dtype=object)[0][:]
 
 def main():
-    rl_test = RL_object(algorithm='frac',
-                        number_of_fractions=8,
-                        sparing_factors=np.linspace(1,1.1,9),
-                        alpha=2.7,
-                        beta=0.014,
-                        goal=30,
-                        C=3
-    )
+    parameters = {'number_of_fractions':7,
+                'sparing_factors':np.ones(7)*1,
+                'alpha':2.7,
+                'beta':0.014,
+                'goal':30,
+                'C':3,
+                'OAR_limit':2,
+                'sth':'great'        
+    }
+    input_dict = {'algorithm':'frac',
+                'parameters':parameters,
+    }
+    rl_test = RL_object(input_dict).optimise()
+
+    print(rl_test)
     
-    print(rl_test.optimise())
+    # print(rl_test.optimise())
 
 if __name__ == '__main__':
     main()
