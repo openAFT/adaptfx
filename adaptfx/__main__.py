@@ -1,3 +1,4 @@
+import click
 import numpy as np
 from reinforce import fraction_minimisation as frac
 from reinforce import oar_minimisation as oar
@@ -102,20 +103,26 @@ class RL_object():
 
         return np.array(relay,dtype=object)[0][:]
 
-def main():
-    parameters = {'number_of_fractions':7,
-                'sparing_factors':np.ones(7)*1,
-                'alpha':2.7,
-                'beta':0.014,
-                'goal':30,
-                'C':3,
-                'OAR_limit':2,
-                'sth':'great'        
-    }
-    input_dict = {'algorithm':'frac',
-                'parameters':parameters,
-    }
-    rl_test = RL_object(input_dict).optimise()
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('instruction_filename')
+@click.option('--gui', '-g', default=False,
+        help='Provide Graphic User Interface for planning')
+
+def main(instruction_filename, gui):
+    '''
+    \b
+    Calculate optimal dose per fraction dependent on algorithm type
+
+    \b
+    <instruction_filename>   : input instruction filename
+    '''
+    with open(instruction_filename, 'r') as f:
+        read_in = f.read()
+        output_dict= eval(read_in)
+    print(output_dict)
+
+    rl_test = RL_object(output_dict).optimise()
 
     print(rl_test)
     
