@@ -5,36 +5,45 @@ from reinforce import oar_minimisation as oar
 from reinforce import tumor_maximisation as tumor
 from reinforce import track_tumor_oar as tumor_oar
 from common import constants as C
+from handler import messages as m
 
 class RL_object():
-    def __init__(self, input_dict):
+    def __init__(self, instruction_filename):
+        with open(instruction_filename, 'r') as f:
+            read_in = f.read()
+        input_dict= eval(read_in)
+
         algorithm = input_dict['algorithm']
         parameters = input_dict['parameters']
+        logging = input_dict['logging']
         full_dict = C.FULL_DICT
         key_dict = C.KEY_DICT
         whole_dict = {}
+
+        m.logging_init(instruction_filename, logging)
+
+        m.aft_message('Read Instructions...', 0)
 
         for key in key_dict[algorithm]:
             if key in parameters:
                 whole_dict[key] = parameters[key]
             elif key not in parameters and key in full_dict:
                 if full_dict[key] == None:
-                    print(f'mandatory key "{key}" is missing')
+                    m.aft_warning(f'mandatory key "{key}" is missing', 0)
                 else:
                     whole_dict[key] = full_dict[key]
 
         for key in parameters:
             if key not in key_dict[algorithm] and key in full_dict:
-                print(f'key "{key}" is not allowed for "{algorithm}", is not passed')
+                m.aft_warning(f'key "{key}" is not allowed for "{algorithm}", is not passed', 0)
             elif key not in full_dict:
-                print(f'key "{key}" is invalid, is not passed')
+                m.aft_warning(f'key "{key}" is invalid, is not passed', 0)
 
-        print(whole_dict)
-
-        print("Successfully loaded keys")
+        m.aft_message('Successfully loaded keys', 1)
 
         self.parameters = whole_dict
         self.algorithm = algorithm
+        self.logging = logging
 
     def optimise(self):
         params = self.parameters
@@ -117,16 +126,14 @@ def main(instruction_filename, gui):
     \b
     <instruction_filename>   : input instruction filename
     '''
-    with open(instruction_filename, 'r') as f:
-        read_in = f.read()
-        output_dict= eval(read_in)
-    print(output_dict)
-
-    rl_test = RL_object(output_dict).optimise()
-
-    print(rl_test)
+    rl_test = RL_object(instruction_filename)
+    m.aft_message_struct('Log:', rl_test.logging, 0)
+    m.aft_message_struct('Type of algorithm:', rl_test.algorithm, 0)
+    m.aft_message_struct('Instruction from Input:', rl_test.parameters, 1)
+    m.aft_message('Optimisation...', 2)
+    m.aft_message_struct('Fractionation Plan:', rl_test.optimise(), 1)
+    m.aft_message('Close Session...', 2)
     
-    # print(rl_test.optimise())
 
 if __name__ == '__main__':
     main()
