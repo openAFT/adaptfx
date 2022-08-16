@@ -27,9 +27,9 @@ class RL_object():
         for key in key_dict[algorithm]:
             if key in parameters:
                 whole_dict[key] = parameters[key]
-            elif key not in parameters and key in full_dict:
+            elif key not in parameters:
                 if full_dict[key] == None:
-                    m.aft_warning(f'mandatory key "{key}" is missing', 0)
+                    m.aft_error(f'mandatory key "{key}" is missing')
                 else:
                     whole_dict[key] = full_dict[key]
 
@@ -127,10 +127,10 @@ def main(instruction_filename, gui):
     <instruction_filename>   : input instruction filename
     '''
     rl_test = RL_object(instruction_filename)
-    m.aft_message_struct('Log:', rl_test.logging, 0)
+    m.aft_message_struct('Log to file:', rl_test.logging, 0)
     m.aft_message_struct('Type of algorithm:', rl_test.algorithm, 0)
     m.aft_message_struct('Instruction from Input:', rl_test.parameters, 1)
-    m.aft_message('Optimisation...', 2)
+    m.aft_message('Start Session...', 2)
     m.aft_message_struct('Fractionation Plan:', rl_test.optimise(), 1)
     m.aft_message('Close Session...', 2)
     

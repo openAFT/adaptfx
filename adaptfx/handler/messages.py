@@ -25,8 +25,8 @@ def logging_init(filename, switch):
 
 def aft_error(error):
     print('AFT> ')
-    logging.error(f'{error}')
-    print('AFT> Exiting Session...')
+    logging.error(error)
+    logging.info('Exiting Session...')
     print('AFT> ')
     sys.exit()
 
@@ -37,7 +37,6 @@ def aft_warning(warning, mode=0):
     if mode == 1:
         print('AFT> ')
         logging.warning(warning)
-        print('AFT> ')
 
 def aft_message(message, mode=0):
     if mode == 0:
@@ -48,11 +47,11 @@ def aft_message(message, mode=0):
     elif mode ==2:
         print('AFT> ')
         logging.info(message)
-        print('AFT> ')
 
 def aft_message_struct(message, struct, mode):
     if mode == 0:
-        print(f'AFT> {message} {struct}')
+        logging.info(f'{message} {struct}')
+        #print(f'AFT> {message} {struct}')
     elif mode == 1:
         print('AFT> ')
         print(f'AFT> {message}')
