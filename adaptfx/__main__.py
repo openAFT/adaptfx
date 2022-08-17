@@ -1,59 +1,57 @@
 import click
 import numpy as np
-from reinforce import fraction_minimisation as frac
-from reinforce import oar_minimisation as oar
-from reinforce import tumor_maximisation as tumor
-from reinforce import track_tumor_oar as tumor_oar
-from common import constants as C
-from handler import messages as m
+import reinforce.fraction_minimisation as frac
+import reinforce.oar_minimisation as oar
+import reinforce.tumor_maximisation as tumor
+import reinforce.track_tumor_oar as tumor_oar
+import common.constants as C
+import handler.messages as m
+import handler.aft_utils as utils
 
 class RL_object():
     def __init__(self, instruction_filename):
         m.logging_init(None, False)
-        try:
+        try: # check if file can be opened
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
             input_dict= eval(read_in)
+        except OSError:
+            m.aft_error(f'could not open file: "{instruction_filename}"')
         except:
-            m.aft_error(f'Cannot read file: "{instruction_filename}"')
-        
-        algorithm = input_dict['algorithm']
-        parameters = input_dict['parameters']
-        logging = input_dict['logging']
-        full_dict = C.FULL_DICT
-        whole_dict = {}
+            m.aft_error(f'unknown error while reading file: "{instruction_filename}"')
 
-        try:
-            key_dict = C.KEY_DICT[algorithm]
-        except:
-            m.aft_error(f'unknown algorithm type: "{algorithm}"')
+        try: # check if algorithm key matches known types
+            algorithm = input_dict['algorithm']
+        except KeyError:
+            m.aft_error(f'"algorithm" key missing in: "{instruction_filename}"')
+        else:
+            if algorithm not in C.KEY_DICT:
+                m.aft_error(f'unknown "algorithm" type: "{algorithm}"')
 
-        m.logging_init(instruction_filename, logging)
+        try: # check if log flag is existent and boolean
+            log_bool = input_dict['log']
+        except KeyError:
+            m.aft_message('no "log" flag was given, set to "False"')
+            log_bool = False
+        else:
+            if not isinstance(log_bool, bool):
+                m.aft_error('"log" flag was not set to boolean')
 
-        m.aft_message('read Instructions...', 0)
+        try: # check if parameter key exists and is a dictionnary
+            parameters = input_dict['parameters']
+        except KeyError:
+            m.aft_error(f'"parameter" key missing in : "{instruction_filename}"')
+        else:
+            if not isinstance(parameters, dict):
+                m.aft_message_error('"parameters" was not a dictionary')
 
-        for key in key_dict:
-            if key in parameters:
-                whole_dict[key] = parameters[key]
-            elif key not in parameters:
-                if full_dict[key] == None:
-                    m.aft_error(f'missing mandatory key: "{key}"')
-                else:
-                    whole_dict[key] = full_dict[key]
-
-        for key in parameters:
-            if key not in key_dict and key in full_dict:
-                m.aft_warning(
-                    f'key: "{key}" is not allowed for "{algorithm}",is not passed', 0
-                    )
-            elif key not in full_dict:
-                m.aft_warning(f'key: "{key}" is invalid, is not passed', 0)
-
-        m.aft_message('success, loading keys', 1)
+        m.logging_init(instruction_filename, log_bool)
+        m.aft_message('loading keys...', 0)
+        whole_dict = utils.key_reader(C.KEY_DICT, C.FULL_DICT, parameters, algorithm)
 
         self.parameters = whole_dict
         self.algorithm = algorithm
-        self.logging = logging
+        self.log_bool = log_bool
 
     def optimise(self):
         params = self.parameters
@@ -138,9 +136,9 @@ def main(instruction_filename, gui):
     <instruction_filename>   : input instruction filename
     '''
     rl_test = RL_object(instruction_filename)
-    m.aft_message_info('log to file:', rl_test.logging, 0)
+    m.aft_message_info('log to file:', rl_test.log_bool, 0)
     m.aft_message_info('type of algorithm:', rl_test.algorithm, 0)
-    m.aft_message_dict('keys:', rl_test.parameters, 1)
+    m.aft_message_dict('parameters:', rl_test.parameters, 1)
     m.aft_message('start session...', 1)
     m.aft_message_list('fractionation plan:', rl_test.optimise(), 1)
     m.aft_message('close session...', 1)
