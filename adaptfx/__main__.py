@@ -9,26 +9,30 @@ from handler import messages as m
 
 class RL_object():
     def __init__(self, instruction_filename):
+        m.logging_init(None, False)
         try:
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
             input_dict= eval(read_in)
         except:
-            m.logging_init('__fail__.log', False)
             m.aft_error(f'Cannot read file: "{instruction_filename}"')
-
+        
         algorithm = input_dict['algorithm']
         parameters = input_dict['parameters']
         logging = input_dict['logging']
         full_dict = C.FULL_DICT
-        key_dict = C.KEY_DICT
         whole_dict = {}
+
+        try:
+            key_dict = C.KEY_DICT[algorithm]
+        except:
+            m.aft_error(f'unknown algorithm type: "{algorithm}"')
 
         m.logging_init(instruction_filename, logging)
 
         m.aft_message('read Instructions...', 0)
 
-        for key in key_dict[algorithm]:
+        for key in key_dict:
             if key in parameters:
                 whole_dict[key] = parameters[key]
             elif key not in parameters:
@@ -38,8 +42,10 @@ class RL_object():
                     whole_dict[key] = full_dict[key]
 
         for key in parameters:
-            if key not in key_dict[algorithm] and key in full_dict:
-                m.aft_warning(f'key: "{key}" is not allowed for "{algorithm}", is not passed', 0)
+            if key not in key_dict and key in full_dict:
+                m.aft_warning(
+                    f'key: "{key}" is not allowed for "{algorithm}",is not passed', 0
+                    )
             elif key not in full_dict:
                 m.aft_warning(f'key: "{key}" is invalid, is not passed', 0)
 
@@ -52,67 +58,68 @@ class RL_object():
     def optimise(self):
         params = self.parameters
         if self.algorithm == 'oar':
-            relay = oar.whole_plan(number_of_fractions=params['number_of_fractions'],
-                                   sparing_factors=params['sparing_factors'],
-                                   alpha=params['alpha'],
-                                   beta=params['beta'],
-                                   goal=params['goal'],
-                                   abt=params['abt'],
-                                   abn=params['abn'],
-                                   min_dose=params['min_dose'],
-                                   max_dose=params['max_dose'],
-                                   fixed_prob=params['fixed_prob'],
-                                   fixed_mean=params['fixed_mean'],
-                                   fixed_std=params['fixed_std'],
+            relay = oar.whole_plan(
+                number_of_fractions=params['number_of_fractions'],
+                sparing_factors=params['sparing_factors'],
+                alpha=params['alpha'],
+                beta=params['beta'],
+                goal=params['goal'],
+                abt=params['abt'],
+                abn=params['abn'],
+                min_dose=params['min_dose'],
+                max_dose=params['max_dose'],
+                fixed_prob=params['fixed_prob'],
+                fixed_mean=params['fixed_mean'],
+                fixed_std=params['fixed_std'],
             )
         elif self.algorithm == 'tumor':
-            relay = tumor.whole_plan(number_of_fractions=params['number_of_fractions'],
-                                    sparing_factors=params['sparing_factors'],
-                                    alpha=params['alpha'],
-                                    beta=params['beta'],
-                                    OAR_limit=params['OAR_limit'],
-                                    abt=params['abt'],
-                                    abn=params['abn'],
-                                    min_dose=params['min_dose'],
-                                    max_dose=params['max_dose'],
-                                    fixed_prob=params['fixed_prob'],
-                                    fixed_mean=params['fixed_mean'],
-                                    fixed_std=params['fixed_std'],
+            relay = tumor.whole_plan(
+                number_of_fractions=params['number_of_fractions'],
+                sparing_factors=params['sparing_factors'],
+                alpha=params['alpha'],
+                beta=params['beta'],
+                OAR_limit=params['OAR_limit'],
+                abt=params['abt'],
+                abn=params['abn'],
+                min_dose=params['min_dose'],
+                max_dose=params['max_dose'],
+                fixed_prob=params['fixed_prob'],
+                fixed_mean=params['fixed_mean'],
+                fixed_std=params['fixed_std'],
             )
         elif self.algorithm == 'frac':
-            relay = frac.whole_plan(number_of_fractions=params['number_of_fractions'],
-                                    sparing_factors=params['sparing_factors'],
-                                    alpha=params['alpha'],
-                                    beta=params['beta'],
-                                    goal=params['goal'],
-                                    C=params['C'],
-                                    abt=params['abt'],
-                                    abn=params['abn'],
-                                    min_dose=params['min_dose'],
-                                    max_dose=params['max_dose'],
-                                    fixed_prob=params['fixed_prob'],
-                                    fixed_mean=params['fixed_mean'],
-                                    fixed_std=params['fixed_std'],
+            relay = frac.whole_plan(
+                number_of_fractions=params['number_of_fractions'],
+                sparing_factors=params['sparing_factors'],
+                alpha=params['alpha'],
+                beta=params['beta'],
+                goal=params['goal'],
+                C=params['C'],
+                abt=params['abt'],
+                abn=params['abn'],
+                min_dose=params['min_dose'],
+                max_dose=params['max_dose'],
+                fixed_prob=params['fixed_prob'],
+                fixed_mean=params['fixed_mean'],
+                fixed_std=params['fixed_std'],
             )
 
         elif self.algorithm == 'tumor_oar':
-            relay = tumor_oar.whole_plan(number_of_fractions=params['number_of_fractions'],
-                                        sparing_factors=params['sparing_factors'],
-                                        alpha=params['alpha'],
-                                        beta=params['beta'],
-                                        bound_OAR=params['bound_OAR'],
-                                        bound_tumor=['bound_tumor'],
-                                        abt=params['abt'],
-                                        abn=params['abn'],
-                                        min_dose=params['min_dose'],
-                                        max_dose=params['max_dose'],
-                                        fixed_prob=params['fixed_prob'],
-                                        fixed_mean=params['fixed_mean'],
-                                        fixed_std=params['fixed_std'],
+            relay = tumor_oar.whole_plan(
+                number_of_fractions=params['number_of_fractions'],
+                sparing_factors=params['sparing_factors'],
+                alpha=params['alpha'],
+                beta=params['beta'],
+                bound_OAR=params['bound_OAR'],
+                bound_tumor=['bound_tumor'],
+                abt=params['abt'],
+                abn=params['abn'],
+                min_dose=params['min_dose'],
+                max_dose=params['max_dose'],
+                fixed_prob=params['fixed_prob'],
+                fixed_mean=params['fixed_mean'],
+                fixed_std=params['fixed_std'],
             )
-
-        else:
-            print(f'algorithm "{self.algorithm}" not known')
 
         return np.array(relay,dtype=object)[0][:]
 
