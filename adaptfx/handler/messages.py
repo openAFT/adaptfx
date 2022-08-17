@@ -25,7 +25,7 @@ def logging_init(filename, switch):
 def aft_error(error):
     print('AFT>')
     logging.error(error)
-    logging.info('Exiting Session...')
+    logging.info('exiting Session...')
     sys.exit()
 
 def aft_warning(warning, mode=0):
