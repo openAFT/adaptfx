@@ -10,7 +10,6 @@ import handler.aft_utils as utils
 
 class RL_object():
     def __init__(self, instruction_filename):
-        m.logging_init(None, False)
         try: # check if file can be opened
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
@@ -20,14 +19,6 @@ class RL_object():
         except:
             m.aft_error(f'unknown error while reading file: "{instruction_filename}"')
 
-        try: # check if algorithm key matches known types
-            algorithm = input_dict['algorithm']
-        except KeyError:
-            m.aft_error(f'"algorithm" key missing in: "{instruction_filename}"')
-        else:
-            if algorithm not in C.KEY_DICT:
-                m.aft_error(f'unknown "algorithm" type: "{algorithm}"')
-
         try: # check if log flag is existent and boolean
             log_bool = input_dict['log']
         except KeyError:
@@ -36,6 +27,16 @@ class RL_object():
         else:
             if not isinstance(log_bool, bool):
                 m.aft_error('"log" flag was not set to boolean')
+            else:
+                m.logging_init(instruction_filename, log_bool)
+
+        try: # check if algorithm key matches known types
+            algorithm = input_dict['algorithm']
+        except KeyError:
+            m.aft_error(f'"algorithm" key missing in: "{instruction_filename}"')
+        else:
+            if algorithm not in C.KEY_DICT:
+                m.aft_error(f'unknown "algorithm" type: "{algorithm}"')
 
         try: # check if parameter key exists and is a dictionnary
             parameters = input_dict['parameters']
@@ -45,7 +46,6 @@ class RL_object():
             if not isinstance(parameters, dict):
                 m.aft_message_error('"parameters" was not a dictionary')
 
-        m.logging_init(instruction_filename, log_bool)
         m.aft_message('loading keys...', 0)
         whole_dict = utils.key_reader(C.KEY_DICT, C.FULL_DICT, parameters, algorithm)
 
