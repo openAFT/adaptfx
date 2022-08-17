@@ -8,6 +8,27 @@ def timing_with_time():
     return (stop - start)
 
 def key_reader(all_keys, full_dict, parameters, algorithm):
+    """
+    read and check all keys from a parameters
+    file by cycling through all_keys
+
+    Parameters
+    ----------
+    all_keys : dict
+        all keys necessary for some algorithm type.
+    full_dict : dict
+        all possible keys.
+    parameters : dict
+        read in parameters from an instruction file.
+    algorithm : string
+        type of algorithm.
+
+    Returns
+    -------
+    whole dict : dict
+        all keys copied from parameters
+        
+    """
     whole_dict = {}
     key_dict = all_keys[algorithm]
 

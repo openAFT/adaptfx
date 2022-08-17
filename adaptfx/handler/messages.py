@@ -2,6 +2,21 @@ import sys
 import logging
 
 def logging_init(filename, switch):
+    """
+    log initialisation to write to filename
+
+    Parameters
+    ----------
+    filename : string
+        filename of log file
+    switch : bool
+        switch to store log to filename
+
+    Returns
+    -------
+    None
+        
+    """
     if switch:
         log_filename = "{0}_{2}.{1}".format(*filename.rsplit('.', 1) + ['log'])
         logging.basicConfig(
