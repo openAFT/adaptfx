@@ -9,9 +9,13 @@ from handler import messages as m
 
 class RL_object():
     def __init__(self, instruction_filename):
-        with open(instruction_filename, 'r') as f:
-            read_in = f.read()
-        input_dict= eval(read_in)
+        try:
+            with open(instruction_filename, 'r') as f:
+                read_in = f.read()
+            input_dict= eval(read_in)
+        except:
+            m.logging_init('__fail__.log', False)
+            m.aft_error(f'Cannot read file: "{instruction_filename}"')
 
         algorithm = input_dict['algorithm']
         parameters = input_dict['parameters']
@@ -22,24 +26,24 @@ class RL_object():
 
         m.logging_init(instruction_filename, logging)
 
-        m.aft_message('Read Instructions...', 0)
+        m.aft_message('read Instructions...', 0)
 
         for key in key_dict[algorithm]:
             if key in parameters:
                 whole_dict[key] = parameters[key]
             elif key not in parameters:
                 if full_dict[key] == None:
-                    m.aft_error(f'mandatory key "{key}" is missing')
+                    m.aft_error(f'missing mandatory key: "{key}"')
                 else:
                     whole_dict[key] = full_dict[key]
 
         for key in parameters:
             if key not in key_dict[algorithm] and key in full_dict:
-                m.aft_warning(f'key "{key}" is not allowed for "{algorithm}", is not passed', 0)
+                m.aft_warning(f'key: "{key}" is not allowed for "{algorithm}", is not passed', 0)
             elif key not in full_dict:
-                m.aft_warning(f'key "{key}" is invalid, is not passed', 0)
+                m.aft_warning(f'key: "{key}" is invalid, is not passed', 0)
 
-        m.aft_message('Successfully loaded keys', 1)
+        m.aft_message('success, loading keys', 1)
 
         self.parameters = whole_dict
         self.algorithm = algorithm
@@ -127,12 +131,12 @@ def main(instruction_filename, gui):
     <instruction_filename>   : input instruction filename
     '''
     rl_test = RL_object(instruction_filename)
-    m.aft_message_struct('Log to file:', rl_test.logging, 0)
-    m.aft_message_struct('Type of algorithm:', rl_test.algorithm, 0)
-    m.aft_message_struct('Instruction from Input:', rl_test.parameters, 1)
-    m.aft_message('Start Session...', 2)
-    m.aft_message_struct('Fractionation Plan:', rl_test.optimise(), 1)
-    m.aft_message('Close Session...', 2)
+    m.aft_message_info('log to file:', rl_test.logging, 0)
+    m.aft_message_info('type of algorithm:', rl_test.algorithm, 0)
+    m.aft_message_dict('keys:', rl_test.parameters, 1)
+    m.aft_message('start session...', 1)
+    m.aft_message_list('fractionation plan:', rl_test.optimise(), 1)
+    m.aft_message('close session...', 1)
     
 
 if __name__ == '__main__':

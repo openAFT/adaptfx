@@ -1,6 +1,5 @@
 import sys
 import logging
-import time
 
 def logging_init(filename, switch):
     if switch:
@@ -24,46 +23,50 @@ def logging_init(filename, switch):
         )
 
 def aft_error(error):
-    print('AFT> ')
+    print('AFT>')
     logging.error(error)
     logging.info('Exiting Session...')
-    print('AFT> ')
     sys.exit()
 
 def aft_warning(warning, mode=0):
     if mode == 0:
-        print('AFT>')
         logging.warning(warning)
     if mode == 1:
-        print('AFT> ')
+        print('AFT>')
         logging.warning(warning)
 
 def aft_message(message, mode=0):
     if mode == 0:
         logging.info(message)
     elif mode == 1:
-        print('AFT> ')
-        logging.info(message)
-    elif mode ==2:
-        print('AFT> ')
+        print('AFT>')
         logging.info(message)
 
-def aft_message_struct(message, struct, mode):
+def aft_message_info(message, info, mode=0):
     if mode == 0:
-        logging.info(f'{message} {struct}')
-        #print(f'AFT> {message} {struct}')
+        logging.info(f'{message} {info}')
     elif mode == 1:
-        print('AFT> ')
-        print(f'AFT> {message}')
-        print(f'AFT> {struct}')
-    elif mode == 2:
-        print('AFT> ')
-        print(f'AFT> {message}')
-        print(f'AFT> {struct}')
-        print('AFT> ')
+        print('AFT>')
+        logging.info(f'{message} {info}')
 
-def timing_with_time():
-    start = time.perf_counter()
-    time.sleep(1)
-    stop = time.perf_counter()
-    return (stop - start)
+def aft_message_dict(message, dict, mode=0):
+    if mode == 0:
+        logging.info(message)
+        for key, value in dict:
+            logging.info('{%(key)s: %(value)s}' %
+                {'key': key, "value": value})
+    if mode == 1:
+        print('AFT>')
+        logging.info(message)
+        for key, value in dict.items():
+            logging.info('{%(key)s: %(value)s}' %
+                {'key': key, "value": value})
+        
+def aft_message_list(message, struct, mode=0):
+    if mode == 0:
+        logging.info(message)
+        logging.info('%s', struct)
+    elif mode == 1:
+        print('AFT>')
+        logging.info(message)
+        logging.info('%s', struct)
