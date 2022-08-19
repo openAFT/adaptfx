@@ -27,7 +27,7 @@ def logging_init(filename, log, debug):
         log_level = logging.INFO
     
     if log:
-        log_filename = "{0}_{2}.{1}".format(*filename.rsplit('.', 1) + ['log'])
+        log_filename = "{0}.{2}".format(*filename.rsplit('.', 1) + ['log'])
         logging.basicConfig(
             format=format_file,
             level=log_level, 
