@@ -65,7 +65,6 @@ class RL_object():
 
         self.parameters = whole_dict
         self.algorithm = algorithm
-        self.log_bool = log_bool
 
     def optimise(self):
         params = self.parameters
@@ -155,5 +154,5 @@ def main(instruction_filename, gui):
     m.aft_message('close session...', nme, 1)
     
 
-if nme == '__main__':
+if __name__ == '__main__':
     main()
