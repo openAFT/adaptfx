@@ -235,7 +235,7 @@ def value_eval(
         physical_dose = policy4 / 10
     tumor_dose = BED_calc0(physical_dose, abt)
     OAR_dose = BED_calc0(physical_dose, abn, sparing_factors[-1])
-    return [policy, sf, physical_dose, tumor_dose, OAR_dose]
+    return [physical_dose, tumor_dose, OAR_dose, policy, sf, BEDT]
 
 
 def whole_plan(
@@ -302,8 +302,11 @@ def whole_plan(
     physical_doses = np.zeros(number_of_fractions)
     tumor_doses = np.zeros(number_of_fractions)
     OAR_doses = np.zeros(number_of_fractions)
+    policy_list = []
+    BEDT_list = []
+    sf_list = []
     for looper in range(0, number_of_fractions):
-        [policy, sf, physical_dose, tumor_dose, OAR_dose] = value_eval(
+        [physical_dose, tumor_dose, OAR_dose, policy, sf, BEDT] = value_eval(
             looper + 1,
             number_of_fractions,
             accumulated_tumor_dose,
@@ -320,9 +323,12 @@ def whole_plan(
             fixed_mean,
             fixed_std,
         )
+        policy_list.append(policy)
+        BEDT_list.append(BEDT)
+        sf_list.append(sf)
         accumulated_tumor_dose += tumor_dose
         accumulated_OAR_dose += OAR_dose
         tumor_doses[looper] = tumor_dose
         OAR_doses[looper] = OAR_dose
         physical_doses[looper] = physical_dose
-    return [tumor_doses, OAR_doses, physical_doses]
+    return [tumor_doses, OAR_doses, physical_doses, policy_list, sf_list, BEDT_list]
