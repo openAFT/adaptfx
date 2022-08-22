@@ -15,10 +15,8 @@ class RL_object():
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
             input_dict= eval(read_in)
-        except OSError:
-            m.aft_error(f'could not open file: "{instruction_filename}"', nme)
         except:
-            m.aft_error(f'unknown error while reading file: "{instruction_filename}"', nme)
+            m.aft_error(f'could not open file: "{instruction_filename}"', nme)
 
         try: # check if log flag is existent and boolean
             log_bool = input_dict['log']
