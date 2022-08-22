@@ -199,7 +199,7 @@ def value_eval(
                         best_action = np.zeros(len(sf))
                         valer = np.zeros(len(sf))
                     else:
-                        best_action = Vs.argmax(axis=1)
+                        best_action = actionspace_clipped[Vs.argmax(axis=1)]
                         valer = Vs.max(axis=1)
                 elif tumor_value > goal: #calculate value for terminal case
                     best_action = 0
