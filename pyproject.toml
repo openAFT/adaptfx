@@ -39,15 +39,15 @@ source = "https://github.com/openAFT/Adaptive-fractionation"
 
 
 #[tool.setuptools_scm]
-#write_to = "lymph/_version.py"
+#write_to = "adaptfx/_version.py"
 #local_scheme = "no-local-version"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["adaptfx"]
 include = ["*"]
 
 [project.scripts]
-aft = "console.main:main"
+aft = "console.aft:main"
 
 #[tool.setuptools.dynamic]
 #version = {attr = "lymph._version.version"}
