@@ -1,20 +1,72 @@
 # The `adaptfx` package
 
+## What is `adaptfx`?
+
+`adaptfx` is a python package distributed on PyPI, which allows to calculate fractionation schemes in Adaptive Fractionation Therapy (AFT). AFT is a supplementary technique of on-line Adaptive Radiotherapy. The goal of AFT is to decide on an optimal dose to be delivered in each fraction on the basis of MRI images. This package was built to provide a toolbox that allows calculation of the type discussed by Haas et al. [cite!].
 
 ## Installation
 
-For the GUIs to work one needs Tkinter. It often comes installed, but if not you can find the relevant installation instructions [here](https://tkdocs.com/tutorial/install.html).
+To install the `adaptfx` package:
 
-E.g., for python and on Ubuntu, you would install it via
+```shell
+pip install adaptfx
+```
+
+the command line tool will be available which can be used via
+
+```shell
+aft [options] <instructions_file>
+````
+
+for more infromation on the usage of the command line tool read the manual [link!].
+
+The user can also decide to use the scripts from `reinforce` in their python scripts
+
+```python
+import reinforce.tumor_maximisation as tumor_max
+```
+`aft` is also shipped with a GUI. It is however dependent on `Tkinter`. It often comes installed, but if not you can find the relevant installation instructions [here](https://tkdocs.com/tutorial/install.html). E.g. in python and on Ubuntu, you would install it via
 
 ```shell
 sudo apt install python3-tk
 ```
 
+## Dependecies
+
+The package is dependent on `click`, `numpy`, `scipy`, `pandas` tough it is aimed to reduce dependency to `click` and `numpy` only.
+
+
+## Organisation
+
+The package is organised in the `adaptfx` folder. The relevant scripts that calculate the fractionation schemes are located in reinforce. 
+```
+adaptfx
+└───common
+|   |   __init__.py
+│   │   constants.py
+|   |   maths.py
+│   │   radiobiology.py
+│   
+└───console
+|   |   __init__.py
+|   │   aft.py
+│
+└───handler
+|   |   __init__.py
+│   │   aft_utils.py
+│   │   messages.py
+│   
+└───reinforce
+    |   __init__.py
+    │   fraction_minimisatioin.py
+    │   oar_minimisation.py
+    │   track_tumor_oar.py
+    │   tumor_maximisation.py
+```
 
 ## Description
 
-In these scripts one can find all relevant codes to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumor BED and OAR BED (maximizing tumor BED while minimizing OAR BED).
+In the `reinforce` scripts one can find all relevant codes to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumor BED and OAR BED (maximizing tumor BED while minimizing OAR BED).
 
 There are two different types of algorithms. The 2D algorithm, which only tracks OAR BED or tumor BED and maximizes based on an OAR BED or tumor BED constraint. This is the faster algorithm, but it could overshoot with the dose delivered to the tumor/OAR. Since only one of the organs can be tracked, one has to decide whether reaching the prescribed tumor dose or staying below the maximum OAR BED is more relevant. Generally the OAR tracking is better suited for patients with anatomies where the OAR and tumor are close to each other and reaching the prescribed dose is not expected. the tumor tracking is better suited when the OAR and tumor are farther apart and the prescribed tumor dose is supposed to be reached while staying below the maximum OAR BED.
 
@@ -40,3 +92,5 @@ The two additional folders (DVH_figures, Patientdata_paper) contain the DVH data
 Apart from using a gamma prior for the standard deviation, a full bayesian approach can be done with a conjugate prior for the variance.
 In the t-distribution folder the same algorithms as in the paper are applied, but instead of using the gamma prior, the probability distribution is estimated from an updated t-distribution by using a inverse-gamma prior for the variance.
 The results are slightly different when alternative priors are applied. Since the t-distribution estimates larger standrad deviations, more sparing factors are relevant and thus the state space is increased which results in a longer computation time.
+
+## References
