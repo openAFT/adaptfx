@@ -25,7 +25,7 @@ class RL_object():
             log_bool = False
         else:
             if not isinstance(log_bool, bool):
-                m.aft_error('"log" flag was not set to boolean')
+                m.aft_error('"log" flag was not set to boolean', nme)
 
         try: # check if log flag is existent and boolean
             debug_bool = input_dict['debug']
@@ -146,10 +146,13 @@ def main(instruction_filename, gui):
     \b
     <instruction_filename>   : input instruction filename
     '''
+    start = utils.timing()
     rl_test = RL_object(instruction_filename)
     m.aft_message('start session...', nme, 1)
     m.aft_message_list('fractionation plan:', rl_test.optimise(), nme, 1)
+    utils.timing(start)
     m.aft_message('close session...', nme, 1)
+
     
 
 if __name__ == '__main__':
