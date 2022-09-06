@@ -1,6 +1,7 @@
 [build-system]
 requires = [
-    "setuptools >= 61.0.0",
+    "setuptools >= 61",
+    "setuptools_scm",
     "wheel",
 ]
 
@@ -21,7 +22,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Operating System :: OS Independent",
 ]
@@ -42,15 +42,15 @@ source = "https://github.com/openAFT/Adaptive-fractionation"
 #write_to = "adaptfx/_version.py"
 #local_scheme = "no-local-version"
 
+#[tool.setuptools.dynamic]
+#version = {attr = "adaptfx._version.version"}
+
 [tool.setuptools.packages.find]
 where = ["adaptfx"]
 include = ["*"]
 
 [project.scripts]
 aft = "console.aft:main"
-
-#[tool.setuptools.dynamic]
-#version = {attr = "lymph._version.version"}
 
 
 #[tool.isort]
