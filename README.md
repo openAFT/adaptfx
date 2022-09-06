@@ -1,16 +1,16 @@
 # The `adaptfx` package
 
 ## About
----
+
 `adaptfx` is a python package distributed on PyPI, which allows to calculate fractionation schemes in Adaptive Fractionation Therapy (AFT). AFT is a supplementary technique of on-line Adaptive Radiotherapy. The goal of AFT is to decide on an optimal dose to be delivered in each fraction on the basis of MRI images. This package was built to provide a toolbox that allows calculation of the type discussed by Haas et al. [cite!].
 
 ## Installation
----
 
 To install the `adaptfx` package:
 
 
 #### Method 1: pip
+
 ```shell
 $ pip install adaptfx
 ```
@@ -43,12 +43,10 @@ $ sudo apt install python3-tk
 ```
 
 ## Dependecies
----
 
 The package is dependent on `click`, `numpy`, `scipy`, `pandas` tough it is aimed to reduce dependency to `click` and `numpy` only.
 
 ## Package Structure
----
 
 The package is organised in the `adaptfx` folder. The relevant scripts that calculate the fractionation schemes are located in `reinforce`. 
 ```
@@ -77,7 +75,6 @@ adaptfx
 ```
 
 ## Description
----
 
 In the `reinforce` module one can find all relevant code to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumor BED and OAR BED (maximizing tumor BED while minimizing OAR BED). 
 
@@ -124,7 +121,6 @@ In the t-distribution folder the same algorithms as in the paper are applied, bu
 The results are slightly different when alternative priors are applied. Since the t-distribution estimates larger standrad deviations, more sparing factors are relevant and thus the state space is increased which results in a longer computation time.
 
 ## Extended Functionality
----
 
 The algorithms allow to chose some extra parameters to specify extra constraints. The suggested parameters are specified for a 5 fraction SBRT plan where there are not constraints on the maximum or minimum dose.:
 - Chose the amount of fractions. Instead of just calculating for the case of a 5 fractions SBRT treatment, the amount of fractions can be chosen freely (e.g. 30 fractions)
@@ -132,4 +128,3 @@ The algorithms allow to chose some extra parameters to specify extra constraints
 - Calculate optimal fraction size by tracking tumor BED: The 2D GUI has an additional extension, where one can optimize the optimal dose based on the prescribed tumor dose. (E.g. the clinician prescribes a tumor BED of 72 BED. The program will try to minimize the OAR BED while aiming on the 72 BED prescribed dose.)
 
 ## References
----
