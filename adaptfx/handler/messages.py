@@ -47,6 +47,21 @@ def logging_init(filename, log, debug):
         )
 
 def aft_error(error, name):
+    """
+    error message that exits process
+
+    Parameters
+    ----------
+    error : string
+        message that is logged on logging.ERROR level
+    name : string
+        logger name
+
+    Returns
+    -------
+    None
+        
+    """
     log_name = logging.getLogger(name)
     print('AFT>')
     log_name.error(error)
@@ -54,6 +69,21 @@ def aft_error(error, name):
     sys.exit()
 
 def aft_warning(warning, name, mode=0):
+    """
+    warning message
+
+    Parameters
+    ----------
+    warning : string
+        message that is logged in logging.WARNING level
+    name : string
+        logger name
+
+    Returns
+    -------
+    None
+        
+    """
     log_name = logging.getLogger(name)
     if mode == 0:
         log_name.warning(warning)
@@ -62,6 +92,21 @@ def aft_warning(warning, name, mode=0):
         log_name.warning(warning)
 
 def aft_message(message, name, mode=0):
+    """
+    information message
+
+    Parameters
+    ----------
+    message : string
+        message that is logged on logging.INFO level
+    name : string
+        logger name
+
+    Returns
+    -------
+    None
+        
+    """
     log_name = logging.getLogger(name)
     if mode == 0:
         log_name.info(message)
@@ -70,6 +115,23 @@ def aft_message(message, name, mode=0):
         log_name.info(message)
 
 def aft_message_info(message, info, name, mode=0):
+    """
+    information message belonging to certain string
+
+    Parameters
+    ----------
+    message : string
+        message that is logged on logging.INFO level
+    info : string
+        variable information
+    name : string
+        logger name
+
+    Returns
+    -------
+    None
+        
+    """
     log_name = logging.getLogger(name)
     if mode == 0:
         log_name.info(f'{message} {info}')
@@ -78,6 +140,23 @@ def aft_message_info(message, info, name, mode=0):
         log_name.info(f'{message} {info}')
 
 def aft_message_dict(message, dict, name, mode=0):
+    """
+    print statement for dictionary
+
+    Parameters
+    ----------
+    message : string
+        message that is logged on logging.INFO level
+    dict : dict
+        dictionary of parameters
+    name : string
+        logger name
+
+    Returns
+    -------
+    None
+        
+    """
     log_name = logging.getLogger(name)
     if mode == 0:
         log_name.info(message)
@@ -92,6 +171,23 @@ def aft_message_dict(message, dict, name, mode=0):
                 {'key': key, "value": value})
         
 def aft_message_list(message, struct, name, mode=0):
+    """
+    print statement for general structures (e.g. list)
+
+    Parameters
+    ----------
+    message : string
+        message that is logged on logging.INFO level
+    struct : list
+        list of fractionation plans
+    name : string
+        logger name
+
+    Returns
+    -------
+    None
+        
+    """
     log_name = logging.getLogger(name)
     if mode == 0:
         log_name.info(message)
