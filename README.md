@@ -2,7 +2,7 @@
 
 ## About
 
-`adaptfx` is a python package distributed on PyPI, which allows to calculate dose fractionation schemes in Adaptive Radiotherapy. Using MR guidance in Adaptive Ratiotherapy, treatment plans can be on-line adapted to inter-fractional motion of tumors and organs at risk. When standard treatments deliver the same dose in each fraction, Adaptive Fractionation exploits the inter-fractional motion by delivering dose adaptively to daily tumor and organ at risk distance.
+`adaptfx` is a python package distributed on PyPI, which allows to calculate dose fractionation schemes in Adaptive Radiotherapy. Using MR guidance in Adaptive Radiotherapy, treatment plans can be on-line adapted to inter-fractional motion of tumors and organs at risk (OAR). When standard treatments deliver the same dose in each fraction, Adaptive Fractionation exploits the inter-fractional motion by delivering dose adaptively to daily tumor and OAR distance.
 
 For this adaptive approach a Reinforcement Learning algorithm based on dynamic programming was developed.. This package was built to provide the toolbox initially developed by Haas et al. [[1](https://www.estro.org/Congresses/ESTRO-2022/562/inter-fractionmotionandadaptiveradiotherapy/5249/adaptivefractionationatthemr-linacbasedonadynamicp)]. It allows calculation of Adaptive Dose Fractionation discussed in the initial (not-yet) published paper and brings newer applicable features to the user.
 
@@ -50,9 +50,9 @@ Dependent on `click`, `numpy`, `scipy`, `pandas`
 
 ## Package Structure
 
-The package is organised in the `adaptfx` folder. The relevant scripts that calculate the fractionation schemes are located in `reinforce`. 
+The package is organised in the `src` folder. The relevant scripts that calculate the fractionation schemes are located in `reinforce`. 
 ```
-adaptfx
+src
 └───common
 │   │   constants.py
 |   |   maths.py
@@ -74,7 +74,7 @@ adaptfx
 
 ## Description
 
-In the `reinforce` module one can find all relevant code to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumor BED and OAR BED (maximizing tumor BED while minimizing OAR BED). 
+In the `reinforce` module one can find all relevant code to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumor biological effective dose (tumor BED) and OAR BED (maximizing tumor BED while minimizing OAR BED). 
 
 ### The 2D algorithms
 ```

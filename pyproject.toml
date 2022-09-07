@@ -7,7 +7,7 @@ requires = [
 
 [project]
 name = "adaptfx"
-description = "Package for computing adaptive fractionation plans in Radiotherapy"
+description = "Package for computing dose fractionation schemes in MR guided Adaptive Radiotherapy"
 authors = [
     { name = "Janic Tom Weber", email = "janic.weber@uzh.ch"},
     { name = "Yoel Pérez Haas", email = "yoel.perezhaas@uzh.ch"}
@@ -15,7 +15,7 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = ["cancer", "fractionation", "model", "radiotherapy", "reinforcement-learning"]
+keywords = ["fractionation", "adaptive radiotherapy", "reinforcement-learning"]
 license = {text = "MIT"}
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -36,14 +36,14 @@ source = "https://github.com/openAFT/Adaptive-fractionation"
 
 
 [tool.setuptools_scm]
-write_to = "adaptfx/_version.py"
+write_to = "src/_version.py"
 local_scheme = "no-local-version"
 
 [tool.setuptools.dynamic]
-version = {attr = "adaptfx._version.version"}
+version = {attr = "src._version.version"}
 
 [tool.setuptools.packages.find]
-where = ["adaptfx"]
+where = ["src"]
 include = ["*"]
 
 [project.scripts]
