@@ -2,11 +2,9 @@
 
 ## About
 
-`adaptfx` is a python package distributed on PyPI, which allows to calculate dose fractionation schemes in Adaptive Radiotherapy.
+`adaptfx` is a python package distributed on PyPI, which allows to calculate dose fractionation schemes in Adaptive Radiotherapy. Using MR guidance in Adaptive Ratiotherapy, treatment plans can be on-line adapted to inter-fractional motion of tumors and organs at risk. When standard treatments deliver the same dose in each fraction, Adaptive Fractionation exploits the inter-fractional motion by delivering dose adaptively to daily tumor and organ at risk distance.
 
-Using MR guidance in Adaptive Ratiotherapy, treatment plans can be on-line adapted to inter-fractional motion of tumors and organs at risk. When standard treatments deliver the same dose in each fraction, Adaptive Fractionation exploits the inter-fractional motion by delivering dose adaptively to daily tumor and organ at risk distance.
-
-A Reinforcement Learning algorithm based on dynamic programming was developed for the Adaptive Fractionation approach. This package was built to provide the toolbox initially developed by Haas et al. [[1](https://www.estro.org/Congresses/ESTRO-2022/562/inter-fractionmotionandadaptiveradiotherapy/5249/adaptivefractionationatthemr-linacbasedonadynamicp)]. It allows calculation of Adaptive Dose Fractionation discussed in the initial (not-yet) published paper (citation here) and brings newer applicable features to the user.
+For this adaptive approach a Reinforcement Learning algorithm based on dynamic programming was developed.. This package was built to provide the toolbox initially developed by Haas et al. [[1](https://www.estro.org/Congresses/ESTRO-2022/562/inter-fractionmotionandadaptiveradiotherapy/5249/adaptivefractionationatthemr-linacbasedonadynamicp)]. It allows calculation of Adaptive Dose Fractionation discussed in the initial (not-yet) published paper and brings newer applicable features to the user.
 
 ## Installation
 
@@ -27,13 +25,13 @@ $ cd Adaptive-fractionation
 $ pip3 install .
 ```
 
-the command line tool is then available which can be used via
+the command line tool (CLI) is then available which can be used via
 
 ```shell
 $ aft [options] <instructions_file>
 ````
 
-for more infromation on the usage of the command line tool read the manual [link!].
+for more infromation on the usage of the CLI read the manual.
 
 The user can also decide to use the scripts from `reinforce` in their python scripts
 
@@ -68,7 +66,7 @@ adaptfx
 │   │   messages.py
 │   
 └───reinforce
-    │   fraction_minimisatioin.py
+    │   fraction_minimisation.py
     │   oar_minimisation.py
     │   track_tumor_oar.py
     │   tumor_maximisation.py
@@ -84,13 +82,13 @@ In the `reinforce` module one can find all relevant code to calculate an OAR tra
     │   oar_minimisation.py
     │   tumor_maximisation.py
 ```
-These only track OAR BED or tumor BED and maximizes based on an OAR BED or tumor BED constraint. This is the faster algorithm, but it could overshoot with the dose delivered to the tumor/OAR. Since only one of the organs can be tracked, one has to decide whether reaching the prescribed tumor dose or staying below the maximum OAR BED is more relevant. Generally the OAR tracking is better suited for patients with anatomies where the OAR and tumor are close to each other and reaching the prescribed dose is not expected. the tumor tracking is better suited when the OAR and tumor are farther apart and the prescribed tumor dose is supposed to be reached while staying below the maximum OAR BED.
+These only track OAR BED or tumor BED and maximizes based on tumor BED or minimises based on OAR BED constraint. These are the faster algorithm, due to the smaller state space, but it could overshoot with the dose delivered to the tumor/OAR. Since only one of the organs can be tracked, one has to decide whether reaching the prescribed tumor dose or staying below the maximum OAR BED is more relevant. Generally the OAR tracking is better suited for patients with anatomies where the OAR and tumor are close to each other and reaching the prescribed dose is not expected. The tumor tracking is better suited when the OAR and tumor are farther apart and the prescribed tumor dose is supposed to be reached while staying below the maximum OAR BED.
 
 ```
 └───
     │   fraction_minimisation.py
 ```
-This function tracks OAR BED and minimises the number of fractions.
+This function tracks OAR BED and minimises the number of fractions in cases where there appears an exceptionally low sparing factor.
 
 
 ### The 3D algorithms
@@ -106,7 +104,7 @@ There is a function to calculate the hyperparameters of the inverse-gamma distri
 
 ### Discrete Value Function
 
-There is a subfolder with more basic algorithms, the discrete algorithms. Generally, we can not calculate the Value function for each possible OAR BED and sparing factor. Thus, the values must be calculated for discrete steps. E.g. 0.1Gy BED steps for the OAR BED and 0.01 steps for the sparing factors. The discrete algorithms depict this idea of using these steps to calculate the value for each discrete value of BED and sparing factor. This approach limits the precision of the computed doses, as we must round any given BED to a the given steps. To improve precision, an interpolation was done, to calculate the value for every possible BED. This is used in the interpolation programs (Those not in the discrete folder). A higher precision comes with the cost of larger computation time, but the 2D code still runs in a matter of seconds, while the 3D code runs in a matter of minutes.
+There is a subfolder with more basic algorithms, the discrete algorithms. Generally, we can not calculate the Value function for each possible OAR BED and sparing factor. Thus, the values must be calculated for discrete steps. E.g. 0.1Gy BED steps for the OAR BED and 0.01 steps for the sparing factors. The discrete algorithms depict this idea of using these steps to calculate the value for each discrete value of BED and sparing factor. This approach limits the precision of the computed doses, as we must round any given BED to the given steps. So interpolation was used to improve precision, in calculating every possible BED. A higher precision comes with the cost of larger computation time, but the 2D code still runs in a matter of seconds, while the 3D code runs in a matter of minutes.
 
 ### GUI
 
