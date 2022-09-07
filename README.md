@@ -20,8 +20,8 @@ $ pip install adaptfx
 #### Method 2: install from source
 
 ```shell
-$ git clone https://github.com/openAFT/Adaptive-fractionation.git
-$ cd Adaptive-fractionation
+$ git clone https://github.com/openAFT/adaptfx.git
+$ cd adaptfx
 $ pip3 install .
 ```
 
