@@ -1,7 +1,50 @@
 [build-system]
-requires = ["setuptools >= 42", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools >= 65",
+    "setuptools_scm",
+    "wheel",
+]
 
-[tool.black]
-line-length = 88
-target-version = ['py36']
+[project]
+name = "adaptfx"
+description = "Package for computing dose fractionation schemes in MR guided Adaptive Radiotherapy"
+authors = [
+    { name = "Janic Tom Weber", email = "janic.weber@uzh.ch"},
+    { name = "Yoel Pérez Haas", email = "yoel.perezhaas@uzh.ch"}
+
+]
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["fractionation", "adaptive radiotherapy", "reinforcement-learning"]
+license = {text = "MIT"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click",
+    "numpy",
+    "scipy",
+    "pandas",
+]
+
+dynamic = ["version"]
+
+[project.urls]
+source = "https://github.com/openAFT/Adaptive-fractionation"
+
+
+[tool.setuptools_scm]
+write_to = "src/_version.py"
+local_scheme = "no-local-version"
+
+[tool.setuptools.dynamic]
+version = {attr = "src._version.version"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["*"]
+
+[project.scripts]
+aft = "console.aft:main"
