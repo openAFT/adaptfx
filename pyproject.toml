@@ -32,7 +32,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-source = "https://github.com/openAFT/Adaptive-fractionation"
+source = "https://github.com/openAFT/adaptfx"
 
 
 [tool.setuptools_scm]
