@@ -49,7 +49,7 @@ def key_reader(all_keys, full_dict, parameters, algorithm):
         all keys copied from parameters
         
     """
-    whole_dict = {}
+    whole_dict = full_dict.copy()
     key_dict = all_keys[algorithm]
 
     for key in key_dict:
@@ -57,16 +57,16 @@ def key_reader(all_keys, full_dict, parameters, algorithm):
             whole_dict[key] = parameters[key]
         elif key not in parameters:
             if full_dict[key] == None:
-                m.aft_error(f'missing mandatory key: "{key}"')
+                m.aft_error(f'missing mandatory key: "{key}"', nme)
             else:
                 whole_dict[key] = full_dict[key]
 
     for key in parameters:
         if key not in key_dict and key in full_dict:
             m.aft_warning(
-                f'key: "{key}" is not allowed for "{algorithm}"', 0
+                f'key: "{key}" is not allowed for "{algorithm}"', nme, 0
                 )
         elif key not in full_dict:
-            m.aft_warning(f'unexpected parameter: "{key}" invalid', 0)
+            m.aft_warning(f'unexpected parameter: "{key}" invalid', nme, 0)
 
     return whole_dict

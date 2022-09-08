@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import click
 import numpy as np
 import reinforce.fraction_minimisation as frac
@@ -12,7 +14,7 @@ nme = __name__
 class RL_object():
     def __init__(self, instruction_filename):
         try: # check if file can be opened
-            m.aft_message('reading "{instruction_filename}" ...', nme)
+            m.aft_message('', nme, 1)
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
             input_dict= eval(read_in)
@@ -59,7 +61,7 @@ class RL_object():
             if not isinstance(parameters, dict):
                 m.aft_message_error('"parameters" was not a dictionary', nme)
 
-        m.aft_message('loading keys...', nme, 0)
+        m.aft_message('loading keys...', nme, 1)
         whole_dict = utils.key_reader(C.KEY_DICT, C.FULL_DICT, parameters, algorithm)
         m.aft_message_dict('parameters:', whole_dict, nme, 1)
 
@@ -74,7 +76,7 @@ class RL_object():
                 sparing_factors=params['sparing_factors'],
                 alpha=params['alpha'],
                 beta=params['beta'],
-                goal=params['goal'],
+                goal=params['tumor_goal'],
                 abt=params['abt'],
                 abn=params['abn'],
                 min_dose=params['min_dose'],
@@ -104,7 +106,7 @@ class RL_object():
                 sparing_factors=params['sparing_factors'],
                 alpha=params['alpha'],
                 beta=params['beta'],
-                goal=params['goal'],
+                goal=params['tumor_goal'],
                 C=params['C'],
                 abt=params['abt'],
                 abn=params['abn'],
@@ -121,15 +123,15 @@ class RL_object():
                 sparing_factors=params['sparing_factors'],
                 alpha=params['alpha'],
                 beta=params['beta'],
-                bound_OAR=params['bound_OAR'],
-                bound_tumor=['bound_tumor'],
+                bound_OAR=params['OAR_limit'],
+                bound_tumor=params['tumor_goal'],
                 abt=params['abt'],
                 abn=params['abn'],
                 min_dose=params['min_dose'],
                 max_dose=params['max_dose'],
                 fixed_prob=params['fixed_prob'],
                 fixed_mean=params['fixed_mean'],
-                fixed_std=params['fixed_std'],
+                std_fixed=params['fixed_std'],
             )
 
         return np.array(relay,dtype=object)[0][:]
