@@ -12,6 +12,7 @@ nme = __name__
 class RL_object():
     def __init__(self, instruction_filename):
         try: # check if file can be opened
+            m.aft_message('reading "{instruction_filename}" ...', nme)
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
             input_dict= eval(read_in)
@@ -21,19 +22,20 @@ class RL_object():
         try: # check if log flag is existent and boolean
             log_bool = input_dict['log']
         except KeyError:
-            m.aft_message('no "log" flag was given, set to "False"', nme)
-            log_bool = False
+            m.aft_message('no "log" flag was given, set to 0', nme)
+            log_bool = 0
         else:
-            if not isinstance(log_bool, bool):
-                m.aft_error('"log" flag was not set to boolean', nme)
+            if not log_bool in [0,1]:
+                m.aft_error('invalid "log" flag was set', nme)
 
         try: # check if log flag is existent and boolean
             debug_bool = input_dict['debug']
         except KeyError:
-            debug_bool = False
+            m.aft_message('no "debug" flag was given, set to 0', nme)
+            debug_bool = 0
         else:
-            if not isinstance(debug_bool, bool):
-                m.aft_error('"debug" flag was not set to boolean')
+            if not debug_bool in [0,1]:
+                m.aft_error('invalid "debug" flag was set')
 
         m.logging_init(instruction_filename, log_bool, debug_bool)
         m.aft_message_info('debug mode:', debug_bool, nme, 0)
@@ -47,7 +49,7 @@ class RL_object():
             if algorithm not in C.KEY_DICT:
                 m.aft_error(f'unknown "algorithm" type: "{algorithm}"', nme)
             else:
-                m.aft_message_info('type of algorithm:', algorithm, nme, 0)
+                m.aft_message_info('algorithm:', algorithm, nme, 0)
 
         try: # check if parameter key exists and is a dictionnary
             parameters = input_dict['parameters']
