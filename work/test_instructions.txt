@@ -2,8 +2,8 @@
 
 {
 'algorithm': 'frac',
-'log': False,
-'debug': False,
+'debug': 0,
+'log': 0,
 'parameters': 
 	{
 	'number_of_fractions': 3,
