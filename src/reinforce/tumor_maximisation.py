@@ -206,8 +206,6 @@ def value_eval(
                     ] = upperbound  # any dose surpassing 90.1 is set to 90.1
                     if index == 0:  # last state no more further values to add
                         best_action = convert_to_physical(bound-bed_value, abn, sf)
-                        if bed_value > bound:
-                            best_action = np.zeros(best_action.shape)
                         best_action[best_action < min_dose] = min_dose
                         best_action[best_action > max_dose] = max_dose
                         future_bed = BED_calc0(sf, abn, best_action) + bed_value
@@ -292,46 +290,6 @@ def whole_plan(
     fixed_mean=0,
     fixed_std=0,
 ):
-    """
-    calculates whole plan given all sparing factors
-
-    Parameters
-    ----------
-    number_of_fractions : integer
-        number of fractions that will be delivered.
-    sparing_factors : list/array
-        list/array with all observed sparing factors.
-    alpha : float
-        shape of inverse-gamma distribution.
-    beta : float
-        scale of inverse-gamme distrinbution.
-    OAR_limit : float
-        accumulated BED in OAR (from previous fractions)
-    abt : float
-        alpha-beta ratio of tumor.
-    abn : float
-        alpha-beta ratio of OAR.
-    min_dose : float
-        minimal physical doses to be delivered in one fraction.
-        The doses are aimed at PTV 95.
-    max_dose : float
-        maximal physical doses to be delivered in one fraction.
-        The doses are aimed at PTV 95.
-    fixed_prob : int
-        this variable is to turn on a fixed probability distribution.
-        If the variable is not used (0), then the probability will be updated.
-        If the variable is turned to 1, the inserted mean and std will be used
-        for a fixed sparing factor distribution. Then alpha and beta are unused.
-    fixed_mean: float
-        mean of the fixed sparing factor normal distribution.
-    fixed_std: float
-        standard deviation of the fixed sparing factor normal distribution.
-
-    Returns
-    -------
-    List with delivered tumor doses, delivered OAR doses and delivered physical doses.
-
-    """
     total_dose_delivered_OAR = 0
     total_tumor_dose = 0
     tumor_doses = np.zeros(number_of_fractions)

@@ -1,16 +1,17 @@
 # test file for whole plan with fraction number minimisation
 
 {
-'algorithm': 'frac',
-'debug': 0,
+'algorithm': 'tumor',
+'debug': 1,
 'log': 0,
 'parameters': 
 	{
 	'number_of_fractions': 3,
-	'sparing_factors': [1, 1, 1, 1],
+	'sparing_factors': [0.91, 1.02, 1.1, 1],
 	'alpha': 2.7,
 	'beta': 0.014,
-	'goal': 30,
+	'tumor_goal': 30,
+	'OAR_limit': 5,
 	'C': 3,
 	}
 }

@@ -126,5 +126,5 @@ def convert_to_physical(bed, ab, sf=1):
         dose = (-sf + np.sqrt(sf**2 + 4 * sf**2 * bed / ab)) / (
             2 * sf**2 / ab)
     else:
-        dose = 0
+        dose = np.zeros(np.shape(sf))
     return dose
