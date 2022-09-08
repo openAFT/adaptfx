@@ -1,5 +1,6 @@
 import sys
 import logging
+import os
 
 def logging_init(filename, log, debug):
     """
@@ -9,8 +10,10 @@ def logging_init(filename, log, debug):
     ----------
     filename : string
         filename of log file
-    switch : bool
-        switch to store log to filename
+    log : bool
+        if true store log to filename
+    debug: bool
+        if true log extensive message
 
     Returns
     -------
@@ -27,7 +30,21 @@ def logging_init(filename, log, debug):
         log_level = logging.INFO
     
     if log:
-        log_filename = "{0}.{2}".format(*filename.rsplit('.', 1) + ['log'])
+        # create logfile name
+        basename = "{0}".format(*filename.rsplit('.', 1))
+        # search for existing filename
+        i = 1
+        while os.path.exists("{0}_{1}.{2}".format(basename, i, 'log')):
+            # exponential search
+            i *= 2
+        a, b = (i // 2, i)
+        while a+1 < b:
+            c = a + b // 2
+            if os.path.exists("{0}_{1}.{2}".format(basename, c, 'log')):
+                a, b = (c, b)
+            else:
+                a, b = (a,c)
+        log_filename = "{0}_{1}.{2}".format(basename, b, 'log')
         logging.basicConfig(
             format=format_file,
             level=log_level, 
