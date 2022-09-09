@@ -223,7 +223,7 @@ def value_eval(
                     ):  # last state no more further values to add
                         best_action_BED = convert_to_physical(bound_OAR-OAR_value, abn, sf) 
                         # calculate maximal dose that can be delivered to OAR and tumor
-                        best_action_tumor = convert_to_physical(bound_tumor-tumor_value, abt)
+                        best_action_tumor = convert_to_physical(bound_tumor-tumor_value, abt, sf*0+1)
                         best_action = np.min(
                             [best_action_BED, best_action_tumor], axis=0
                         )  # take the smaller of both doses to not surpass the limit
@@ -307,48 +307,6 @@ def whole_plan(
     fixed_mean=0,
     std_fixed=0,
 ):
-    """
-    calculates whole plan given all sparing factors
-
-    Parameters
-    ----------
-    number_of_fractions : integer
-        number of fractions that will be delivered.
-    sparing_factors : list/array
-        list/array with all observed sparing factors.
-    bound_OAR : float
-        maximal BED of OAR.
-    bound_tumor : float
-        prescribed tumor BED.
-    alpha : float
-        alpha hyperparameter of std prior derived from previous patients.
-    beta : float
-        beta hyperparameter of std prior derived from previous patients.
-    abt : float
-        alpha-beta ratio of tumor.
-    abn : float
-        alpha-beta ratio of OAR.
-    min_dose : float
-        minimal physical doses to be delivered in one fraction.
-        The doses are aimed at PTV 95.
-    max_dose : float
-        maximal physical doses to be delivered in one fraction.
-        The doses are aimed at PTV 95.
-    fixed_prob : int
-        this variable is to turn on a fixed probability distribution.
-        If the variable is not used (0), then the probability will be updated.
-        If the variable is turned to 1, the inserted mean and std will be used
-        for a fixed sparing factor distribution. Then alpha and beta are unused.
-    fixed_mean: float
-        mean of the fixed sparing factor normal distribution
-    std_fixed: float
-        standard deviation of the fixed sparing factor normal distribution
-        
-    Returns
-    -------
-    List with delivered tumor doses, delivered OAR doses and delivered physical doses
-
-    """
     physical_doses = np.zeros(number_of_fractions)
     tumor_doses = np.zeros(number_of_fractions)
     OAR_doses = np.zeros(number_of_fractions)

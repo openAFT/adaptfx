@@ -253,50 +253,6 @@ def whole_plan(
     fixed_mean=0,
     fixed_std=0,
 ):
-    """
-    calculates all doses for a number_of_fractions fraction treatment
-
-    Parameters
-    ----------
-    number_of_fractions : integer
-        number of fractions that will be delivered.
-    sparing_factors : list/array
-        list or array of number_of_fractions + 1 sparing factors,
-        that have successively been observed.
-    alpha : float
-        alpha hyperparameter of std prior derived from previous patients.
-    beta : float
-        beta hyperparameter of std prior derived from previous patients.
-    goal : float
-        prescribed tumor BED.
-    abt : float
-        alpha-beta ratio of tumor. Default is 10
-    abn : float
-        alpha-beta ratio of OAR. Default is 3
-    C: float
-        fixed constant to penalize for each additional fraction that is used.
-    min_dose : float
-        minimal physical doses to be delivered in one fraction.
-        The doses are aimed at PTV 95. Defaut is 0
-    max_dose : float
-        maximal physical doses to be delivered in one fraction.
-        The doses are aimed at PTV 95. Default is 22.3
-    fixed_prob : int
-        this variable is to turn on a fixed probability distribution.
-        If the variable is not used (0), then the probability will be updated.
-        If the variable is turned to (1), the inserted mean and std will be used
-        for a fixed sparing factor distribution. Then alpha, beta unused.
-    fixed_mean: float
-        mean of the fixed sparing factor normal distribution.
-    std_fixed: float
-        standard deviation of the fixed sparing factor normal distribution.
-
-    Returns
-    -------
-    List with delivered tumor doses, delivered OAR doses and
-    delivered physical doses.
-
-    """
     accumulated_tumor_dose = 0
     accumulated_OAR_dose = 0
     physical_doses = np.zeros(number_of_fractions)
