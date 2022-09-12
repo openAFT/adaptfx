@@ -26,8 +26,8 @@ def value_eval(
     bound_tumor,
     alpha,
     beta,
-    abt=10,
-    abn=3,
+    abt,
+    abn,
     min_dose=0,
     max_dose=22.3,
     fixed_prob=0,
@@ -125,9 +125,9 @@ def value_eval(
     upperbound_tumor = bound_tumor + 1
 
     OAR_dose = BED_calc_matrix(
-        actionspace, abn, sf
+        sf, abn, actionspace
     )  # calculates the dose that is deposited into the normal tissue for all sparing factors
-    tumor_dose = BED_calc_matrix(actionspace, abt, 1)[
+    tumor_dose = BED_calc_matrix(1, abt, actionspace)[
         0
     ]  # this is the dose delivered to the tumor
     actual_fraction_sf = argfind(sf, sparing_factors[-1])
