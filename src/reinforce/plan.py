@@ -179,6 +179,8 @@ def multiple(algorithm, params):
         OAR_doses[looper] = OAR_dose
 
     return [
+                accumulated_OAR_dose,
+                accumulated_tumor_dose,
                 physical_doses,
                 tumor_doses,
                 OAR_doses
