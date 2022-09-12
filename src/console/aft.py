@@ -3,7 +3,7 @@
 import click
 import numpy as np
 import common.constants as C
-import common.plan as plan
+import reinforce.plan as plan
 import handler.messages as m
 import handler.aft_utils as utils
 nme = __name__
