@@ -263,66 +263,14 @@ def value_eval(
         )
         total_dose_delivered_OAR = dose_delivered_OAR + BED
         actual_dose_delivered = actual_policy[index_sf] / 10
-
-    return [
-        Values,
-        policy,
-        actual_value,
-        actual_policy,
-        dose_delivered_OAR,
-        dose_delivered_tumor,
-        total_dose_delivered_OAR,
-        actual_dose_delivered,
-    ]
-
-
-def whole_plan(
-    number_of_fractions,
-    sparing_factors,
-    alpha,
-    beta,
-    OAR_limit,
-    abt=10,
-    abn=3,
-    min_dose=0,
-    max_dose=22.3,
-    fixed_prob=0,
-    fixed_mean=0,
-    fixed_std=0,
-):
-    total_dose_delivered_OAR = 0
-    total_tumor_dose = 0
-    tumor_doses = np.zeros(number_of_fractions)
-    OAR_doses = np.zeros(number_of_fractions)
-    physical_doses = np.zeros(number_of_fractions)
-    for looper in range(0, number_of_fractions):
-        [
-            Values,
-            policy,
-            actual_value,
-            actual_policy,
-            dose_delivered_OAR,
-            tumor_dose,
-            total_dose_delivered_OAR,
-            actual_dose_delivered,
-        ] = value_eval(
-            looper + 1,
-            number_of_fractions,
-            total_dose_delivered_OAR,
-            sparing_factors[: looper + 2],
-            alpha,
-            beta,
-            abt,
-            abn,
-            OAR_limit,
-            min_dose,
-            max_dose,
-            fixed_prob,
-            fixed_mean,
-            fixed_std,
-        )
-        tumor_doses[looper] = tumor_dose
-        physical_doses[looper] = actual_dose_delivered
-        OAR_doses[looper] = dose_delivered_OAR
-        total_tumor_dose += tumor_dose
-    return [tumor_doses, OAR_doses, physical_doses]
+    return [actual_dose_delivered, dose_delivered_tumor, dose_delivered_OAR]
+    # return [
+    #     Values,
+    #     policy,
+    #     actual_value,
+    #     actual_policy,
+    #     dose_delivered_OAR,
+    #     dose_delivered_tumor,
+    #     total_dose_delivered_OAR,
+    #     actual_dose_delivered,
+    # ]

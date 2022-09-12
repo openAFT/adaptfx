@@ -34,7 +34,7 @@ def value_eval(
     """
     calculates the optimal dose for the desired fraction.
 
-     Parameters
+    Parameters
     ----------
     fraction : integer
         Number of the actual fraction.
@@ -211,48 +211,5 @@ def value_eval(
         physical_dose = policy4 / 10
     tumor_dose = BED_calc0(physical_dose, abt)
     OAR_dose = BED_calc0(physical_dose, abn, sparing_factors[-1])
-    return [policy, sf, physical_dose, tumor_dose, OAR_dose]
-
-
-def whole_plan(
-    number_of_fractions,
-    sparing_factors,
-    alpha,
-    beta,
-    goal,
-    abt=10,
-    abn=3,
-    min_dose=0,
-    max_dose=22.3,
-    fixed_prob=0,
-    fixed_mean=0,
-    fixed_std=0,
-):
-    accumulated_tumor_dose = 0
-    accumulated_OAR_dose = 0
-    physical_doses = np.zeros(number_of_fractions)
-    tumor_doses = np.zeros(number_of_fractions)
-    OAR_doses = np.zeros(number_of_fractions)
-    for looper in range(0, number_of_fractions):
-        [policy, sf, physical_dose, tumor_dose, OAR_dose] = value_eval(
-            looper + 1,
-            number_of_fractions,
-            accumulated_tumor_dose,
-            sparing_factors[0 : looper + 2],
-            alpha,
-            beta,
-            goal,
-            abt,
-            abn,
-            min_dose,
-            max_dose,
-            fixed_prob,
-            fixed_mean,
-            fixed_std,
-        )
-        accumulated_tumor_dose += tumor_dose
-        accumulated_OAR_dose += OAR_dose
-        tumor_doses[looper] = tumor_dose
-        OAR_doses[looper] = OAR_dose
-        physical_doses[looper] = physical_dose
-    return [tumor_doses, OAR_doses, physical_doses]
+    return [physical_dose, tumor_dose, OAR_dose]
+    #return [physical_dose, tumor_dose, OAR_dose, policy, sf, BEDT]
