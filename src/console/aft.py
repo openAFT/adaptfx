@@ -2,11 +2,8 @@
 
 import click
 import numpy as np
-import reinforce.fraction_minimisation as frac
-import reinforce.oar_minimisation as oar
-import reinforce.tumor_maximisation as tumor
-import reinforce.track_tumor_oar as tumor_oar
 import common.constants as C
+import common.plan as plan
 import handler.messages as m
 import handler.aft_utils as utils
 nme = __name__
@@ -18,8 +15,10 @@ class RL_object():
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
             input_dict= eval(read_in)
+        except SyntaxError:
+            m.aft_error(f'Dictionary Syntax Error in: "{instruction_filename}"', nme)
         except:
-            m.aft_error(f'could not open file: "{instruction_filename}"', nme)
+            m.aft_error(f'No such file: "{instruction_filename}"', nme)
 
         try: # check if log flag is existent and boolean
             log_bool = input_dict['log']
@@ -70,71 +69,11 @@ class RL_object():
 
     def optimise(self):
         params = self.parameters
-        if self.algorithm == 'oar':
-            relay = oar.whole_plan(
-                number_of_fractions=params['number_of_fractions'],
-                sparing_factors=params['sparing_factors'],
-                alpha=params['alpha'],
-                beta=params['beta'],
-                goal=params['tumor_goal'],
-                abt=params['abt'],
-                abn=params['abn'],
-                min_dose=params['min_dose'],
-                max_dose=params['max_dose'],
-                fixed_prob=params['fixed_prob'],
-                fixed_mean=params['fixed_mean'],
-                fixed_std=params['fixed_std'],
-            )
-        elif self.algorithm == 'tumor':
-            relay = tumor.whole_plan(
-                number_of_fractions=params['number_of_fractions'],
-                sparing_factors=params['sparing_factors'],
-                alpha=params['alpha'],
-                beta=params['beta'],
-                OAR_limit=params['OAR_limit'],
-                abt=params['abt'],
-                abn=params['abn'],
-                min_dose=params['min_dose'],
-                max_dose=params['max_dose'],
-                fixed_prob=params['fixed_prob'],
-                fixed_mean=params['fixed_mean'],
-                fixed_std=params['fixed_std'],
-            )
-        elif self.algorithm == 'frac':
-            relay = frac.whole_plan(
-                number_of_fractions=params['number_of_fractions'],
-                sparing_factors=params['sparing_factors'],
-                alpha=params['alpha'],
-                beta=params['beta'],
-                goal=params['tumor_goal'],
-                C=params['C'],
-                abt=params['abt'],
-                abn=params['abn'],
-                min_dose=params['min_dose'],
-                max_dose=params['max_dose'],
-                fixed_prob=params['fixed_prob'],
-                fixed_mean=params['fixed_mean'],
-                fixed_std=params['fixed_std'],
-            )
+        algorithm = self.algorithm
+        doses = plan.multiple(algorithm, params)
 
-        elif self.algorithm == 'tumor_oar':
-            relay = tumor_oar.whole_plan(
-                number_of_fractions=params['number_of_fractions'],
-                sparing_factors=params['sparing_factors'],
-                alpha=params['alpha'],
-                beta=params['beta'],
-                bound_OAR=params['OAR_limit'],
-                bound_tumor=params['tumor_goal'],
-                abt=params['abt'],
-                abn=params['abn'],
-                min_dose=params['min_dose'],
-                max_dose=params['max_dose'],
-                fixed_prob=params['fixed_prob'],
-                fixed_mean=params['fixed_mean'],
-                std_fixed=params['fixed_std'],
-            )
-
-        return np.array(relay,dtype=object)[0][:]
+        return doses
+        #return np.array(relay,dtype=object)[0][:]
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
