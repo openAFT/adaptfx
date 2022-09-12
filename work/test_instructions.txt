@@ -8,8 +8,11 @@
 	{
 	'number_of_fractions': 3,
 	'sparing_factors': [0.91, 1.02, 1.1, 1],
-	'alpha': 2.7,
-	'beta': 0.014,
+	'alpha': 'invalid',
+	'beta': 'invalid',
+	'fixed_prob': 1,
+	'fixed_mean': 1,
+	'fixed_std': 0.02,
 	'tumor_goal': 30,
 	'OAR_limit': 5,
 	'C': 3,
