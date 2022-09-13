@@ -181,7 +181,7 @@ def multiple(algorithm, params):
     return [
                 accumulated_OAR_dose,
                 accumulated_tumor_dose,
-                physical_doses,
+                np.array((physical_doses,
                 tumor_doses,
-                OAR_doses
+                OAR_doses))
             ]

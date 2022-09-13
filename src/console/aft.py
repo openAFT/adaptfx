@@ -73,7 +73,6 @@ class RL_object():
         doses = plan.multiple(algorithm, params)
 
         return doses
-        #return np.array(relay,dtype=object)[0][:]
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
