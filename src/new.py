@@ -1,21 +1,25 @@
 import numpy as np
 import reinforce.plan as plan
 import scipy.optimize as opt
-# import scipy.interpolate as interpol
+import scipy.interpolate as interpol
 import matplotlib.pyplot as plt
-
-def B_calc(algorithm, params):
-    relay = plan.multiple(algorithm, params)
-    return relay[0:2]
 
 def fractions(n):
     return np.arange(2, n+1)
 
-def C_n_linear(C, n):
+def B_calc(algorithm, params):
+    # BED^N calculation for single fraction 
+    relay = plan.multiple(algorithm, params)
+    return relay[0:2]
+
+def C_n_linear(c, n):
+    # cost from using additional fraction
     lin = fractions(n)
-    return C * lin
+    return c * lin
 
 def B_n(n, param, reps):
+    # BED^N calculation for list of fractions
+    # and sampled reps times for each fraction
     mu = param['fixed_mean']
     sigma = param['fixed_std']
     cumulative_dose = np.zeros(reps)
@@ -32,21 +36,20 @@ def B_n(n, param, reps):
     return B
 
 def f_n(n, c):
+    # sum linear cost with BED^N cost
     B = B_n(n, params, number_of_rep)[0]
     C = C_n_linear(c, n)
     return np.array((B + C, fractions(n)))
 
-def F_n(c, n, n_target):
-    fs = f_n(n, c)
-    min_index = np.argmin(fs[0])
-    n_min = fs[1][min_index]
-    print(fs)
-    print(n_min)
-    diff = np.abs(n_target - n_min)
-    return diff
+# def F_n(c, n, n_target):
+#     fs = f_n(n, c)
+#     min_index = np.argmin(fs[0])
+#     n_min = fs[1][min_index]
+#     diff = np.abs(n_target - n_min)
+#     return diff
 
-def F_n_fit(n, D):
-    bed = D * (1 + D/(n * params['abn']))
+def F_n_fit(n, D, ab):
+    bed = D * (1 + D/(n * ab))
     return C * n + bed
 
 params = {
@@ -66,17 +69,24 @@ params = {
             'abn': 3
             }
 
-N = 5
+N = 7
 C = 2
 n_target = 5
-number_of_rep = 3
+number_of_rep = 18
+f_n_real = f_n(N, C)
+x = np.arange(2, N, 0.3)
 
-data = f_n(N, C)
+# popt, pcov = opt.curve_fit(F_n_fit, f_n_real[1], f_n_real[0],
+#                     p0=(params['tumor_goal'], params['abn']))
+# print('D, ab fitted:',popt)
 
-popt, pcov = opt.curve_fit(F_n_fit, data[1], data[0], p0=(30))
-print(popt)
+f_n_int = interpol.interp1d(f_n_real[1], f_n_real[0], kind='linear')
 
-plt.plot(fractions(N), F_n_fit(N, popt[0]))
+plt.plot(fractions(N), f_n_real[0], label='real')
+plt.plot(x, F_n_fit(x, params['tumor_goal'], params['abn']), label='no AFT')
+#plt.plot(x, F_n_fit(x, popt[0], popt[1]), label='fit')
+plt.plot(x, f_n_int(x), label='interpol')
+plt.legend()
 plt.show()
 
 # test = opt.minimize(F_n, [0], method='Nelder-Mead', args=(N, N-1))
