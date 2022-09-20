@@ -18,11 +18,11 @@ from common.radiobiology import argfind, BED_calc_matrix, BED_calc0, convert_to_
 def value_eval(
     fraction,
     number_of_fractions,
-    BED,
+    accumulated_OAR_dose,
     sparing_factors,
     alpha,
     beta,
-    bound,
+    OAR_limit,
     abt,
     abn,
     min_dose=0,
@@ -40,7 +40,7 @@ def value_eval(
         number of actual fraction.
     number_of_fractions : integer
         number of fractions that will be delivered.
-    BED : float
+    accumulated_OAR_dose : float
         accumulated BED in OAR (from previous fractions)
     sparing_factors : list/array
         list of sparing factor distribution.
@@ -48,8 +48,8 @@ def value_eval(
         alpha hyperparameter of std prior derived from previous patients.
     beta : float
         beta hyperparameter of std prior derived from previous patients.
-    bound : float
-        upper limit of OAR.
+    OAR_limit : float
+        upper BED limit of OAR.
     abt : float
         alpha-beta ratio of tumor.
     abn : float
@@ -95,7 +95,7 @@ def value_eval(
     sf = sf[prob > 0.00001]  # get rid of all probabilities below 10^-5
     prob = prob[prob > 0.00001]
 
-    BEDT = BEDT = np.arange(BED, bound + 1.6, 1)
+    BEDT = BEDT = np.arange(accumulated_OAR_dose, OAR_limit + 1.6, 1)
     Values = np.zeros(
         ((number_of_fractions - fraction), len(BEDT), len(sf))
     )  # 2d values list with first indice being the BED and second being the sf
@@ -107,7 +107,7 @@ def value_eval(
         min_dose = max_dose - 0.1
     actionspace = np.arange(min_dose, max_dose + 0.1, 0.1)
     policy = np.zeros(((number_of_fractions - fraction), len(BEDT), len(sf)))
-    upperbound = bound + 1
+    upperbound = OAR_limit + 1
 
     delivered_doses = BED_calc_matrix(sf, abn, actionspace)
     BEDT_rew = BED_calc_matrix(
@@ -121,9 +121,9 @@ def value_eval(
         if (
             index == number_of_fractions - 1
         ):  # first state with no prior dose delivered so we dont loop through BEDT
-            future_bed = BED + delivered_doses
+            future_bed = accumulated_OAR_dose + delivered_doses
             future_bed[
-                future_bed > bound
+                future_bed > OAR_limit
             ] = upperbound  # any dose surpassing the upper bound will be set to the upper bound which will be penalized strongly
             value_interpolation = interp2d(sf, BEDT, Values[index - 1])
             future_value = np.zeros(len(sf) * len(actionspace) * len(sf)).reshape(
@@ -136,7 +136,7 @@ def value_eval(
             )  # in this array are all future values multiplied with the probability of getting there. shape = sparing factors x actionspace
             penalties = np.zeros(future_bed.shape)
             penalties[
-                future_bed > bound
+                future_bed > OAR_limit
             ] = (
                 -1000
             )  # penalizing in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
@@ -150,13 +150,13 @@ def value_eval(
                 index == number_of_fractions - fraction
             ):  # if we are in the actual fraction we do not need to check all possible BED states but only the one we are in
                 if fraction != number_of_fractions:
-                    future_bed = BED + delivered_doses
-                    overdosing = (future_bed - bound).clip(min=0)
+                    future_bed = accumulated_OAR_dose + delivered_doses
+                    overdosing = (future_bed - OAR_limit).clip(min=0)
                     penalties_overdose = (
                         overdosing * -1000
                     )  # additional penalty when overdosing is needed when choosing a minimum dose to be delivered
                     future_bed[
-                        future_bed > bound
+                        future_bed > OAR_limit
                     ] = upperbound  # any dose surpassing the upper bound will be set to the upper bound which will be penalized strongly
                     value_interpolation = interp2d(
                         sf, BEDT, Values[index - 1]
@@ -173,7 +173,7 @@ def value_eval(
                     )  # in this array are all future values multiplied with the probability of getting there. shape = sparing factors x actionspace
                     penalties = np.zeros(future_bed.shape)
                     penalties[
-                        future_bed > bound
+                        future_bed > OAR_limit
                     ] = (
                         -1000
                     )  # penalizing in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
@@ -186,8 +186,8 @@ def value_eval(
                     actual_policy = Vs.argmax(axis=1)
                     actual_value = Vs.max(axis=1)
                 else:
-                    best_action = convert_to_physical(bound-BED, abn, sf)
-                    if BED > bound:
+                    best_action = convert_to_physical(OAR_limit-accumulated_OAR_dose, abn, sf)
+                    if accumulated_OAR_dose > OAR_limit:
                         best_action = np.ones(best_action.shape) * min_dose
                     best_action[best_action < min_dose] = min_dose
                     best_action[best_action > max_dose] = max_dose
@@ -200,24 +200,24 @@ def value_eval(
                     BEDT
                 ):  # this and the next for loop allow us to loop through all states
                     future_bed = delivered_doses + bed_value
-                    overdosing = (future_bed - bound).clip(min=0)
+                    overdosing = (future_bed - OAR_limit).clip(min=0)
                     future_bed[
-                        future_bed > bound
+                        future_bed > OAR_limit
                     ] = upperbound  # any dose surpassing 90.1 is set to 90.1
                     if index == 0:  # last state no more further values to add
-                        best_action = convert_to_physical(bound-bed_value, abn, sf)
+                        best_action = convert_to_physical(OAR_limit-bed_value, abn, sf)
                         best_action[best_action < min_dose] = min_dose
                         best_action[best_action > max_dose] = max_dose
                         future_bed = BED_calc0(sf, abn, best_action) + bed_value
-                        overdosing = (future_bed - bound).clip(min=0)
+                        overdosing = (future_bed - OAR_limit).clip(min=0)
                         penalties_overdose = (
                             overdosing * -1000
                         )  # additional penalty when overdosing is needed when choosing a minimum dose to be delivered
                         future_bed[
-                            future_bed > bound + 0.0001
+                            future_bed > OAR_limit + 0.0001
                         ] = upperbound  # 0.0001 is added due to some rounding problems
                         penalties = np.zeros(future_bed.shape)
-                        if bed_value < bound:
+                        if bed_value < OAR_limit:
                             penalties[future_bed == upperbound] = -1000
                         Values[index][bed_index] = (
                             BED_calc0(best_action, abt) + penalties + penalties_overdose
@@ -254,14 +254,14 @@ def value_eval(
         dose_delivered_OAR = BED_calc0(
             actionspace[actual_policy[index_sf]], abn, actual_sparing
         )
-        total_dose_delivered_OAR = dose_delivered_OAR + BED
+        total_dose_delivered_OAR = dose_delivered_OAR + accumulated_OAR_dose
         actual_dose_delivered = actionspace[actual_policy[index_sf]]
     else:
         dose_delivered_tumor = BED_calc0(actual_policy[index_sf] / 10, abt)
         dose_delivered_OAR = BED_calc0(
             actual_policy[index_sf] / 10, abn, actual_sparing
         )
-        total_dose_delivered_OAR = dose_delivered_OAR + BED
+        total_dose_delivered_OAR = dose_delivered_OAR + accumulated_OAR_dose
         actual_dose_delivered = actual_policy[index_sf] / 10
     return [actual_dose_delivered, dose_delivered_tumor, dose_delivered_OAR]
     # return [

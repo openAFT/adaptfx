@@ -42,7 +42,7 @@ def multiple(algorithm, params):
     Specific Parameters
     ----------
     OAR_limit : float
-        upper limit of organ at risk
+        upper BED limit of OAR
     tumor_goal : float
         prescribed tumor BED.
     C: float

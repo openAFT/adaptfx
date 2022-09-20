@@ -18,11 +18,11 @@ from common.radiobiology import BED_calc_matrix, BED_calc0, max_action, convert_
 def value_eval(
     fraction,
     number_of_fractions,
-    accumulated_dose,
+    accumulated_tumor_dose,
     sparing_factors,
     alpha,
     beta,
-    goal,
+    tumor_goal,
     abt,
     abn,
     min_dose=0,
@@ -40,7 +40,7 @@ def value_eval(
         Number of the actual fraction.
     number_of_fractions : integer
         number of fractions that will be delivered.
-    accumulated_dose : float
+    accumulated_tumor_dose : float
         accumulated tumor BED.
     sparing_factors : list/array
         list or array of all observed sparing factors. Include planning
@@ -49,7 +49,7 @@ def value_eval(
         alpha hyperparameter of std prior derived from previous patients.
     beta : float
         beta hyperparameter of std prior derived from previous patients.
-    goal : float
+    tumor_goal : float
         prescribed tumor BED.
     abt : float, optional
         alpha beta ratio of the tumor. The default is 10.
@@ -88,9 +88,9 @@ def value_eval(
         mean = fixed_mean
         standard_deviation = fixed_std
     X = get_truncated_normal(mean=mean, sd=standard_deviation, low=0.01, upp=1.3)
-    BEDT = np.arange(accumulated_dose, goal, 1)
+    BEDT = np.arange(accumulated_tumor_dose, tumor_goal, 1)
     BEDT = np.concatenate(
-        (BEDT, [goal, goal + 1])
+        (BEDT, [tumor_goal, tumor_goal + 1])
     )  # add an extra step outside of our prescribed tumor dose which will be penalized to make sure that we aim at the prescribe tumor dose
     prob = np.array(probdist(X))
     sf = np.arange(0.01, 1.71, 0.01)
@@ -100,7 +100,7 @@ def value_eval(
     Values = np.zeros(
         (number_of_fractions - fraction, len(BEDT), len(sf))
     )  # 2d values list with first indice being the BED and second being the sf
-    max_physical_dose = convert_to_physical(goal, abt)
+    max_physical_dose = convert_to_physical(tumor_goal, abt)
     if max_dose > max_physical_dose:
         # if the max dose is too large we lower it, so we dont needlessly check too many actions
         max_dose = max_physical_dose
@@ -130,13 +130,13 @@ def value_eval(
             fraction_state == fraction and fraction != number_of_fractions
         ):  # actual fraction
             actionspace_clipped = actionspace[
-                0 : max_action(accumulated_dose, actionspace, goal) + 1
+                0 : max_action(accumulated_tumor_dose, actionspace, tumor_goal) + 1
             ]
             BEDN = BED_calc_matrix(sparing_factors[-1], abn, actionspace_clipped)
-            future_BEDT = accumulated_dose + BED_calc0(actionspace_clipped, abt)
-            future_BEDT[future_BEDT > goal] = goal + 1
+            future_BEDT = accumulated_tumor_dose + BED_calc0(actionspace_clipped, abt)
+            future_BEDT[future_BEDT > tumor_goal] = tumor_goal + 1
             penalties = np.zeros(future_BEDT.shape)
-            penalties[future_BEDT > goal] = -10000
+            penalties[future_BEDT > tumor_goal] = -10000
             future_values_func = interp1d(BEDT, (Values[state - 1] * prob).sum(axis=1))
             future_values = future_values_func(
                 future_BEDT
@@ -146,8 +146,8 @@ def value_eval(
         elif (
             fraction == number_of_fractions
         ):  # in this state no penalty has to be defined as the value is not relevant
-            best_action = convert_to_physical(goal-accumulated_dose, abt)
-            if accumulated_dose > goal:
+            best_action = convert_to_physical(tumor_goal-accumulated_tumor_dose, abt)
+            if accumulated_tumor_dose > tumor_goal:
                 best_action = 0
             if best_action < min_dose:
                 best_action = min_dose
@@ -162,7 +162,7 @@ def value_eval(
                 BEDT
             ):  # this and the next for loop allow us to loop through all states
                 actionspace_clipped = actionspace[
-                    0 : max_action(tumor_value, actionspace, goal) + 1
+                    0 : max_action(tumor_value, actionspace, tumor_goal) + 1
                 ]  # we only allow the actions that do not overshoot
                 BEDN = BED_calc_matrix(
                     sf, abn, actionspace_clipped
@@ -170,12 +170,12 @@ def value_eval(
                 BED = BED_calc_matrix(np.ones(len(sf)), abt, actionspace_clipped)
                 if state != 0:
                     future_BEDT = tumor_value + BED
-                    future_BEDT[future_BEDT > goal] = goal + 1
+                    future_BEDT[future_BEDT > tumor_goal] = tumor_goal + 1
                     future_values = future_values_func(
                         future_BEDT
                     )  # for each action and sparing factor calculate the penalty of the action and add the future value we will only have as many future values as we have actions (not sparing dependent)
                     penalties = np.zeros(future_BEDT.shape)
-                    penalties[future_BEDT > goal] = -10000
+                    penalties[future_BEDT > tumor_goal] = -10000
                     Vs = -BEDN + future_values + penalties
                     if Vs.size == 0:
                         best_action = np.zeros(len(sf))
@@ -184,7 +184,7 @@ def value_eval(
                         best_action = Vs.argmax(axis=1)
                         valer = Vs.max(axis=1)
                 else:  # last state no more further values to add
-                    best_action = convert_to_physical(goal-tumor_value, abt)
+                    best_action = convert_to_physical(tumor_goal-tumor_value, abt)
                     if best_action > max_dose:
                         best_action = max_dose
                     if best_action < min_dose:
@@ -193,9 +193,9 @@ def value_eval(
                     future_BEDT = tumor_value + BED_calc0(best_action, abt)
                     underdose_penalty = 0
                     overdose_penalty = 0
-                    if future_BEDT < goal:
-                        underdose_penalty = (future_BEDT - goal) * 10
-                    if future_BEDT > goal:
+                    if future_BEDT < tumor_goal:
+                        underdose_penalty = (future_BEDT - tumor_goal) * 10
+                    if future_BEDT > tumor_goal:
                         overdose_penalty = -10000
                     valer = (
                         -last_BEDN
