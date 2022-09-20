@@ -62,7 +62,7 @@ class RL_object():
 
         m.aft_message('loading keys...', nme, 1)
         whole_dict = utils.key_reader(C.KEY_DICT, C.FULL_DICT, parameters, algorithm)
-        m.aft_message_dict('parameters:', whole_dict, nme, 1)
+        m.aft_message_dict('parameters', whole_dict, nme, 1)
 
         self.parameters = whole_dict
         self.algorithm = algorithm

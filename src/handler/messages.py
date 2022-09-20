@@ -177,15 +177,13 @@ def aft_message_dict(message, dict, name, mode=0):
     log_name = logging.getLogger(name)
     if mode == 0:
         log_name.info(message)
-        for key, value in dict:
-            log_name.info('{%(key)s: %(value)s}' %
-                {'key': key, "value": value})
+        for key, value in dict.items():
+            log_name.info(f'|{key: <19}| {value}')
     if mode == 1:
         print('AFT>')
         log_name.info(message)
         for key, value in dict.items():
-            log_name.info('{%(key)s: %(value)s}' %
-                {'key': key, "value": value})
+            log_name.info(f'|{key: <19}| {value}')
         
 def aft_message_list(message, struct, name, mode=0):
     """
