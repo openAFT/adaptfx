@@ -10,7 +10,8 @@ def fractions(n):
 def B_static(sf, d):
     # BED^N calculation for 1 therapy
     # with static dose
-    b = sf*d * (1+sf*d/params['abn']) 
+    sf = sf[1:]
+    b = sf*d * (1+sf*d/params['abn'])
     return np.sum(b)
 
 def B_aft(algorithm, params):
@@ -34,13 +35,13 @@ def B_n(n, param, reps):
     cumulative_dose_static = np.zeros(reps)
     B = np.zeros((2, n-1))
     for i, n in enumerate(fractions(n)):
+        physical_dose = (np.sqrt(n*ab*(n*ab+4*goal)) - n*ab) / (2*n)
+        param['number_of_fractions'] = n
         for j in range(reps):
             sf_list = np.random.normal(mu,
                 sigma, n+1)
-            param['number_of_fractions'] = n
             param['sparing_factors'] = sf_list
             cumulative_dose[j] = B_aft('oar', param)
-            physical_dose = (np.sqrt(n*ab*(n*ab+4*goal)) - n*ab) / (2*n*mu)
             cumulative_dose_static[j] = B_static(sf_list, physical_dose)
         B[0][i] = np.mean(cumulative_dose)
         B[1][i] = np.mean(cumulative_dose_static)
@@ -91,7 +92,7 @@ params = {
 N = 10
 C = 1.3
 n_target = 5
-num_samples = 13
+num_samples = 12
 plot = 'w/o C'
 
 
