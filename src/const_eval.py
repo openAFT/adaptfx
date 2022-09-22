@@ -76,14 +76,20 @@ def Fn(n_max, c, bed):
 
 def c_find(n_max, n_targ, c_list, bed):
     m = np.shape(c_list)
-    n_list = np.zeros(m)
+    n_list_aft = np.zeros(m)
+    n_list_noaft = np.zeros(m)
     for j, c in enumerate(c_list):
         fn = Fn(n_max, c, bed)
-        # i_noaft = np.argmin(fn[1])
+        i_noaft = np.argmin(fn[1])
         i_aft = np.argmin(fn[2])
-        n_list[j] = fn[0][i_aft]
-    c_mask = np.ma.masked_where(n_list==n_targ, c_list).mask
-    return c_list[c_mask]
+        n_list_aft[j] = fn[0][i_aft]
+        n_list_noaft[j] = fn[0][i_noaft]
+    c_found = np.zeros((3,2))
+    c_mask_aft = np.ma.masked_where(n_list_aft==n_targ, c_list).mask
+    c_mask_noaft = np.ma.masked_where(n_list_noaft==n_targ, c_list).mask
+    c_found[1] = c_list[c_mask_noaft][[0,-1]]
+    c_found[2] = c_list[c_mask_aft][[0,-1]]
+    return c_found
 
 params = {
             'number_of_fractions': 0,
@@ -122,12 +128,10 @@ valid_c = c_find(N_max, N_target, C_list, bn)
 print(valid_c)
 
 if plot:
-    fn1 = Fn(N_max, valid_c[0], bn)
-    fn2 = Fn(N_max, valid_c[-1], bn)
+    fn1 = Fn(N_max, valid_c[1][1], bn)
     plt.scatter(bn[0], bn[1], label='no aft', marker='x')
     plt.scatter(bn[0], bn[2], label='aft', marker='x')
     plt.scatter(fn1[0], fn1[2], label='aftlow', marker='1')
-    plt.scatter(fn2[0], fn2[2], label='afthigh', marker='2')
 
     plt.legend()
     plt.show()
