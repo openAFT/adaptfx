@@ -2,7 +2,7 @@
 
 ## About
 
-`adaptfx` is a python package distributed on PyPI, which allows to calculate dose fractionation schemes in Adaptive Radiotherapy. Using MR guidance in Adaptive Radiotherapy, treatment plans can be on-line adapted to inter-fractional motion of tumours and organs at risk (OAR). When standard treatments deliver the same dose in each fraction, Adaptive Fractionation exploits the inter-fractional motion by delivering dose adaptively to daily tumour and OAR distance.
+`adaptfx` is a python package distributed on PyPI, which allows to calculate dose fractionation schemes in Adaptive Radiotherapy. Using MR guidance in Adaptive Radiotherapy, treatment plans can be on-line adapted to inter-fractional motion of tumors and organs at risk (OAR). When standard treatments deliver the same dose in each fraction, Adaptive Fractionation exploits the inter-fractional motion by delivering dose adaptively to daily tumor and OAR distance.
 
 For this adaptive approach a Reinforcement Learning algorithm based on dynamic programming was developed. This package was built to provide the toolbox initially developed by Pérez Haas et al. [[1](https://www.estro.org/Congresses/ESTRO-2022/562/inter-fractionmotionandadaptiveradiotherapy/5249/adaptivefractionationatthemr-linacbasedonadynamicp)]. It allows calculation of Adaptive Dose Fractionation discussed in the initial (not-yet) published paper and brings newer applicable features to the user.
 
@@ -75,7 +75,7 @@ src
 
 ## Description
 
-In the `reinforce` module one can find all relevant code to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumour biological effective dose (tumour BED) and OAR BED (maximizing tumour BED while minimizing OAR BED). 
+In the `reinforce` module one can find all relevant code to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumor biological effective dose (tumor BED) and OAR BED (maximizing tumor BED while minimizing OAR BED). 
 
 ### The 2D algorithms
 ```
@@ -83,7 +83,7 @@ In the `reinforce` module one can find all relevant code to calculate an OAR tra
     │   oar_minimisation.py
     │   tumor_maximisation.py
 ```
-These only track OAR BED or tumour BED and maximizes based on tumour BED or minimises based on OAR BED constraint. These are the faster algorithm, due to the smaller state space, but it could overshoot with the dose delivered to the tumour/OAR. Since only one of the organs can be tracked, one has to decide whether reaching the prescribed tumour dose or staying below the maximum OAR BED is more relevant. Generally the OAR tracking is better suited for patients with anatomies where the OAR and tumour are close to each other and reaching the prescribed dose is not expected. The tumour tracking is better suited when the OAR and tumour are farther apart and the prescribed tumour dose is supposed to be reached while staying below the maximum OAR BED.
+These only track OAR BED or tumor BED and maximizes based on tumor BED or minimises based on OAR BED constraint. These are the faster algorithm, due to the smaller state space, but it could overshoot with the dose delivered to the tumor/OAR. Since only one of the organs can be tracked, one has to decide whether reaching the prescribed tumor dose or staying below the maximum OAR BED is more relevant. Generally the OAR tracking is better suited for patients with anatomies where the OAR and tumor are close to each other and reaching the prescribed dose is not expected. The tumor tracking is better suited when the OAR and tumor are farther apart and the prescribed tumor dose is supposed to be reached while staying below the maximum OAR BED.
 
 ```
 └───
@@ -98,7 +98,7 @@ This function tracks OAR BED and minimises the number of fractions in cases wher
     │   track_tumor_oar.py
 ```
 
-The 3D algorithms tracks OAR BED and tumour BED. In this version a prescribed tumour dose must be provided aswell. The algorithm then tries to reach the prescribed tumour dose while minimizing the dose delivered to the OAR. If the prescribed tumour dose can not be reached, it is maximized with respect to the OAR limit. This means, that the OAR limit will be reached, just like in the 2D program. Generally, both algorithms give the same result, if the prescribed tumour dose can not be reached and is maximized.
+The 3D algorithms tracks OAR BED and tumor BED. In this version a prescribed tumor dose must be provided aswell. The algorithm then tries to reach the prescribed tumor dose while minimizing the dose delivered to the OAR. If the prescribed tumor dose can not be reached, it is maximized with respect to the OAR limit. This means, that the OAR limit will be reached, just like in the 2D program. Generally, both algorithms give the same result, if the prescribed tumor dose can not be reached and is maximized.
 The algorithms are based on a inverse-gamma prior distribution. To set up this distribution a dataset is needed with prior patient data (sparing factors) from the same population.
 
 There is a function to calculate the hyperparameters of the inverse-gamma distribution. But there is also the option to use a fixed probability distribution for the sparing factors. In this case, the probability distribution must be provided with a mean and a standard deviation and it is not updated as more information is available. To check out how the hyper parameters influence the prior distribution, the `Inverse_gamma_distribution_preview.py` file has been included that allows direct modelling of the distribution.
@@ -126,4 +126,4 @@ The two additional folders (`DVH_figures`, `Patientdata_paper`) contain the DVH 
 The algorithms allow to chose some extra parameters to specify extra constraints. The suggested parameters are specified for a 5 fraction SBRT plan where there are not constraints on the maximum or minimum dose.:
 - Chose the amount of fractions. Instead of just calculating for the case of a 5 fractions SBRT treatment, the amount of fractions can be chosen freely (e.g. 30 fractions)
 - Fix a minimum and maximum dose: Limits the action space by forcing a minimum and maximum dose for each fraction. (e.g. 4-16Gy)
-- Calculate optimal fraction size by tracking tumour BED: The 2D GUI has an additional extension, where one can optimize the optimal dose based on the prescribed tumour dose. (E.g. the clinician prescribes a tumour BED of 72 BED. The program will try to minimize the OAR BED while aiming on the 72 BED prescribed dose.)
+- Calculate optimal fraction size by tracking tumor BED: The 2D GUI has an additional extension, where one can optimize the optimal dose based on the prescribed tumor dose. (E.g. the clinician prescribes a tumor BED of 72 BED. The program will try to minimize the OAR BED while aiming on the 72 BED prescribed dose.)
