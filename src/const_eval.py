@@ -103,12 +103,12 @@ params = {
             }
 
 N_max = 12
-N_target = 5
+N_target = 8
 C_list = np.arange(1,7,0.05)
 num_samples = 1000
-filename = 'BED_T72_N12_resol'
-plot = 0
-write = 1
+filename = 'work/BED_t72_n12_1000.hdf5'
+plot = 1
+write = 0
 
 if write:
     bn = Bn(N_max, params, num_samples)
