@@ -55,15 +55,23 @@ def Cn(n_max, c):
     lin = fractions(n_max)
     return c * lin
 
-def B_func(n, sf, d_tumor, goal, abt, abn, c=None):
-    bed = sf**2 * n * d_tumor * (1/sf - abt/abn) + sf **2 * goal * abt/abn
-    if c == None:
-        return bed
-    else:
-        return bed + c * n
+class fitclass:
+    def __init__(self):
+        pass
 
-def Bn_fit(x, y, func, para):
-    popt, _ = opt.curve_fit(func, x, y, p0=(para))
+    def B_func(self, n, sf, c=None):
+        goal = self.tumor_goal
+        abt = self.abt
+        abn = self.abn
+        d_tumor = d_T(n ,abt, goal)
+        bed = sf**2 * n * d_tumor * (1/sf - abt/abn) + sf **2 * goal * abt/abn
+        if c == None:
+            return bed
+        else:
+            return bed + c * n
+
+def Bn_fit(func, x, y):
+    popt, _ = opt.curve_fit(func, x, y)
     return popt
 
 def Fn(n_max, c, bed):
@@ -127,11 +135,19 @@ else:
 valid_c = c_find(N_max, N_target, C_list, bn)
 print(valid_c)
 
+instance = fitclass()
+instance.tumor_goal = params['tumor_goal']
+instance.abt = params['abt']
+instance.abn = params['abn']
+coe, _ = Bn_fit(instance.B_func, bn[0], bn[2])
+x = np.arange(2, N_max, 0.3)
+
 if plot:
     fn1 = Fn(N_max, valid_c[1][1], bn)
     plt.scatter(bn[0], bn[1], label='no aft', marker='x')
     plt.scatter(bn[0], bn[2], label='aft', marker='x')
     plt.scatter(fn1[0], fn1[2], label='aftlow', marker='1')
+    plt.plot(x, instance.B_func(x, coe, valid_c[1][1]))
 
     plt.legend()
     plt.show()
