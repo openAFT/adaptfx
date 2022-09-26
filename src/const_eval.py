@@ -55,16 +55,19 @@ def Cn(n_max, c):
     lin = fractions(n_max)
     return c * lin
 
-class fitclass:
+class FitClass:
+    '''
+    This class is used to fit to several functions
+    which also enables the use of parameters
+    '''
     def __init__(self):
         pass
 
     def B_func(self, n, sf, c=None):
-        goal = self.tumor_goal
-        abt = self.abt
-        abn = self.abn
-        d_tumor = d_T(n ,abt, goal)
-        bed = sf**2 * n * d_tumor * (1/sf - abt/abn) + sf **2 * goal * abt/abn
+        para = self.para
+        d_tumor = d_T(n ,para['abt'], para['tumor_goal'])
+        bed = sf**2 * n * d_tumor * (1/sf - para['abt']/para['abn']) + \
+            sf **2 * para['tumor_goal'] * para['abt']/para['abn']
         if c == None:
             return bed
         else:
@@ -98,6 +101,13 @@ def c_find(n_max, n_targ, c_list, bed):
     c_found[1] = c_list[c_mask_noaft][[0,-1]]
     c_found[2] = c_list[c_mask_aft][[0,-1]]
     return c_found
+
+def c_find_root(n_targ, sf, func):
+    def thing(c):
+        f_min = opt.minimize(func, n_targ, args=(sf, c)).x
+        return n_targ - f_min[0]
+    c_opt = opt.root(thing, 1).x
+    return c_opt[0]
 
 params = {
             'number_of_fractions': 0,
@@ -135,19 +145,21 @@ else:
 valid_c = c_find(N_max, N_target, C_list, bn)
 print(valid_c)
 
-instance = fitclass()
-instance.tumor_goal = params['tumor_goal']
-instance.abt = params['abt']
-instance.abn = params['abn']
-coe, _ = Bn_fit(instance.B_func, bn[0], bn[2])
+instance = FitClass()
+instance.para = params
+sf_fit, _ = Bn_fit(instance.B_func, bn[0], bn[2])
 x = np.arange(2, N_max, 0.3)
+c = valid_c[2][1]
+
+c_opt = c_find_root(N_target, sf_fit, instance.B_func)
+print(c_opt)
 
 if plot:
-    fn1 = Fn(N_max, valid_c[1][1], bn)
+    fn1 = Fn(N_max, c, bn)
     plt.scatter(bn[0], bn[1], label='no aft', marker='x')
     plt.scatter(bn[0], bn[2], label='aft', marker='x')
     plt.scatter(fn1[0], fn1[2], label='aftlow', marker='1')
-    plt.plot(x, instance.B_func(x, coe, valid_c[1][1]))
+    plt.plot(x, instance.B_func(x, sf_fit, c))
 
     plt.legend()
     plt.show()
