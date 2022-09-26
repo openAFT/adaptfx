@@ -8,8 +8,19 @@ For this adaptive approach a Reinforcement Learning algorithm based on dynamic p
 
 ## Installation
 
-To install the `adaptfx` package:
+To install the `adaptfx` package, it is recommended to create a virtual environment using the `venv` module:
 
+```
+$ python3.10 -m venv adaptfx_env
+```
+
+activate the virtual environment
+```
+$ cd adaptfx_env
+$ source bin/activate
+```
+
+then install the `adaptfx` package with either method.
 
 #### Method 1: pip
 
@@ -33,7 +44,7 @@ $ aft [options] <instructions_file>
 
 for more infromation on the usage of the CLI read the manual.
 
-The user can also decide to use the scripts from `reinforce` in their python scripts
+The user can also decide to use the scripts from `reinforce` in their python scripts e.g.
 
 ```python
 import reinforce.tumor_maximisation as tumor_max
