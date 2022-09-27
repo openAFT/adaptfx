@@ -148,9 +148,12 @@ print(valid_c)
 instance = FitClass()
 instance.para = params
 sf_fit, _ = Bn_fit(instance.B_func, bn[0], bn[2])
+sf_fit_no, _ = Bn_fit(instance.B_func, bn[0], bn[1])
 x = np.arange(2, N_max, 0.3)
 c = valid_c[2][1]
 
+c_opt_no = c_find_root(N_target, sf_fit_no, instance.B_func)
+print(c_opt_no)
 c_opt = c_find_root(N_target, sf_fit, instance.B_func)
 print(c_opt)
 
@@ -159,7 +162,9 @@ if plot:
     plt.scatter(bn[0], bn[1], label='no aft', marker='x')
     plt.scatter(bn[0], bn[2], label='aft', marker='x')
     plt.scatter(fn1[0], fn1[2], label='aftlow', marker='1')
+    plt.scatter(fn1[0], fn1[1], label='noaftlow', marker='1')
     plt.plot(x, instance.B_func(x, sf_fit, c))
+    plt.plot(x, instance.B_func(x, sf_fit_no, c))
 
     plt.legend()
     plt.show()
