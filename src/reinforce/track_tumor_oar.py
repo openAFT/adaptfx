@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Interpolation module for tracking a 3 dimensional state space. 
-Tracks sparing factor, tumor BED and OAR BED. If the prescribed
-tumor dose can be reached, the OAR dose is minimized. If the 
-prescribed tumor dose can not be reached while staying below
-maximum BED, the tumor dose is maximized.
+This function tracks sparing factor, tumor BED and OAR BED.
+If the prescribed tumor dose can be reached, the OAR dose
+is minimised. If the  prescribed tumor dose can not be reached,
+while staying below maximum BED, the tumor dose is maximised.
 """
 
 import numpy as np
@@ -143,7 +142,7 @@ def value_eval(
             future_tumor = accumulated_tumor_dose + tumor_dose
             future_OAR[
                 future_OAR > OAR_limit
-            ] = upperbound_normal_tissue  # any dose surpassing the upper bound will be set to the upper bound which will be penalized strongly
+            ] = upperbound_normal_tissue  # any dose surpassing the upper bound will be set to the upper bound which will be penalised strongly
             future_tumor[future_tumor > tumor_goal] = upperbound_tumor
             future_values_prob = (Values[index - 1] * prob).sum(
                 axis=2
@@ -165,7 +164,7 @@ def value_eval(
                 overdosing = (future_OAR - OAR_limit).clip(min=0)
                 future_OAR[
                     future_OAR > OAR_limit
-                ] = upperbound_normal_tissue  # any dose surpassing the upper bound will be set to the upper bound which will be penalized strongly
+                ] = upperbound_normal_tissue  # any dose surpassing the upper bound will be set to the upper bound which will be penalised strongly
                 future_tumor = accumulated_tumor_dose + tumor_dose
                 future_tumor[future_tumor > tumor_goal] = upperbound_tumor
                 future_values_prob = (Values[index - 1] * prob).sum(
@@ -259,7 +258,7 @@ def value_eval(
                             + overdose_penalty2
                             + overdose_penalty3
                             + end_penalty_OAR
-                        )  # we also substract all the dose delivered to the OAR so the algorithm tries to minimize it
+                        )  # we also substract all the dose delivered to the OAR so the algorithm tries to minimise it
                         policy[index][tumor_index][OAR_index] = best_action * 10
                     else:
                         future_value = np.zeros([len(sf), len(actionspace)])

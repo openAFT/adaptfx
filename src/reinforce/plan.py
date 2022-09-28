@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+This function computes the doses for a whole
+treatment plan (when all sparing factors are known).
+"""
+
 import numpy as np
 import reinforce.fraction_minimisation as frac
 import reinforce.oar_minimisation as oar
@@ -46,7 +51,7 @@ def multiple(algorithm, params):
     tumor_goal : float
         prescribed tumor BED.
     C: float
-        fixed constant to penalize for each additional fraction that is used.
+        fixed constant to penalise for each additional fraction that is used.
 
     Returns
     -------

@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Interpolation module for OAR minimisation with minimum
-and maximum physical dose per fraction (to tumor).
 2D state space (tracking sparing factor and tumor BED).
-In this program the optimal fraction doses are compueted
-based on a prescribed tumor dose while minimizing OAR BED.
-
-whole_plan computes the doses for a whole
-treatment plan (when all sparing factors are known).
+In this function the optimal fraction doses are compueted
+based on a prescribed tumor dose while minimising OAR BED.
 """
 
 import numpy as np
@@ -91,7 +86,7 @@ def value_eval(
     BEDT = np.arange(accumulated_tumor_dose, tumor_goal, 1)
     BEDT = np.concatenate(
         (BEDT, [tumor_goal, tumor_goal + 1])
-    )  # add an extra step outside of our prescribed tumor dose which will be penalized to make sure that we aim at the prescribe tumor dose
+    )  # add an extra step outside of our prescribed tumor dose which will be penalised to make sure that we aim at the prescribe tumor dose
     prob = np.array(probdist(X))
     sf = np.arange(0.01, 1.71, 0.01)
     sf = sf[prob > 0.00001]

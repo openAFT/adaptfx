@@ -4,10 +4,7 @@ Interpolation module for tumor BED maximisation with minimum
 and maximum physical dose per fraction (to tumor).
 2D state space (tracking sparing factor and OAR BED).
 In this program the optimal fraction doses are
-computed based on a maximal OAR dose while maximizing tumor BED.
-
-whole_plan computes the doses for a whole
-treatment plan (when all sparing factors are known).
+computed based on a maximal OAR dose while maximising tumor BED.
 """
 
 import numpy as np
@@ -124,7 +121,7 @@ def value_eval(
             future_bed = accumulated_OAR_dose + delivered_doses
             future_bed[
                 future_bed > OAR_limit
-            ] = upperbound  # any dose surpassing the upper bound will be set to the upper bound which will be penalized strongly
+            ] = upperbound  # any dose surpassing the upper bound will be set to the upper bound which will be penalised strongly
             value_interpolation = interp2d(sf, BEDT, Values[index - 1])
             future_value = np.zeros(len(sf) * len(actionspace) * len(sf)).reshape(
                 len(sf), len(actionspace), len(sf)
@@ -139,7 +136,7 @@ def value_eval(
                 future_bed > OAR_limit
             ] = (
                 -1000
-            )  # penalizing in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
+            )  # penalising in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
             Vs = future_values_prob + BEDT_transformed + penalties
 
             actual_policy = Vs.argmax(axis=1)
@@ -157,7 +154,7 @@ def value_eval(
                     )  # additional penalty when overdosing is needed when choosing a minimum dose to be delivered
                     future_bed[
                         future_bed > OAR_limit
-                    ] = upperbound  # any dose surpassing the upper bound will be set to the upper bound which will be penalized strongly
+                    ] = upperbound  # any dose surpassing the upper bound will be set to the upper bound which will be penalised strongly
                     value_interpolation = interp2d(
                         sf, BEDT, Values[index - 1]
                     )
@@ -176,7 +173,7 @@ def value_eval(
                         future_bed > OAR_limit
                     ] = (
                         -1000
-                    )  # penalizing in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
+                    )  # penalising in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
                     Vs = (
                         future_values_prob
                         + BEDT_transformed
@@ -194,7 +191,7 @@ def value_eval(
                     actual_policy = best_action * 10
                     actual_value = BED_calc0(
                         best_action, abt
-                    )  # we do not need to penalize, as this value is not relevant.
+                    )  # we do not need to penalise, as this value is not relevant.
             else:
                 for bed_index, bed_value in enumerate(
                     BEDT
