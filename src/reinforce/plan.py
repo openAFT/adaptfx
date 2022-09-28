@@ -55,9 +55,10 @@ def multiple(algorithm, params):
 
     Returns
     -------
-    List with delivered physical doses, tumor doses and OAR doses.
+    list
 
     """
+    
     number_of_fractions=params['number_of_fractions']
     sparing_factors=params['sparing_factors']
     alpha=params['alpha']

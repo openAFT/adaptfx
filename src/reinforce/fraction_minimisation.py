@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
+2D state space (tracking sparing factor and tumor BED).
 In this function the optimal fraction doses are computed
-based on a prescribed tumor dose while sing the
+based on a prescribed tumor dose while minimising the
 number of fractions used for the treatment.
 """
 
@@ -72,11 +73,9 @@ def value_eval(
     Returns
     -------
     list
-        Returns list with policies, relevant sparing factors range,
-        physical dose to be delivered, tumor BED to be delivered,
-        OAR BED to be delivered.
 
     """
+    
     if fixed_prob != 1:
         mean = np.mean(
             sparing_factors

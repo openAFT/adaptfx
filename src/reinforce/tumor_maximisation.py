@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Interpolation module for tumor BED maximisation with minimum
-and maximum physical dose per fraction (to tumor).
 2D state space (tracking sparing factor and OAR BED).
-In this program the optimal fraction doses are
-computed based on a maximal OAR dose while maximising tumor BED.
+In this function the optimal fraction doses are computed 
+based on a maximal OAR dose while maximising tumor BED.
 """
 
 import numpy as np
@@ -71,9 +69,6 @@ def value_eval(
     Returns
     -------
     list
-        Returns a list with Values, policies, value of the actual fraction,
-        actual policy, BED delivered to the OAR, BED delivered to the tumor,
-        accumulated OAR BED and accumulated tumor BED.
 
     """
     

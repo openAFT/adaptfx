@@ -69,9 +69,7 @@ def value_eval(
     Returns
     -------
     list
-        Returns list with policies, relevant sparing factors range,
-        physical dose to be delivered, tumor BED to be delivered,
-        OAR BED to be delivered.
+    
     """
 
     if fixed_prob != 1:

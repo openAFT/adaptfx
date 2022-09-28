@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-This function tracks sparing factor, tumor BED and OAR BED.
+3D state space (tracking sparing factor, tumor BED and OAR BED).
 If the prescribed tumor dose can be reached, the OAR dose
-is minimised. If the  prescribed tumor dose can not be reached,
+is minimised. If the prescribed tumor dose cannot be reached,
 while staying below maximum BED, the tumor dose is maximised.
 """
 
@@ -80,12 +80,6 @@ def value_eval(
     Returns
     -------
     list
-        list with following arrays/values:
-        physical_dose: optimal physical dose for actual fraction
-        accumulated_tumor_dose: accumulated tumor BED
-        accumulated_OAR_dose: accumulated OAR BED
-        tumor_dose: tumor BED to be delivered
-        OAR_dose: OAR BED to be delivered
 
     """
 
