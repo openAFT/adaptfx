@@ -87,9 +87,9 @@ def value_eval(
     sf = sf[prob > 0.00001]  # get rid of all probabilities below 10^-5
     prob = prob[prob > 0.00001]
 
-    BEDT = BEDT = np.arange(accumulated_oar_dose, oar_limit + 1.6, 1)
-    Values = np.zeros(
-        ((number_of_fractions - fraction), len(BEDT), len(sf))
+    bedt = np.arange(accumulated_oar_dose, oar_limit + 1.6, 1)
+    values = np.zeros(
+        ((number_of_fractions - fraction), len(bedt), len(sf))
     )  # 2d values list with first indice being the BED and second being the sf
     if (
         max_dose > 22.3
@@ -98,14 +98,14 @@ def value_eval(
     if min_dose > max_dose:
         min_dose = max_dose - 0.1
     actionspace = np.arange(min_dose, max_dose + 0.1, 0.1)
-    policy = np.zeros(((number_of_fractions - fraction), len(BEDT), len(sf)))
+    policy = np.zeros(((number_of_fractions - fraction), len(bedt), len(sf)))
     upperbound = oar_limit + 1
 
     delivered_doses = BED_calc_matrix(sf, abn, actionspace)
-    BEDT_rew = BED_calc_matrix(
+    bedt_reward = BED_calc_matrix(
         1, abt, actionspace
     )  # this is the reward for the dose deposited inside the tumor.
-    BEDT_transformed, meaningless = np.meshgrid(BEDT_rew, np.zeros(len(sf)))
+    bedt_transformed, meaningless = np.meshgrid(bedt_reward, np.zeros(len(sf)))
 
     for index, frac_state in enumerate(
         np.arange(fraction, number_of_fractions + 1)
@@ -117,7 +117,7 @@ def value_eval(
             future_bed[
                 future_bed > oar_limit
             ] = upperbound  # any dose surpassing the upper bound will be set to the upper bound which will be penalised strongly
-            value_interpolation = interp2d(sf, BEDT, Values[index - 1])
+            value_interpolation = interp2d(sf, bedt, values[index - 1])
             future_value = np.zeros(len(sf) * len(actionspace) * len(sf)).reshape(
                 len(sf), len(actionspace), len(sf)
             )
@@ -132,10 +132,10 @@ def value_eval(
             ] = (
                 -1000
             )  # penalising in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
-            Vs = future_values_prob + BEDT_transformed + penalties
+            vs = future_values_prob + bedt_transformed + penalties
 
-            actual_policy = Vs.argmax(axis=1)
-            actual_value = Vs.max(axis=1)
+            actual_policy = vs.argmax(axis=1)
+            actual_value = vs.max(axis=1)
 
         else:
             if (
@@ -151,7 +151,7 @@ def value_eval(
                         future_bed > oar_limit
                     ] = upperbound  # any dose surpassing the upper bound will be set to the upper bound which will be penalised strongly
                     value_interpolation = interp2d(
-                        sf, BEDT, Values[index - 1]
+                        sf, bedt, values[index - 1]
                     )
                     future_value = np.zeros(
                         len(sf) * len(actionspace) * len(sf)
@@ -169,14 +169,14 @@ def value_eval(
                     ] = (
                         -1000
                     )  # penalising in each fraction is needed. If not, once the algorithm reached the upper bound, it would just deliver maximum dose over and over again
-                    Vs = (
+                    vs = (
                         future_values_prob
-                        + BEDT_transformed
+                        + bedt_transformed
                         + penalties
                         + penalties_overdose
                     )
-                    actual_policy = Vs.argmax(axis=1)
-                    actual_value = Vs.max(axis=1)
+                    actual_policy = vs.argmax(axis=1)
+                    actual_value = vs.max(axis=1)
                 else:
                     best_action = convert_to_physical(oar_limit-accumulated_oar_dose, abn, sf)
                     if accumulated_oar_dose > oar_limit:
@@ -189,7 +189,7 @@ def value_eval(
                     )  # we do not need to penalise, as this value is not relevant.
             else:
                 for bed_index, bed_value in enumerate(
-                    BEDT
+                    bedt
                 ):  # this and the next for loop allow us to loop through all states
                     future_bed = delivered_doses + bed_value
                     overdosing = (future_bed - oar_limit).clip(min=0)
@@ -211,7 +211,7 @@ def value_eval(
                         penalties = np.zeros(future_bed.shape)
                         if bed_value < oar_limit:
                             penalties[future_bed == upperbound] = -1000
-                        Values[index][bed_index] = (
+                        values[index][bed_index] = (
                             BED_calc0(best_action, abt) + penalties + penalties_overdose
                         )
                         policy[index][bed_index] = (best_action - min_dose) * 10
@@ -222,7 +222,7 @@ def value_eval(
                             overdosing * -1000
                         )  # additional penalty when overdosing is needed when choosing a minimum dose to be delivered
                         value_interpolation = interp2d(
-                            sf, BEDT, Values[index - 1]
+                            sf, bedt, values[index - 1]
                         )
                         future_value = np.zeros((len(sf), len(actionspace), len(sf)))
                         for actual_sf in range(0, len(sf)):
@@ -230,16 +230,16 @@ def value_eval(
                                 sf, future_bed[actual_sf]
                             )
                         future_values_prob = (future_value * prob).sum(axis=2)
-                        Vs = (
+                        vs = (
                             future_values_prob
-                            + BEDT_transformed
+                            + bedt_transformed
                             + penalties
                             + penalties_overdose
                         )
-                        best_action = Vs.argmax(axis=1)
-                        valer = Vs.max(axis=1)
+                        best_action = vs.argmax(axis=1)
+                        valer = vs.max(axis=1)
                         policy[index][bed_index] = best_action
-                        Values[index][bed_index] = valer
+                        values[index][bed_index] = valer
     index_sf = argfind(sf, actual_sparing)
     if fraction != number_of_fractions:
         dose_delivered_tumor = BED_calc0(actionspace[actual_policy[index_sf]], abt)

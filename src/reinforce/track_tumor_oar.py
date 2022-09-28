@@ -97,12 +97,12 @@ def value_eval(
     sf = sf[prob > 0.00001]  # get rid of all probabilities below 10^-5
     prob = prob[prob > 0.00001]
     underdosepenalty = 10
-    BEDT = np.arange(accumulated_tumor_dose, tumor_goal, 1)  # tumordose
-    BEDNT = np.arange(accumulated_oar_dose, oar_limit, 1)  # OAR dose
-    BEDNT = np.concatenate((BEDNT, [oar_limit, oar_limit + 1]))
-    BEDT = np.concatenate((BEDT, [tumor_goal, tumor_goal + 1]))
-    Values = np.zeros(
-        [(number_of_fractions - fraction), len(BEDT), len(BEDNT), len(sf)]
+    bedt = np.arange(accumulated_tumor_dose, tumor_goal, 1)  # tumordose
+    bednt = np.arange(accumulated_oar_dose, oar_limit, 1)  # OAR dose
+    bednt = np.concatenate((bednt, [oar_limit, oar_limit + 1]))
+    bedt = np.concatenate((bedt, [tumor_goal, tumor_goal + 1]))
+    values = np.zeros(
+        [(number_of_fractions - fraction), len(bedt), len(bednt), len(sf)]
     )  # 2d values list with first indice being the BED and second being the sf
     max_physical_dose = convert_to_physical(tumor_goal, abt)
     if max_dose > max_physical_dose:  
@@ -112,7 +112,7 @@ def value_eval(
         min_dose = max_dose - 0.1
     actionspace = np.arange(min_dose, max_dose + 0.1, 0.1)
     policy = np.zeros(
-        ((number_of_fractions - fraction), len(BEDT), len(BEDNT), len(sf))
+        ((number_of_fractions - fraction), len(bedt), len(bednt), len(sf))
     )
     upperbound_normal_tissue = oar_limit + 1
     upperbound_tumor = tumor_goal + 1
@@ -138,17 +138,17 @@ def value_eval(
                 future_oar > oar_limit
             ] = upperbound_normal_tissue  # any dose surpassing the upper bound will be set to the upper bound which will be penalised strongly
             future_tumor[future_tumor > tumor_goal] = upperbound_tumor
-            future_values_prob = (Values[index - 1] * prob).sum(
+            future_values_prob = (values[index - 1] * prob).sum(
                 axis=2
             )  # future values of tumor and oar state
             value_interpolation = RegularGridInterpolator(
-                (BEDT, BEDNT), future_values_prob
+                (bedt, bednt), future_values_prob
             )
             future_value_actual = value_interpolation(
                 np.array([future_tumor, future_oar]).T
             )
-            Vs = future_value_actual - oar_dose[actual_fraction_sf]
-            actual_policy = Vs.argmax(axis=0)
+            vs = future_value_actual - oar_dose[actual_fraction_sf]
+            actual_policy = vs.argmax(axis=0)
 
         elif (
             frac_state == fraction
@@ -161,11 +161,11 @@ def value_eval(
                 ] = upperbound_normal_tissue  # any dose surpassing the upper bound will be set to the upper bound which will be penalised strongly
                 future_tumor = accumulated_tumor_dose + tumor_dose
                 future_tumor[future_tumor > tumor_goal] = upperbound_tumor
-                future_values_prob = (Values[index - 1] * prob).sum(
+                future_values_prob = (values[index - 1] * prob).sum(
                     axis=2
                 )  # future values of tumor and oar state
                 value_interpolation = RegularGridInterpolator(
-                    (BEDT, BEDNT), future_values_prob
+                    (bedt, bednt), future_values_prob
                 )
                 penalties = (
                     overdosing * -10000000000
@@ -173,13 +173,13 @@ def value_eval(
                 future_value_actual = value_interpolation(
                     np.array([future_tumor, future_oar]).T
                 )
-                Vs = future_value_actual - oar_dose[actual_fraction_sf] + penalties
-                actual_policy = Vs.argmax(axis=0)
+                vs = future_value_actual - oar_dose[actual_fraction_sf] + penalties
+                actual_policy = vs.argmax(axis=0)
             else:
                 sf_end = sparing_factors[-1]
-                best_action_BED = convert_to_physical(oar_limit-accumulated_oar_dose, abn, sf_end)
+                best_action_oar = convert_to_physical(oar_limit-accumulated_oar_dose, abn, sf_end)
                 best_action_tumor = convert_to_physical(tumor_goal-accumulated_tumor_dose, abt)
-                best_action = np.min([best_action_BED, best_action_tumor], axis=0)
+                best_action = np.min([best_action_oar, best_action_tumor], axis=0)
                 if accumulated_oar_dose > oar_limit or accumulated_tumor_dose > tumor_goal:
                     best_action = np.ones(best_action.shape) * min_dose
                 if best_action > max_dose:
@@ -191,15 +191,15 @@ def value_eval(
                 future_oar = accumulated_oar_dose + BED_calc0(best_action, abn, sf_end)
                 actual_policy = best_action * 10
         else:
-            future_values_prob = (Values[index - 1] * prob).sum(
+            future_values_prob = (values[index - 1] * prob).sum(
                 axis=2
             )  # future values of tumor and oar state
             value_interpolation = RegularGridInterpolator(
-                (BEDT, BEDNT), future_values_prob
+                (bedt, bednt), future_values_prob
             )  # interpolation function
-            for tumor_index, tumor_value in enumerate(BEDT):
+            for tumor_index, tumor_value in enumerate(bedt):
                 for oar_index, oar_value in enumerate(
-                    BEDNT
+                    bednt
                 ):  # this and the next for loop allow us to loop through all states
                     future_oar = oar_dose + oar_value
                     overdosing = (future_oar - oar_limit).clip(min=0)
@@ -214,11 +214,11 @@ def value_eval(
                     if (
                         frac_state == number_of_fractions
                     ):  # last state no more further values to add
-                        best_action_BED = convert_to_physical(oar_limit-oar_value, abn, sf) 
+                        best_action_oar = convert_to_physical(oar_limit-oar_value, abn, sf) 
                         # calculate maximal dose that can be delivered to OAR and tumor
                         best_action_tumor = convert_to_physical(tumor_goal-tumor_value, abt, sf*0+1)
                         best_action = np.min(
-                            [best_action_BED, best_action_tumor], axis=0
+                            [best_action_oar, best_action_tumor], axis=0
                         )  # take the smaller of both doses to not surpass the limit
                         best_action[best_action > max_dose] = max_dose
                         best_action[best_action < min_dose] = min_dose
@@ -246,7 +246,7 @@ def value_eval(
                         end_penalty_oar = (
                             -(future_oar - oar_limit).clip(min=0) * 1000
                         )  # if overdosing the OAR is not preventable, the overdosing should stay as low as possible
-                        Values[index][tumor_index][oar_index] = (
+                        values[index][tumor_index][oar_index] = (
                             end_penalty
                             - BED_calc0(best_action, abn, sf)
                             + overdose_penalty2
@@ -263,11 +263,11 @@ def value_eval(
                         penalties = (
                             overdosing * -10000000000
                         )  # additional penalty when overdosing is needed when choosing a minimum dose to be delivered
-                        Vs = future_value - oar_dose + penalties
-                        best_action = Vs.argmax(axis=1)
-                        valer = Vs.max(axis=1)
+                        vs = future_value - oar_dose + penalties
+                        best_action = vs.argmax(axis=1)
+                        valer = vs.max(axis=1)
                         policy[index][tumor_index][oar_index] = best_action
-                        Values[index][tumor_index][oar_index] = valer
+                        values[index][tumor_index][oar_index] = valer
     if fraction != number_of_fractions:
         physical_dose = actionspace[actual_policy]
     else:
