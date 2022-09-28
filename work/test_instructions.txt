@@ -14,7 +14,7 @@
 	'fixed_mean': 0.9,
 	'fixed_std': 0.04,
 	'tumor_goal': 72,
-	'OAR_limit': 90,
+	'oar_limit': 90,
 	'C': 0.8,
 	}
 }

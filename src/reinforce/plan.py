@@ -46,7 +46,7 @@ def multiple(algorithm, params):
 
     Specific Parameters
     ----------
-    OAR_limit : float
+    oar_limit : float
         upper BED limit of OAR
     tumor_goal : float
         prescribed tumor BED.
@@ -64,7 +64,7 @@ def multiple(algorithm, params):
     alpha=params['alpha']
     beta=params['beta']
     tumor_goal=params['tumor_goal']
-    OAR_limit=params['OAR_limit']
+    oar_limit=params['oar_limit']
     C=params['C']
     abt=params['abt']
     abn=params['abn']
@@ -75,10 +75,10 @@ def multiple(algorithm, params):
     fixed_std=params['fixed_std']
 
     accumulated_tumor_dose = 0
-    accumulated_OAR_dose = 0
+    accumulated_oar_dose = 0
     physical_doses = np.zeros(number_of_fractions)
     tumor_doses = np.zeros(number_of_fractions)
-    OAR_doses = np.zeros(number_of_fractions)
+    oar_doses = np.zeros(number_of_fractions)
 
     # if algorithm == 'frac':
     #     policy_list = []
@@ -90,7 +90,7 @@ def multiple(algorithm, params):
             [
                 physical_dose,
                 tumor_dose,
-                OAR_dose
+                oar_dose
             ] = oar.value_eval(
                 looper + 1,
                 number_of_fractions,
@@ -111,15 +111,15 @@ def multiple(algorithm, params):
             [
                 physical_dose,
                 tumor_dose,
-                OAR_dose,
+                oar_dose,
             ] = tumor.value_eval(
                 looper + 1,
                 number_of_fractions,
-                accumulated_OAR_dose,
+                accumulated_oar_dose,
                 sparing_factors[: looper + 2],
                 alpha,
                 beta,
-                OAR_limit,
+                oar_limit,
                 abt,
                 abn,
                 min_dose,
@@ -132,7 +132,7 @@ def multiple(algorithm, params):
             [
                 physical_dose,
                 tumor_dose,
-                OAR_dose
+                oar_dose
             ] = frac.value_eval(
                 looper + 1,
                 number_of_fractions,
@@ -158,14 +158,14 @@ def multiple(algorithm, params):
             [
                 physical_dose,
                 tumor_dose,
-                OAR_dose
+                oar_dose
             ] = tumor_oar.value_eval(
                 looper + 1,
                 number_of_fractions,
-                accumulated_OAR_dose,
+                accumulated_oar_dose,
                 accumulated_tumor_dose,
                 sparing_factors[0 : looper + 2],
-                OAR_limit,
+                oar_limit,
                 tumor_goal,
                 alpha,
                 beta,
@@ -179,15 +179,15 @@ def multiple(algorithm, params):
             )
 
         accumulated_tumor_dose += tumor_dose
-        accumulated_OAR_dose += OAR_dose
+        accumulated_oar_dose += oar_dose
         physical_doses[looper] = physical_dose
         tumor_doses[looper] = tumor_dose
-        OAR_doses[looper] = OAR_dose
+        oar_doses[looper] = oar_dose
 
     return [
-                accumulated_OAR_dose,
+                accumulated_oar_dose,
                 accumulated_tumor_dose,
                 np.array((physical_doses,
                 tumor_doses,
-                OAR_doses))
+                oar_doses))
             ]

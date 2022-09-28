@@ -116,7 +116,7 @@ params = {
             'fixed_mean': 0.9,
             'fixed_std': 0.04,
             'tumor_goal': 72,
-            'OAR_limit': None,
+            'oar_limit': None,
             'C': None,
             'alpha': None,
             'beta': None,

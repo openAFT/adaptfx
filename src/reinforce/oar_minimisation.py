@@ -203,6 +203,6 @@ def value_eval(
     if fraction == number_of_fractions:
         physical_dose = policy4 / 10
     tumor_dose = BED_calc0(physical_dose, abt)
-    OAR_dose = BED_calc0(physical_dose, abn, sparing_factors[-1])
-    return [physical_dose, tumor_dose, OAR_dose]
-    #return [physical_dose, tumor_dose, OAR_dose, policy, sf, BEDT]
+    oar_dose = BED_calc0(physical_dose, abn, sparing_factors[-1])
+    return [physical_dose, tumor_dose, oar_dose]
+    #return [physical_dose, tumor_dose, oar_dose, policy, sf, BEDT]
