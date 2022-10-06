@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import click
-import numpy as np
+import argparse
 import common.constants as C
 import reinforce.plan as plan
 import handler.messages as m
@@ -9,6 +8,10 @@ import handler.aft_utils as utils
 nme = __name__
 
 class RL_object():
+    """
+    Reinforcement Learning class to check instructions and invoke
+    parameters from file
+    """
     def __init__(self, instruction_filename):
         try: # check if file can be opened
             m.aft_message('', nme, 1)
@@ -74,28 +77,37 @@ class RL_object():
 
         return doses
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.command(context_settings=CONTEXT_SETTINGS)
-@click.argument('instruction_filename')
-@click.option('--gui', '-g', default=False,
-        help='Provide Graphic User Interface for planning')
-
-def main(instruction_filename, gui):
-    '''
-    \b
-    Calculate optimal dose per fraction dependent on algorithm type
-
-    \b
-    <instruction_filename>   : input instruction filename
-    '''
+def main():
+    """
+    CLI interface to invoke the RL class
+    """
     start = utils.timing()
-    rl_test = RL_object(instruction_filename)
+    parser = argparse.ArgumentParser(
+        description='Calculate optimal dose per fraction dependent on algorithm type'
+    )
+    parser.add_argument(
+        '-f',
+        '--filename',
+        metavar='',
+        help='input instruction filename of dictionary',
+        default=None,
+        type=str
+    )
+    parser.add_argument(
+        '-g',
+        '--gui',
+        metavar='',
+        help='Provide Graphic User Interface for planning - NOT YET AVAILABLE',
+        default=False,
+        type=bool
+    )
+    args = parser.parse_args()
+    rl_test = RL_object(args.filename)
     m.aft_message('start session...', nme, 1)
     m.aft_message_list('fractionation plan:', rl_test.optimise(), nme, 1)
     utils.timing(start)
     m.aft_message('close session...', nme, 1)
 
-    
 
 if __name__ == '__main__':
     main()
