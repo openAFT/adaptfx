@@ -87,9 +87,9 @@ def value_eval(
     sf = sf[prob > 0.00001]  # get rid of all probabilities below 10^-5
     prob = prob[prob > 0.00001]
 
-    bedt = np.arange(accumulated_oar_dose, oar_limit + 1.6, 1)
+    bedn = np.arange(accumulated_oar_dose, oar_limit + 1.6, 1)
     values = np.zeros(
-        ((number_of_fractions - fraction), len(bedt), len(sf))
+        ((number_of_fractions - fraction), len(bedn), len(sf))
     )  # 2d values list with first indice being the BED and second being the sf
     if (
         max_dose > 22.3
@@ -98,7 +98,7 @@ def value_eval(
     if min_dose > max_dose:
         min_dose = max_dose - 0.1
     actionspace = np.arange(min_dose, max_dose + 0.1, 0.1)
-    policy = np.zeros(((number_of_fractions - fraction), len(bedt), len(sf)))
+    policy = np.zeros(((number_of_fractions - fraction), len(bedn), len(sf)))
     upperbound = oar_limit + 1
 
     delivered_doses = BED_calc_matrix(sf, abn, actionspace)
@@ -117,7 +117,7 @@ def value_eval(
             future_bed[
                 future_bed > oar_limit
             ] = upperbound  # any dose surpassing the upper bound will be set to the upper bound which will be penalised strongly
-            value_interpolation = interp2d(sf, bedt, values[index - 1])
+            value_interpolation = interp2d(sf, bedn, values[index - 1])
             future_value = np.zeros(len(sf) * len(actionspace) * len(sf)).reshape(
                 len(sf), len(actionspace), len(sf)
             )
@@ -151,7 +151,7 @@ def value_eval(
                         future_bed > oar_limit
                     ] = upperbound  # any dose surpassing the upper bound will be set to the upper bound which will be penalised strongly
                     value_interpolation = interp2d(
-                        sf, bedt, values[index - 1]
+                        sf, bedn, values[index - 1]
                     )
                     future_value = np.zeros(
                         len(sf) * len(actionspace) * len(sf)
@@ -189,7 +189,7 @@ def value_eval(
                     )  # we do not need to penalise, as this value is not relevant.
             else:
                 for bed_index, bed_value in enumerate(
-                    bedt
+                    bedn
                 ):  # this and the next for loop allow us to loop through all states
                     future_bed = delivered_doses + bed_value
                     overdosing = (future_bed - oar_limit).clip(min=0)
@@ -222,7 +222,7 @@ def value_eval(
                             overdosing * -1000
                         )  # additional penalty when overdosing is needed when choosing a minimum dose to be delivered
                         value_interpolation = interp2d(
-                            sf, bedt, values[index - 1]
+                            sf, bedn, values[index - 1]
                         )
                         future_value = np.zeros((len(sf), len(actionspace), len(sf)))
                         for actual_sf in range(0, len(sf)):
