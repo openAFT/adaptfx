@@ -98,11 +98,11 @@ def value_eval(
     prob = prob[prob > 0.00001]
     underdosepenalty = 10
     bedt = np.arange(accumulated_tumor_dose, tumor_goal, 1)  # tumordose
-    bednt = np.arange(accumulated_oar_dose, oar_limit, 1)  # OAR dose
-    bednt = np.concatenate((bednt, [oar_limit, oar_limit + 1]))
+    bedn = np.arange(accumulated_oar_dose, oar_limit, 1)  # OAR dose
+    bedn = np.concatenate((bedn, [oar_limit, oar_limit + 1]))
     bedt = np.concatenate((bedt, [tumor_goal, tumor_goal + 1]))
     values = np.zeros(
-        [(number_of_fractions - fraction), len(bedt), len(bednt), len(sf)]
+        [(number_of_fractions - fraction), len(bedt), len(bedn), len(sf)]
     )  # 2d values list with first indice being the BED and second being the sf
     max_physical_dose = convert_to_physical(tumor_goal, abt)
     if max_dose > max_physical_dose:  
@@ -112,7 +112,7 @@ def value_eval(
         min_dose = max_dose - 0.1
     actionspace = np.arange(min_dose, max_dose + 0.1, 0.1)
     policy = np.zeros(
-        ((number_of_fractions - fraction), len(bedt), len(bednt), len(sf))
+        ((number_of_fractions - fraction), len(bedt), len(bedn), len(sf))
     )
     upperbound_normal_tissue = oar_limit + 1
     upperbound_tumor = tumor_goal + 1
@@ -142,7 +142,7 @@ def value_eval(
                 axis=2
             )  # future values of tumor and oar state
             value_interpolation = RegularGridInterpolator(
-                (bedt, bednt), future_values_prob
+                (bedt, bedn), future_values_prob
             )
             future_value_actual = value_interpolation(
                 np.array([future_tumor, future_oar]).T
@@ -165,7 +165,7 @@ def value_eval(
                     axis=2
                 )  # future values of tumor and oar state
                 value_interpolation = RegularGridInterpolator(
-                    (bedt, bednt), future_values_prob
+                    (bedt, bedn), future_values_prob
                 )
                 penalties = (
                     overdosing * -10000000000
@@ -195,11 +195,11 @@ def value_eval(
                 axis=2
             )  # future values of tumor and oar state
             value_interpolation = RegularGridInterpolator(
-                (bedt, bednt), future_values_prob
+                (bedt, bedn), future_values_prob
             )  # interpolation function
             for tumor_index, tumor_value in enumerate(bedt):
                 for oar_index, oar_value in enumerate(
-                    bednt
+                    bedn
                 ):  # this and the next for loop allow us to loop through all states
                     future_oar = oar_dose + oar_value
                     overdosing = (future_oar - oar_limit).clip(min=0)
