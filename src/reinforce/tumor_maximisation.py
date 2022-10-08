@@ -91,10 +91,10 @@ def value_eval(
     values = np.zeros(
         ((number_of_fractions - fraction), len(bedn), len(sf))
     )  # 2d values list with first indice being the BED and second being the sf
-    if (
-        max_dose > 22.3
-    ):  # if the chosen maximum dose is too large, it gets reduced. So the algorithm doesn't needlessly check too many actions
-        max_dose = 22.3
+    max_physical_dose = convert_to_physical(oar_limit, abn, actual_sparing)
+    if max_dose > max_physical_dose:
+        # if the chosen maximum dose is too large, it gets reduced. So the algorithm doesn't needlessly check too many actions
+        max_dose = max_physical_dose
     if min_dose > max_dose:
         min_dose = max_dose - 0.1
     actionspace = np.arange(min_dose, max_dose + 0.1, 0.1)
