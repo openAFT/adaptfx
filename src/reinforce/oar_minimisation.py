@@ -94,7 +94,9 @@ def value_eval(
         (number_of_fractions - fraction, len(bedt), len(sf))
     )  # 2d values list with first indice being the BED and second being the sf
     max_physical_dose = convert_to_physical(tumor_goal, abt)
-    if max_dose > max_physical_dose:
+    if max_dose == -1:
+        max_dose = max_physical_dose
+    elif max_dose > max_physical_dose:
         # if the max dose is too large we lower it, so we dont needlessly check too many actions
         max_dose = max_physical_dose
     if min_dose > max_dose:
@@ -104,9 +106,8 @@ def value_eval(
     policy = np.zeros((number_of_fractions - fraction, len(bedt), len(sf)))
 
     for state, fraction_state in enumerate(
-        np.arange(number_of_fractions + 1, fraction, -1)
+        np.arange(number_of_fractions, fraction - 1, -1)
     ):  # We have five fractionations with 2 special cases 0 and 4
-        fraction_state = fraction_state - 1
         if (
             state == number_of_fractions - 1
         ):  # first state with no prior dose delivered so we dont loop through BEDT
