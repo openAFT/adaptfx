@@ -92,10 +92,9 @@ def value_eval(
         else: 
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
             future_values_func = interp1d(bedt, future_values_discrete)
-            for bedt_index, bedt_dose in enumerate(bedt):
-                bedn_space = BED_calc_matrix(sf,abn,actionspace)
-                bedt_space = BED_calc_matrix(np.ones(n_sf),abt,actionspace)
-                
+            bedn_space = BED_calc_matrix(sf,abn,actionspace)
+            bedt_space = BED_calc_matrix(np.ones(n_sf),abt,actionspace)
+            for bedt_index, bedt_dose in enumerate(bedt):                
                 future_bedt = bedt_space + bedt_dose
                 future_bedt[future_bedt > tumor_goal] = tumor_limit
                 future_values = future_values_func(future_bedt)
