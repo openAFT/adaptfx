@@ -1,10 +1,16 @@
 DOSE_STEP_SIZE = 0.1
-SF_STEP_SIZE = 0.01
+SF_STEPSIZE = 0.01
+SF_LOW = 0 + SF_STEPSIZE
+SF_HIGH = 1.7 + SF_STEPSIZE
+SF_PROB = 0.001
 INF_PENALTY = 1e4
+
+# keys
 ALPHA_BETA_TUMOR = 10
 ALPHA_BETA_OAR = 3
 MIN_DOSE = 0
-MAX_DOSE = 22.3
+MAX_DOSE = -1
+FIXED_PROB = 0
 
 FULL_DICT = {'number_of_fractions':None,
         'sparing_factors':None,
@@ -17,9 +23,9 @@ FULL_DICT = {'number_of_fractions':None,
         'abn':ALPHA_BETA_OAR,
         'min_dose':MIN_DOSE,
         'max_dose':MAX_DOSE,
-        'fixed_prob':0,
-        'fixed_mean':0,
-        'fixed_std':0,
+        'fixed_prob':FIXED_PROB,
+        'fixed_mean':None,
+        'fixed_std':None,
 }
 
 OAR_LIST = ['number_of_fractions',
