@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 
-def BED_calc0(dose, ab, sparing=1):
+def bed_calc0(dose, ab, sf=1):
     """
     calculates the BED for a specific dose
 
@@ -10,7 +11,7 @@ def BED_calc0(dose, ab, sparing=1):
         physical dose to be delivered.
     ab : float
         alpha-beta ratio of tissue.
-    sparing : float, optional
+    sf : float, optional
         sparing factor. The default is 1 (tumor).
 
     Returns
@@ -20,22 +21,22 @@ def BED_calc0(dose, ab, sparing=1):
         and alpha-beta ratio.
 
     """
-    BED = sparing * dose * (1 + (sparing * dose) / ab)
+    BED = sf * dose * (1 + (sf * dose) / ab)
     return BED
 
 
-def BED_calc_matrix(sf, ab, actionspace):
+def bed_calc_matrix(actionspace, ab, sf):
     """
     calculates the BED for an array of values
 
     Parameters
     ----------
-    sf : list/array
-        list of sparing factors to calculate the correspondent BED.
-    ab : float
-        alpha-beta ratio of tissue.
     actionspace : list/array
         doses to be delivered.
+    ab : float
+        alpha-beta ratio of tissue.
+    sf : list/array
+        list of sparing factors to calculate the correspondent BED.
 
     Returns
     -------
@@ -44,9 +45,9 @@ def BED_calc_matrix(sf, ab, actionspace):
         and sparing factors.
 
     """
-    BED = np.outer(sf, actionspace) * (
-        1 + np.outer(sf, actionspace) / ab
-    )  # produces a sparing factors x actions space array
+    BED = np.outer(actionspace, sf) * (
+        1 + np.outer(actionspace, sf) / ab
+    )  # produces a actions space x sparing factor array
     return BED
 
 
@@ -122,9 +123,8 @@ def convert_to_physical(bed, ab, sf=1):
     dose : positive values float/array
         physical dose
     """
-    if bed > 0:
-        dose = (-sf + np.sqrt(sf**2 + 4 * sf**2 * bed / ab)) / (
-            2 * sf**2 / ab)
-    else:
-        dose = np.zeros(np.shape(sf))
-    return dose
+    bed_array = np.array(bed)
+    bed_array[bed_array < 0] = 0
+    physical_dose = (-sf + np.sqrt(sf**2 + 4 * sf**2 * bed_array / ab)) / (
+        2 * sf**2 / ab)
+    return physical_dose

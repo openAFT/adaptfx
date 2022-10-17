@@ -5,10 +5,10 @@ treatment plan (when all sparing factors are known).
 """
 
 import numpy as np
-import reinforce.fraction_minimisation as frac
-import reinforce.oar_minimisation as oar
-import reinforce.tumor_maximisation as tumor
-import reinforce.track_tumor_oar as tumor_oar
+import fraction_minimisation as frac
+import oar_minimisation as oar
+# import tumor_maximisation as tumor
+# import track_tumor_oar as tumor_oar
 
 def multiple(algorithm, params):
     """
@@ -107,76 +107,76 @@ def multiple(algorithm, params):
                 fixed_mean,
                 fixed_std,
             )
-        elif algorithm == 'tumor':
-            [
-                physical_dose,
-                tumor_dose,
-                oar_dose,
-            ] = tumor.value_eval(
-                looper + 1,
-                number_of_fractions,
-                accumulated_oar_dose,
-                sparing_factors[: looper + 2],
-                alpha,
-                beta,
-                oar_limit,
-                abt,
-                abn,
-                min_dose,
-                max_dose,
-                fixed_prob,
-                fixed_mean,
-                fixed_std,
-            )
-        elif algorithm == 'frac':
-            [
-                physical_dose,
-                tumor_dose,
-                oar_dose
-            ] = frac.value_eval(
-                looper + 1,
-                number_of_fractions,
-                accumulated_tumor_dose,
-                sparing_factors[0 : looper + 2],
-                alpha,
-                beta,
-                tumor_goal,
-                abt,
-                abn,
-                C,
-                min_dose,
-                max_dose,
-                fixed_prob,
-                fixed_mean,
-                fixed_std,
-            )
-            # policy_list.append(policy)
-            # BEDT_list.append(BEDT)
-            # sf_list.append(sf)
+        # elif algorithm == 'tumor':
+        #     [
+        #         physical_dose,
+        #         tumor_dose,
+        #         oar_dose,
+        #     ] = tumor.value_eval(
+        #         looper + 1,
+        #         number_of_fractions,
+        #         accumulated_oar_dose,
+        #         sparing_factors[: looper + 2],
+        #         alpha,
+        #         beta,
+        #         oar_limit,
+        #         abt,
+        #         abn,
+        #         min_dose,
+        #         max_dose,
+        #         fixed_prob,
+        #         fixed_mean,
+        #         fixed_std,
+        #     )
+        # elif algorithm == 'frac':
+        #     [
+        #         physical_dose,
+        #         tumor_dose,
+        #         oar_dose
+        #     ] = frac.value_eval(
+        #         looper + 1,
+        #         number_of_fractions,
+        #         accumulated_tumor_dose,
+        #         sparing_factors[0 : looper + 2],
+        #         alpha,
+        #         beta,
+        #         tumor_goal,
+        #         abt,
+        #         abn,
+        #         C,
+        #         min_dose,
+        #         max_dose,
+        #         fixed_prob,
+        #         fixed_mean,
+        #         fixed_std,
+        #     )
+        #     # policy_list.append(policy)
+        #     # BEDT_list.append(BEDT)
+        #     # sf_list.append(sf)
 
-        elif algorithm == 'tumor_oar':
-            [
-                physical_dose,
-                tumor_dose,
-                oar_dose
-            ] = tumor_oar.value_eval(
-                looper + 1,
-                number_of_fractions,
-                accumulated_oar_dose,
-                accumulated_tumor_dose,
-                sparing_factors[0 : looper + 2],
-                oar_limit,
-                tumor_goal,
-                alpha,
-                beta,
-                abt,
-                abn,
-                min_dose,
-                max_dose,
-                fixed_prob,
-                fixed_mean,
-                fixed_std,
-            )
+        # elif algorithm == 'tumor_oar':
+        #     [
+        #         physical_dose,
+        #         tumor_dose,
+        #         oar_dose
+        #     ] = tumor_oar.value_eval(
+        #         looper + 1,
+        #         number_of_fractions,
+        #         accumulated_oar_dose,
+        #         accumulated_tumor_dose,
+        #         sparing_factors[0 : looper + 2],
+        #         oar_limit,
+        #         tumor_goal,
+        #         alpha,
+        #         beta,
+        #         abt,
+        #         abn,
+        #         min_dose,
+        #         max_dose,
+        #         fixed_prob,
+        #         fixed_mean,
+        #         fixed_std,
+        #     )
 
         accumulated_tumor_dose += tumor_dose
         accumulated_oar_dose += oar_dose

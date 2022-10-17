@@ -1,7 +1,7 @@
 # test file for whole plan with fraction number minimisation
 
 {
-'algorithm': 'frac',
+'algorithm': 'oar',
 'debug': 1,
 'log': 0,
 'parameters': 

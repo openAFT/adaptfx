@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 import time
-import handler.messages as m
+import aft_messages as m
 nme = __name__
 
 def timing(start=None):

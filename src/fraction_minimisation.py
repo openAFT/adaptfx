@@ -8,8 +8,8 @@ number of fractions used for the treatment.
 
 import numpy as np
 from scipy.interpolate import interp1d
-from common.maths import std_calc, get_truncated_normal, probdist
-from common.radiobiology import BED_calc_matrix, BED_calc0, max_action, convert_to_physical
+from maths import std_calc, get_truncated_normal, probdist
+from radiobiology import bed_calc_matrix, bed_calc0, max_action, convert_to_physical
 
 def value_eval(
     fraction,
@@ -113,10 +113,10 @@ def value_eval(
         if (
             state == number_of_fractions - 1 #fraction_state == 1
         ):  # first state with no prior dose delivered so we dont loop through BEDT
-            bedn = BED_calc_matrix(
+            bedn = bed_calc_matrix(
                 sparing_factors[-1], abn, actionspace
             )  # calculate all delivered doses to the Normal tissues (the penalty)
-            future_bedt = BED_calc0(actionspace, abt)
+            future_bedt = bed_calc0(actionspace, abt)
             future_values_func = interp1d(bedt, (values[state - 1] * prob).sum(axis=1))
             future_values = future_values_func(
                 future_bedt
@@ -129,7 +129,7 @@ def value_eval(
             accumulated_tumor_dose >= tumor_goal
         ):
             best_action = 0
-            last_BEDN = BED_calc0(best_action, abn, sparing_factors[-1])
+            last_BEDN = bed_calc0(best_action, abn, sparing_factors[-1])
             policy4 = 0
             break
         elif (
@@ -138,8 +138,8 @@ def value_eval(
             actionspace_clipped = actionspace[
                 0 : max_action(accumulated_tumor_dose, actionspace, tumor_goal) + 1
             ]
-            bedn = BED_calc_matrix(sparing_factors[-1], abn, actionspace_clipped)
-            future_bedt = accumulated_tumor_dose + BED_calc0(actionspace_clipped, abt)
+            bedn = bed_calc_matrix(sparing_factors[-1], abn, actionspace_clipped)
+            future_bedt = accumulated_tumor_dose + bed_calc0(actionspace_clipped, abt)
             future_bedt[future_bedt > tumor_goal] = tumor_goal + 1
             penalties = np.zeros(future_bedt.shape)
             c_penalties = np.zeros(future_bedt.shape)
@@ -161,7 +161,7 @@ def value_eval(
                 best_action = min_dose
             if best_action > max_dose:
                 best_action = max_dose
-            last_BEDN = BED_calc0(best_action, abn, sparing_factors[-1])
+            last_BEDN = bed_calc0(best_action, abn, sparing_factors[-1])
             policy4 = best_action * 10
         else:
             future_value_prob = (values[state - 1] * prob).sum(axis=1)
@@ -172,10 +172,10 @@ def value_eval(
                 actionspace_clipped = actionspace[
                     0 : max_action(tumor_value, actionspace, tumor_goal) + 1
                 ]  # we only allow the actions that do not overshoot
-                bedn = BED_calc_matrix(
+                bedn = bed_calc_matrix(
                     sf, abn, actionspace_clipped
                 )  # this one could be done outside of the loop and only the clipping would happen inside the loop.
-                bed = BED_calc_matrix(np.ones(len(sf)), abt, actionspace_clipped)
+                bed = bed_calc_matrix(np.ones(len(sf)), abt, actionspace_clipped)
                 if state != 0 and tumor_value < tumor_goal:
                     future_bedt = tumor_value + bed
                     future_bedt[future_bedt > tumor_goal] = tumor_goal + 1
@@ -203,8 +203,8 @@ def value_eval(
                         best_action = max_dose
                     if best_action < min_dose:
                         best_action = min_dose
-                    last_BEDN = BED_calc0(best_action, abn, sf)
-                    future_bedt = tumor_value + BED_calc0(best_action, abt)
+                    last_BEDN = bed_calc0(best_action, abn, sf)
+                    future_bedt = tumor_value + bed_calc0(best_action, abt)
                     underdose_penalty = 0
                     overdose_penalty = 0
                     if future_bedt < tumor_goal:
@@ -223,7 +223,7 @@ def value_eval(
         physical_dose = actionspace[policy4]
     if fraction == number_of_fractions:
         physical_dose = policy4 / 10
-    tumor_dose = BED_calc0(physical_dose, abt)
-    oar_dose = BED_calc0(physical_dose, abn, sparing_factors[-1])
+    tumor_dose = bed_calc0(physical_dose, abt)
+    oar_dose = bed_calc0(physical_dose, abn, sparing_factors[-1])
     return [physical_dose, tumor_dose, oar_dose]
     # return [physical_dose, tumor_dose, oar_dose, policy, sf, BEDT]

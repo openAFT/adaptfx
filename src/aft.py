@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-
 import argparse
-import common.constants as C
-import reinforce.plan as plan
-import handler.messages as m
-import handler.aft_utils as utils
+import constants as C
+import planning as plan
+import aft_messages as m
+import aft_utils as utils
 nme = __name__
 
 class RL_object():
