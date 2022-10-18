@@ -3,8 +3,8 @@ import numpy as np
 import constants as C
 from scipy.interpolate import interp1d
 from maths import (std_calc, 
-                   get_truncated_normal,
-                   probdist)
+                   truncated_normal,
+                   sf_probdist)
 from radiobiology import (bed_calc_matrix,
                           bed_calc0,
                           convert_to_physical)
@@ -27,13 +27,14 @@ def value_eval(
     sf_low=C.SF_LOW,
     sf_high=C.SF_HIGH,
     sf_stepsize=C.SF_STEPSIZE,
-    sf_prob=C.SF_PROB,
+    sf_prob_threshold=C.SF_PROB_THRESHOLD,
     inf_penalty=C.INF_PENALTY,
     dose_stepsize=C.DOSE_STEP_SIZE
 ):
     # ---------------------------------------------------------------------- #
     underdosage = 10 # sort this out!!!!
-
+    dose_stepsize = 5
+    sf_stepsize = 0.3
     # prepare distribution
     actual_sf = sparing_factors[-1]
     if not fixed_prob:
@@ -43,16 +44,15 @@ def value_eval(
     else:
         mean = fixed_mean
         std = fixed_std
-    X = get_truncated_normal(mean, std, 0, sf_high)
-    prob = np.array(probdist(X))
-    sf_all = np.arange(sf_low, sf_high, sf_stepsize)
-    # get rid of all probabilities below given threshold
-    sf = sf_all[prob > sf_prob]
+    # initialise normal distributed random variable
+    X = truncated_normal(mean, std, sf_low, sf_high)
+    sf, prob = sf_probdist(X, sf_low, sf_high, sf_stepsize, sf_prob_threshold)
     n_sf = len(sf)
 
     # actionspace
     max_physical_dose = convert_to_physical(tumor_goal, abt)
     if max_dose == -1:
+        # automatic max_dose calculation
         max_dose = max_physical_dose
     elif max_dose > max_physical_dose:
         # Reduce max_dose to prohibit tumor_goal overshoot
@@ -61,6 +61,7 @@ def value_eval(
     if min_dose > max_dose:
         min_dose = max_dose - dose_stepsize
     actionspace = np.arange(min_dose, max_dose + dose_stepsize, dose_stepsize)
+    n_action = len(actionspace)
 
     # tumor bed for tracking dose
     tumor_limit = tumor_goal + dose_stepsize
@@ -97,13 +98,13 @@ def value_eval(
             last_bedn = bed_calc_matrix(best_actions, abn, sf)
             last_bedt = bedt + bed_calc0(best_actions, abt, 1)
             penalties = (last_bedt - tumor_goal) * underdosage
-            penalties[penalties > 0] = inf_penalty
-
+            penalties[penalties > 0] = -inf_penalty
+            # to each best action add the according penalties
             vs = -last_bedn + penalties.reshape(n_bedt, 1)
-            
+
             values[fraction_index] = vs
             # policy calculation for each bedt, but sf is not considered
-            _, police = np.meshgrid(np.ones(n_sf), vs.argmax(axis=1))
+            _, police = np.meshgrid(np.ones(n_sf), best_actions)
             policy[fraction_index] = police
 
         elif fraction_index != 0:
@@ -114,15 +115,15 @@ def value_eval(
             bedt_space = bed_calc_matrix(actionspace, abt, np.ones(n_sf))
             for bedt_index, bedt_dose in enumerate(bedt): 
                 future_bedt = bedt_space + bedt_dose
-                future_bedt[future_bedt > tumor_goal] = tumor_limit
+                future_bedt[future_bedt > tumor_goal] = tumor_goal + 0.01
                 future_values = future_values_func(future_bedt)
-                penalties = np.zeros(n_sf)
-                penalties[future_bedt > tumor_goal] = inf_penalty
-
+                penalties = np.zeros((n_action, n_sf))
+                penalties[future_bedt > tumor_goal] = -inf_penalty
+                # to each action and sparing factor add future values and penalties
                 vs = -bedn_space + future_values + penalties
 
-                values[fraction_index][bedt_index] = vs.max(axis=1)
-                policy[fraction_index][bedt_index] = vs.argmax(axis=1)
+                values[fraction_index][bedt_index] = vs.max(axis=0)
+                policy[fraction_index][bedt_index] = vs.argmax(axis=0)
         
         else:
             print('error')
