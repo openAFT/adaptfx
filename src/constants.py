@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 DOSE_STEP_SIZE = 0.1
 SF_STEPSIZE = 0.01
-SF_LOW = 0 + SF_STEPSIZE
-SF_HIGH = 1.7 + SF_STEPSIZE
-SF_PROB = 1e-5
+SF_LOW = 0
+SF_HIGH = 1.7
+SF_PROB_THRESHOLD = 1e-5
 INF_PENALTY = 1e4
 
 # keys
