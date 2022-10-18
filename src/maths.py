@@ -11,43 +11,46 @@ def data_fit(data):
     ----------
     data : array
         a nxk matrix with n the amount of patients and k the amount
-        of sparing factors per patient.
+        of sparing factors per patient
 
     Returns
     -------
     list
-        alpha and beta hyperparameter.
+        alpha and beta hyperparameter
     """
     standard_devs = data.std(axis=1)
-    alpha, loc, beta = gamma.fit(standard_devs, floc=0)
+    alpha, _, beta = gamma.fit(standard_devs, floc=0)
     return [alpha, beta]
 
 
-def get_truncated_normal(mean=0, sd=1, low=0.01, upp=10):
+def truncated_normal(mean, std, low, upp):
     """
     produces a truncated normal distribution
 
     Parameters
     ----------
     mean : float, optional
-        The default is 0.
-    sd : float, optional
-        The default is 1.
+        mean of the sparing factor distribution
+    std : float, optional
+        standard deviation of the sparing factor distribution
     low : float, optional
-        The default is 0.01.
+        lower bound of distribution
     upp : float, optional
-        The default is 10.
+        upper bound of distribution
 
     Returns
     -------
     scipy.stats._distn_infrastructure.rv_frozen
-        distribution function.
+        distribution function
 
     """
-    return truncnorm((low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
+    normal = truncnorm((low - mean) / std, (upp - mean) / std,
+                        loc=mean, scale=std)
+
+    return normal
 
 
-def probdist(X):
+def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     """
     This function produces a probability distribution
     based on the normal distribution X
@@ -55,20 +58,39 @@ def probdist(X):
     Parameters
     ----------
     X : scipy.stats._distn_infrastructure.rv_frozen
-        distribution function.
+        distribution function
+    sf_low : float
+        lower bound for sparing factor distribution
+    sf_high : float
+        upper bound for sparing factor distribution
+    step_size : float
+        sparing factor step size
+    probability_threshold : float
+        threshold of the probability distribution
 
     Returns
     -------
-    prob : list
-        list with probabilities for each sparing factor.
+    sf : array
+        array with sparing factors
+    prob : array
+        array with probability to each sparing factor
 
     """
-    prob = np.zeros(170)
-    idx = 0
-    for i in np.arange(0.01, 1.71, 0.01):
-        prob[idx] = X.cdf(i + 0.004999999999999999999) - X.cdf(i - 0.005)
-        idx += 1
-    return prob
+    # create sample sparing factor array
+    sample_sf = np.arange(sf_low, sf_high + sf_stepsize, sf_stepsize)
+    n_samples = len(sample_sf)
+
+    # sum probability density from cumulative density function in interval
+    # to get probability
+    half_interval = sf_stepsize/2
+    upp_bound = (half_interval - sf_stepsize*1e-6) * np.ones(n_samples)
+    low_bound = half_interval * np.ones(n_samples)
+    prob = X.cdf(sample_sf + upp_bound) - X.cdf(sample_sf - low_bound)
+
+     # get rid of all probabilities below given threshold
+    probability = prob[prob > probability_threshold]
+    sf = sample_sf[prob > probability_threshold]
+    return sf, probability
 
 
 def distribution_update(sparing_factors, alpha, beta):
@@ -88,7 +110,7 @@ def distribution_update(sparing_factors, alpha, beta):
     Returns
     -------
     list
-        means and stds of all 5 fractions.
+        means and stds of all 5 fractions
 
     """
     means = np.zeros(len(sparing_factors))
