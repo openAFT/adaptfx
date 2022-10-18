@@ -8,7 +8,7 @@ number of fractions used for the treatment.
 
 import numpy as np
 from scipy.interpolate import interp1d
-from maths import std_calc, get_truncated_normal, probdist
+from maths import std_calc, truncated_normal, sf_probdist
 from radiobiology import bed_calc_matrix, bed_calc0, max_action, convert_to_physical
 
 def value_eval(
