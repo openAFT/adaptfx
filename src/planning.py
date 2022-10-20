@@ -74,28 +74,21 @@ def multiple(algorithm, params):
     fixed_mean=params['fixed_mean']
     fixed_std=params['fixed_std']
 
-    accumulated_tumor_dose = 0
-    accumulated_oar_dose = 0
     physical_doses = np.zeros(number_of_fractions)
     tumor_doses = np.zeros(number_of_fractions)
     oar_doses = np.zeros(number_of_fractions)
 
-    # if algorithm == 'frac':
-    #     policy_list = []
-    #     BEDT_list = []
-    #     sf_list = []
-
-    for looper in range(0, number_of_fractions):
+    for i in range(0, number_of_fractions):
         if algorithm == 'oar':
             [
-                physical_dose,
-                tumor_dose,
-                oar_dose
+                physical_doses[i],
+                tumor_doses[i],
+                oar_doses[i]
             ] = oar.value_eval(
-                looper + 1,
+                i + 1,
                 number_of_fractions,
-                accumulated_tumor_dose,
-                sparing_factors[0 : looper + 2],
+                tumor_doses.sum(),
+                sparing_factors[0 : i + 2],
                 alpha,
                 beta,
                 tumor_goal,
@@ -178,15 +171,9 @@ def multiple(algorithm, params):
         #         fixed_std,
         #     )
 
-        accumulated_tumor_dose += tumor_dose
-        accumulated_oar_dose += oar_dose
-        physical_doses[looper] = physical_dose
-        tumor_doses[looper] = tumor_dose
-        oar_doses[looper] = oar_dose
-
     return [
-                accumulated_oar_dose,
-                accumulated_tumor_dose,
+                oar_doses.sum(),
+                tumor_doses.sum(),
                 np.array((physical_doses,
                 tumor_doses,
                 oar_doses))
