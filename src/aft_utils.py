@@ -3,6 +3,10 @@ import time
 import aft_messages as m
 nme = __name__
 
+def stat_rounding(number, decimal):
+    magnitude = 10 ** decimal
+    return round(number * magnitude) / magnitude
+
 def timing(start=None):
     """
     measure time for general process:
@@ -25,7 +29,7 @@ def timing(start=None):
         return start_time
     else:
         stop = time.perf_counter()
-        time_elapsed = (stop - start)
+        time_elapsed = stat_rounding((stop - start), 4)
         m.aft_message(f'process duration: {time_elapsed} s:', nme, 1)
 
 def key_reader(all_keys, full_dict, parameters, algorithm):
