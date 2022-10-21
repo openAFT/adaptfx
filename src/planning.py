@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 This function computes the doses for a whole
-treatment plan (when all sparing factors are known).
+treatment plan (when all sparing factors are known)
+
+or for a single fraction with known previous
+sparing factors and accumulated BED
 """
 
 import numpy as np
-import fraction_minimisation as frac
-import oar_minimisation as oar
-# import tumor_maximisation as tumor
-# import track_tumor_oar as tumor_oar
+from reinforce_oar import min_oar_bed
 
 def multiple(algorithm, params):
     """
@@ -84,7 +84,7 @@ def multiple(algorithm, params):
                 physical_doses[i],
                 tumor_doses[i],
                 oar_doses[i]
-            ] = oar.value_eval(
+            ] = min_oar_bed(
                 i + 1,
                 number_of_fractions,
                 np.round(tumor_doses.sum(),2),
@@ -143,9 +143,6 @@ def multiple(algorithm, params):
         #         fixed_mean,
         #         fixed_std,
         #     )
-        #     # policy_list.append(policy)
-        #     # BEDT_list.append(BEDT)
-        #     # sf_list.append(sf)
 
         # elif algorithm == 'tumor_oar':
         #     [
