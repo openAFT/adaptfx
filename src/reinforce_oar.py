@@ -9,7 +9,7 @@ from radiobiology import (bed_calc_matrix,
                           bed_calc0,
                           convert_to_physical)
 
-def value_eval(
+def min_oar_bed(
     fraction,
     number_of_fractions,
     accumulated_tumor_dose,
