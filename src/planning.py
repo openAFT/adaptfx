@@ -10,7 +10,7 @@ sparing factors and accumulated BED
 import numpy as np
 from reinforce_oar import min_oar_bed
 
-def multiple(algorithm, params):
+def multiple(algorithm, keys, settings):
     """
     calculates whole plan given all sparing factors
 
@@ -58,21 +58,20 @@ def multiple(algorithm, params):
     list
 
     """
-    
-    number_of_fractions=params['number_of_fractions']
-    sparing_factors=params['sparing_factors']
-    alpha=params['alpha']
-    beta=params['beta']
-    tumor_goal=params['tumor_goal']
-    oar_limit=params['oar_limit']
-    C=params['C']
-    abt=params['abt']
-    abn=params['abn']
-    min_dose=params['min_dose']
-    max_dose=params['max_dose']
-    fixed_prob=params['fixed_prob']
-    fixed_mean=params['fixed_mean']
-    fixed_std=params['fixed_std']
+    number_of_fractions=keys.number_of_fractions
+    sparing_factors=keys.sparing_factors
+    alpha=keys.alpha
+    beta=keys.beta
+    tumor_goal=keys.tumor_goal
+    oar_limit=keys.oar_limit
+    c=keys.c
+    abt=keys.abt
+    abn=keys.abn
+    min_dose=keys.min_dose
+    max_dose=keys.max_dose
+    fixed_prob=keys.fixed_prob
+    fixed_mean=keys.fixed_mean
+    fixed_std=keys.fixed_std
 
     physical_doses = np.zeros(number_of_fractions)
     tumor_doses = np.zeros(number_of_fractions)
@@ -99,6 +98,7 @@ def multiple(algorithm, params):
                 fixed_prob,
                 fixed_mean,
                 fixed_std,
+                settings,
             )
         # elif algorithm == 'tumor':
         #     [

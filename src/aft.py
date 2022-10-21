@@ -82,13 +82,11 @@ class RL_object():
             m.aft_message_dict('settings', settings, nme, 1)
 
         self.algorithm = algorithm
-        self.keys = keys
-        self.settings = settings
+        self.keys = utils.DotDict(keys)
+        self.settings = utils.DotDict(settings)
 
     def optimise(self):
-        params = self.keys
-        algorithm = self.algorithm
-        doses = plan.multiple(algorithm, params)
+        doses = plan.multiple(self.algorithm, self.keys, self.settings)
 
         return doses
 

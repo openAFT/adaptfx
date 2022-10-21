@@ -24,12 +24,7 @@ def min_oar_bed(
     fixed_prob,
     fixed_mean,
     fixed_std,
-    sf_low=C.SF_LOW,
-    sf_high=C.SF_HIGH,
-    sf_stepsize=C.SF_STEPSIZE,
-    sf_prob_threshold=C.SF_PROB_THRESHOLD,
-    inf_penalty=C.INF_PENALTY,
-    bedt_stepsize=C.BEDT_STEPSIZE
+    sets,
 ):
     # ---------------------------------------------------------------------- #
     # prepare distribution
@@ -42,13 +37,14 @@ def min_oar_bed(
         mean = fixed_mean
         std = fixed_std
     # initialise normal distributed random variable (rv)
-    rv = truncated_normal(mean, std, sf_low, sf_high)
-    sf, prob = sf_probdist(rv, sf_low, sf_high, sf_stepsize, sf_prob_threshold)
+    rv = truncated_normal(mean, std, sets.sf_low, sets.sf_high)
+    sf, prob = sf_probdist(rv, sets.sf_low, sets.sf_high,
+                            sets.sf_stepsize, sets.sf_prob_threshold)
     n_sf = len(sf)
 
     # actionspace
     max_physical_dose = convert_to_physical(tumor_goal, abt)
-    dose_stepsize = convert_to_physical(bedt_stepsize, abt)
+    dose_stepsize = convert_to_physical(sets.bedt_stepsize, abt)
     if max_dose == -1:
         # automatic max_dose calculation
         max_dose = max_physical_dose
@@ -62,11 +58,12 @@ def min_oar_bed(
     # tumor bed for tracking dose
     remaining_dose = tumor_goal - accumulated_tumor_dose
     # include at least one more step for bedt
-    bed_diff = remaining_dose + bedt_stepsize
+    bed_diff = remaining_dose + sets.bedt_stepsize
     # define number of bed_dose steps to fulfill stepsize
     # this line just rounds up the number of steps
-    n_bedsteps = int(bed_diff // bedt_stepsize + (bed_diff % bedt_stepsize > 0))
-    tumor_limit = tumor_goal + bedt_stepsize
+    n_bedsteps = int(bed_diff // sets.bedt_stepsize + 
+                    (bed_diff % sets.bedt_stepsize > 0))
+    tumor_limit = tumor_goal + sets.bedt_stepsize
     bedt = np.linspace(accumulated_tumor_dose, tumor_limit, n_bedsteps)
     n_bedt = len(bedt)
 
@@ -117,7 +114,7 @@ def min_oar_bed(
             overdose_args = (future_bedt > tumor_goal)
             future_bedt[overdose_args] = tumor_limit
             penalties = np.zeros(n_action)
-            penalties[overdose_args] = -inf_penalty
+            penalties[overdose_args] = -sets.inf_penalty
             vs = -bedn_space + future_values + penalties
             # print(actionspace)
             # print(vs)
@@ -147,7 +144,7 @@ def min_oar_bed(
             last_bedn = bed_calc_matrix(best_actions, abn, sf)
             last_bedt = bedt + remaining_bedt
             penalties = last_bedt - tumor_goal
-            penalties[penalties > 0] = -inf_penalty
+            penalties[penalties > 0] = -sets.inf_penalty
             # to each best action add the according penalties
             # penalties need to be reshaped as it was not numpy allocated
             vs = -last_bedn + penalties.reshape(n_bedt, 1)
@@ -168,7 +165,7 @@ def min_oar_bed(
                 future_bedt[overdose_args] = tumor_limit
                 future_values = future_values_func(future_bedt)
                 penalties = np.zeros((n_action, n_sf))
-                penalties[overdose_args] = -inf_penalty
+                penalties[overdose_args] = -sets.inf_penalty
                 # to each action and sparing factor add future values and penalties
                 vs = -bedn_sf_space + future_values + penalties
 

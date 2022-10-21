@@ -101,3 +101,35 @@ def setting_reader(all_settings, user_settings):
             whole_settings[skey] = all_settings[skey]
 
     return whole_settings
+
+class DotDict(dict):
+    """
+    object with dot.notation to
+    access dictionary attributes
+    """
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__  # type: ignore
+    __delattr__ = dict.__delitem__  # type: ignore
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for k, v in self.items():
+            if isinstance(v, dict):
+                self[k] = DotDict(v)
+
+    def lookup(self, dotkey):
+        """
+        lookup value in a nested structure with a single key
+        """
+        path = list(reversed(dotkey.split(".")))
+        v = self
+        while path:
+            key = path.pop()
+            if isinstance(v, dict):
+                v = v[key]
+            elif isinstance(v, list):
+                v = v[int(key)]
+            else:
+                raise KeyError(key)
+        return v
+
