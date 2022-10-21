@@ -29,7 +29,7 @@ def min_oar_bed(
     sf_stepsize=C.SF_STEPSIZE,
     sf_prob_threshold=C.SF_PROB_THRESHOLD,
     inf_penalty=C.INF_PENALTY,
-    dose_stepsize=C.DOSE_STEP_SIZE
+    bedt_stepsize=C.BEDT_STEPSIZE
 ):
     # ---------------------------------------------------------------------- #
     # prepare distribution
@@ -48,6 +48,7 @@ def min_oar_bed(
 
     # actionspace
     max_physical_dose = convert_to_physical(tumor_goal, abt)
+    dose_stepsize = convert_to_physical(bedt_stepsize, abt)
     if max_dose == -1:
         # automatic max_dose calculation
         max_dose = max_physical_dose
@@ -61,11 +62,11 @@ def min_oar_bed(
     # tumor bed for tracking dose
     remaining_dose = tumor_goal - accumulated_tumor_dose
     # include at least one more step for bedt
-    bed_diff = remaining_dose + dose_stepsize
+    bed_diff = remaining_dose + bedt_stepsize
     # define number of bed_dose steps to fulfill stepsize
     # this line just rounds up the number of steps
-    n_bedsteps = int(bed_diff // dose_stepsize + (bed_diff % dose_stepsize > 0))
-    tumor_limit = tumor_goal + dose_stepsize
+    n_bedsteps = int(bed_diff // bedt_stepsize + (bed_diff % bedt_stepsize > 0))
+    tumor_limit = tumor_goal + bedt_stepsize
     bedt = np.linspace(accumulated_tumor_dose, tumor_limit, n_bedsteps)
     n_bedt = len(bedt)
 

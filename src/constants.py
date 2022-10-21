@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-DOSE_STEP_SIZE = 0.1
-SF_STEPSIZE = 0.01
+BEDT_STEPSIZE = 0.1
 SF_LOW = 0
 SF_HIGH = 1.7
+SF_STEPSIZE = 0.01
 SF_PROB_THRESHOLD = 1e-5
 INF_PENALTY = 1e4
 
@@ -26,7 +26,16 @@ FULL_DICT = {'number_of_fractions':None,
         'max_dose':MAX_DOSE,
         'fixed_prob':FIXED_PROB,
         'fixed_mean':None,
-        'fixed_std':None,
+        'fixed_std':None
+}
+
+SETTING_DICT = {
+        'dose_stepsize': BEDT_STEPSIZE,
+        'sf_low': SF_LOW,
+        'sf_high': SF_HIGH,
+        'sf_stepsize': SF_STEPSIZE,
+        'sf_prob_threshold': SF_PROB_THRESHOLD,
+        'inf_penalty': INF_PENALTY
 }
 
 OAR_LIST = ['number_of_fractions',
