@@ -38,7 +38,7 @@ class RL_object():
             debug_bool = 0
         else:
             if not debug_bool in [0,1]:
-                m.aft_error('invalid "debug" flag was set')
+                m.aft_error('invalid "debug" flag was set', nme)
 
         m.logging_init(instruction_filename, log_bool, debug_bool)
         m.aft_message_info('debug mode:', debug_bool, nme, 0)
@@ -60,7 +60,7 @@ class RL_object():
             m.aft_error(f'"parameter" key missing in : "{instruction_filename}"', nme)
         else:
             if not isinstance(parameters, dict):
-                m.aft_message_error('"parameters" was not a dictionary', nme)
+                m.aft_error('"parameters" was not a dictionary', nme)
 
         m.aft_message('loading keys...', nme, 1)
         whole_dict = utils.key_reader(C.KEY_DICT, C.FULL_DICT, parameters, algorithm)
