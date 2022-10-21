@@ -8,9 +8,11 @@ sparing factors and accumulated BED
 """
 
 import numpy as np
+import constants as C
 from reinforce_oar import min_oar_bed
+import aft_utils
 
-def multiple(algorithm, keys, settings):
+def multiple(algorithm, keys, settings=C.SETTING_DICT):
     """
     calculates whole plan given all sparing factors
 
@@ -58,46 +60,29 @@ def multiple(algorithm, keys, settings):
     list
 
     """
-    number_of_fractions=keys.number_of_fractions
-    sparing_factors=keys.sparing_factors
-    alpha=keys.alpha
-    beta=keys.beta
-    tumor_goal=keys.tumor_goal
-    oar_limit=keys.oar_limit
-    c=keys.c
-    abt=keys.abt
-    abn=keys.abn
-    min_dose=keys.min_dose
-    max_dose=keys.max_dose
-    fixed_prob=keys.fixed_prob
-    fixed_mean=keys.fixed_mean
-    fixed_std=keys.fixed_std
+    if isinstance(keys, dict):
+        # check if keys is a dictionary from manual user
+        keys = aft_utils.DotDict(keys)
+    
+    # k.tumor_goal=keys.tumor_goal
+    # k.oar_limit=keys.oar_limit
+    # k.c constant
 
-    physical_doses = np.zeros(number_of_fractions)
-    tumor_doses = np.zeros(number_of_fractions)
-    oar_doses = np.zeros(number_of_fractions)
+    physical_doses = np.zeros(keys.number_of_fractions)
+    tumor_doses = np.zeros(keys.number_of_fractions)
+    oar_doses = np.zeros(keys.number_of_fractions)
 
-    for i in range(0, number_of_fractions):
+    for i in range(0, keys.number_of_fractions):
+        keys.fraction = i + 1
+        keys.accumulated_tumor_dose = np.round(tumor_doses.sum(),2)
+        keys.sparing_factors_public = keys.sparing_factors[0 : i + 2]
         if algorithm == 'oar':
             [
                 physical_doses[i],
                 tumor_doses[i],
                 oar_doses[i]
             ] = min_oar_bed(
-                i + 1,
-                number_of_fractions,
-                np.round(tumor_doses.sum(),2),
-                sparing_factors[0 : i + 2],
-                alpha,
-                beta,
-                tumor_goal,
-                abt,
-                abn,
-                min_dose,
-                max_dose,
-                fixed_prob,
-                fixed_mean,
-                fixed_std,
+                keys,
                 settings,
             )
         # elif algorithm == 'tumor':

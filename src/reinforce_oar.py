@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+import aft_utils
 import constants as C
 from scipy.interpolate import interp1d
 from maths import (std_calc, 
@@ -9,30 +10,32 @@ from radiobiology import (bed_calc_matrix,
                           bed_calc0,
                           convert_to_physical)
 
-def min_oar_bed(
-    fraction,
-    number_of_fractions,
-    accumulated_tumor_dose,
-    sparing_factors,
-    alpha,
-    beta,
-    tumor_goal,
-    abt,
-    abn,
-    min_dose,
-    max_dose,
-    fixed_prob,
-    fixed_mean,
-    fixed_std,
-    sets,
-):
+def min_oar_bed(keys, sets=C.SETTING_DICT):
+    # check if keys is a dictionary from manual user
+    if isinstance(keys, dict):
+        keys = aft_utils.DotDict(keys)
+
+    fraction = keys.fraction
+    number_of_fractions = keys.number_of_fractions
+    accumulated_tumor_dose = keys.accumulated_tumor_dose
+    sparing_factors_public = keys.sparing_factors_public
+    alpha = keys.alpha
+    beta = keys.beta
+    tumor_goal = keys.tumor_goal
+    abt = keys.abt
+    abn = keys.abn
+    min_dose = keys.min_dose
+    max_dose = keys.max_dose
+    fixed_prob = keys.fixed_prob
+    fixed_mean = keys.fixed_mean
+    fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
     # prepare distribution
-    actual_sf = sparing_factors[-1]
+    actual_sf = sparing_factors_public[-1]
     if not fixed_prob:
         # setup the sparingfactor distribution
-        mean = np.mean(sparing_factors)
-        std = std_calc(sparing_factors, alpha, beta)
+        mean = np.mean(sparing_factors_public)
+        std = std_calc(sparing_factors_public, alpha, beta)
     else:
         mean = fixed_mean
         std = fixed_std
@@ -70,7 +73,8 @@ def min_oar_bed(
     # actionspace in physical dose
     actions_bedt = np.linspace(0, remaining_dose, n_bedsteps)
     actions_physical = convert_to_physical(actions_bedt, abt)
-    range_condition = (actions_physical >= min_dose) & (actions_physical <= max_dose)
+    range_condition = (actions_physical >= min_dose) & \
+                        (actions_physical <= max_dose)
     actionspace = actions_physical[range_condition]
     n_action = len(actionspace)
 

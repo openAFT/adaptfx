@@ -1,5 +1,5 @@
 import numpy as np
-import reinforce.plan as plan
+import planning
 import scipy.optimize as opt
 import h5py as hdf
 import matplotlib.pyplot as plt
@@ -17,7 +17,7 @@ def B_noaft(sf, d, para):
 
 def B_aft(algorithm, para):
     # BED^N calculation for 1 therapy
-    relay = plan.multiple(algorithm, para)
+    relay = planning.multiple(algorithm, para)
     return relay[0]
 
 def d_T(n, abt, goal):
