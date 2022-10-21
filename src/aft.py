@@ -8,8 +8,9 @@ nme = __name__
 
 class RL_object():
     """
-    Reinforcement Learning class to check instructions and invoke
-    parameters from file
+    Reinforcement Learning class to check instructions
+    of calculation, invoke keys and define
+    calculation settings from file
     """
     def __init__(self, instruction_filename):
         try: # check if file can be opened
@@ -54,23 +55,38 @@ class RL_object():
             else:
                 m.aft_message_info('algorithm:', algorithm, nme, 0)
 
-        try: # check if parameter key exists and is a dictionnary
-            parameters = input_dict['parameters']
+        try: # check if keys exists and is a dictionnary
+            raw_keys = input_dict['keys']
         except KeyError:
-            m.aft_error(f'"parameter" key missing in : "{instruction_filename}"', nme)
+            m.aft_error(f'"keys" is missing in : "{instruction_filename}"', nme)
         else:
-            if not isinstance(parameters, dict):
-                m.aft_error('"parameters" was not a dictionary', nme)
+            if not isinstance(raw_keys, dict):
+                m.aft_error('"keys" is not a dictionary', nme)
+            # load and check keys
+            m.aft_message('loading keys...', nme, 1)
+            keys = utils.key_reader(C.KEY_DICT, C.FULL_DICT, raw_keys, algorithm)
+            m.aft_message_dict('keys', keys, nme, 1)
 
-        m.aft_message('loading keys...', nme, 1)
-        whole_dict = utils.key_reader(C.KEY_DICT, C.FULL_DICT, parameters, algorithm)
-        m.aft_message_dict('parameters', whole_dict, nme, 1)
+        try: # check if settings exist and is a dictionnary
+            user_settings = input_dict['settings']
+        except KeyError:
+            m.aft_message('no "settings" were given, set to default', nme)
+            settings = C.SETTING_DICT
+            m.aft_message_dict('settings', settings, nme, 1)
+        else:
+            if not isinstance(user_settings, dict):
+                m.aft_error('"settings" is not a dictionary', nme)
+            # load and check settings
+            m.aft_message('loading settings...', nme, 1)
+            settings = utils.setting_reader(C.SETTING_DICT, user_settings)
+            m.aft_message_dict('settings', settings, nme, 1)
 
-        self.parameters = whole_dict
         self.algorithm = algorithm
+        self.keys = keys
+        self.settings = settings
 
     def optimise(self):
-        params = self.parameters
+        params = self.keys
         algorithm = self.algorithm
         doses = plan.multiple(algorithm, params)
 
