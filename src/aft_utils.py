@@ -34,7 +34,7 @@ def timing(start=None):
 
 def key_reader(all_keys, full_dict, user_keys, algorithm):
     """
-    read and check all keys from a parameters
+    read and check all keys from a instruction
     file by cycling through all_keys
 
     Parameters
@@ -43,8 +43,8 @@ def key_reader(all_keys, full_dict, user_keys, algorithm):
         all keys necessary for some algorithm type.
     full_dict : dict
         all possible keys.
-    parameters : dict
-        read in parameters from an instruction file.
+    user_keys : dict
+        read in keys from an instruction file.
     algorithm : string
         type of algorithm.
 
@@ -72,7 +72,7 @@ def key_reader(all_keys, full_dict, user_keys, algorithm):
                 f'key: "{key}" is not allowed for "{algorithm}"', nme, 0
                 )
         elif key not in full_dict:
-            m.aft_warning(f'unexpected parameter: "{key}" invalid', nme, 0)
+            m.aft_warning(f'unexpected key: "{key}"', nme, 0)
 
     return whole_dict
 
@@ -83,6 +83,8 @@ def setting_reader(all_settings, user_settings):
 
     Parameters
     ----------
+    all_settings : dict
+        all settings necessary for calculation
     settings : dict
         all settings for calculation
 
@@ -92,13 +94,15 @@ def setting_reader(all_settings, user_settings):
         all settings
         
     """
-    whole_settings = user_settings.copy()
+    whole_settings = all_settings.copy()
 
     for skey in all_settings:
         if skey in user_settings:
             whole_settings[skey] = user_settings[skey]
-        elif skey not in user_settings:
-            whole_settings[skey] = all_settings[skey]
+    
+    for skey in user_settings:
+        if skey not in all_settings:
+            m.aft_warning(f'unexpected setting: "{skey}"', nme, 0)
 
     return whole_settings
 

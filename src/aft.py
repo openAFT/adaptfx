@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import argparse
 import constants as C
-import planning as plan
+import planning
 import aft_messages as m
-import aft_utils as utils
+import aft_utils
 nme = __name__
 
 class RL_object():
@@ -64,7 +64,7 @@ class RL_object():
                 m.aft_error('"keys" is not a dictionary', nme)
             # load and check keys
             m.aft_message('loading keys...', nme, 1)
-            keys = utils.key_reader(C.KEY_DICT, C.FULL_DICT, raw_keys, algorithm)
+            keys = aft_utils.key_reader(C.KEY_DICT, C.FULL_DICT, raw_keys, algorithm)
             m.aft_message_dict('keys', keys, nme, 1)
 
         try: # check if settings exist and is a dictionnary
@@ -78,15 +78,15 @@ class RL_object():
                 m.aft_error('"settings" is not a dictionary', nme)
             # load and check settings
             m.aft_message('loading settings...', nme, 1)
-            settings = utils.setting_reader(C.SETTING_DICT, user_settings)
+            settings = aft_utils.setting_reader(C.SETTING_DICT, user_settings)
             m.aft_message_dict('settings', settings, nme, 1)
 
         self.algorithm = algorithm
-        self.keys = utils.DotDict(keys)
-        self.settings = utils.DotDict(settings)
+        self.keys = aft_utils.DotDict(keys)
+        self.settings = aft_utils.DotDict(settings)
 
     def optimise(self):
-        doses = plan.multiple(self.algorithm, self.keys, self.settings)
+        doses = planning.multiple(self.algorithm, self.keys, self.settings)
 
         return doses
 
@@ -94,7 +94,7 @@ def main():
     """
     CLI interface to invoke the RL class
     """
-    start = utils.timing()
+    start = aft_utils.timing()
     parser = argparse.ArgumentParser(
         description='Calculate optimal dose per fraction dependent on algorithm type'
     )
@@ -118,7 +118,7 @@ def main():
     rl_test = RL_object(args.filename)
     m.aft_message('start session...', nme, 1)
     m.aft_message_list('fractionation plan:', rl_test.optimise(), nme, 1)
-    utils.timing(start)
+    aft_utils.timing(start)
     m.aft_message('close session...', nme, 1)
 
 
