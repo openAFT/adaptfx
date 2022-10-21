@@ -32,10 +32,6 @@ def value_eval(
     dose_stepsize=C.DOSE_STEP_SIZE
 ):
     # ---------------------------------------------------------------------- #
-    dose_stepsize = 8
-    sf_stepsize = 0.5
-    # overdose_args and action clipping in each iteration
-
     # prepare distribution
     actual_sf = sparing_factors[-1]
     if not fixed_prob:
@@ -45,9 +41,9 @@ def value_eval(
     else:
         mean = fixed_mean
         std = fixed_std
-    # initialise normal distributed random variable
-    X = truncated_normal(mean, std, sf_low, sf_high)
-    sf, prob = sf_probdist(X, sf_low, sf_high, sf_stepsize, sf_prob_threshold)
+    # initialise normal distributed random variable (rv)
+    rv = truncated_normal(mean, std, sf_low, sf_high)
+    sf, prob = sf_probdist(rv, sf_low, sf_high, sf_stepsize, sf_prob_threshold)
     n_sf = len(sf)
 
     # actionspace
@@ -73,21 +69,21 @@ def value_eval(
     bedt = np.linspace(accumulated_tumor_dose, tumor_limit, n_bedsteps)
     n_bedt = len(bedt)
 
-    # actionspace and corresponding bedt and bedn space
+    # actionspace in physical dose
     actions_bedt = np.linspace(0, remaining_dose, n_bedsteps)
     actions_physical = convert_to_physical(actions_bedt, abt)
     range_condition = (actions_physical >= min_dose) & (actions_physical <= max_dose)
     actionspace = actions_physical[range_condition]
     n_action = len(actionspace)
 
-    # bedn space to relate actionspace to oar- and tumor-dose
+    # bed_space to relate actionspace to oar- and tumor-dose
     bedn_space = bed_calc0(actionspace, abn, actual_sf)
     bedt_space = bed_calc0(actionspace, abt)
     # relate actionspace to bed and possible sparing factors
     bedn_sf_space = bed_calc_matrix(actionspace, abn, sf)
     _ , bedt_sf_space = np.meshgrid(np.ones(n_sf), bedt_space)
-    # note the line below is equivalent but 40% slower:
-    # "bedt_sf_space = bed_calc_matrix(actionspace, abt, np.ones(n_sf))"
+    # note the line below is equivalent but 30% slower:
+    # -bedt_sf_space = bed_calc_matrix(actionspace, abt, np.ones(n_sf))- #
 
     # values matrix
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
@@ -108,29 +104,32 @@ def value_eval(
             future_values = future_values_func(bedt_space)
             vs = -bedn_space + future_values
             physical_dose = float(actionspace[vs.argmax(axis=0)])
+            break
 
         elif fraction_state == fraction and fraction != number_of_fractions:
             # state is the actual fraction to calculate
             # but actual fraction is not the last fraction
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
+            future_values_func = interp1d(bedt, future_values_discrete)
             future_bedt = accumulated_tumor_dose + bedt_space
+            future_values = future_values_func(future_bedt)
             overdose_args = (future_bedt > tumor_goal)
             future_bedt[overdose_args] = tumor_limit
             penalties = np.zeros(n_action)
             penalties[overdose_args] = -inf_penalty
-            future_values_func = interp1d(bedt, future_values_discrete)
-            future_values = future_values_func(future_bedt)
             vs = -bedn_space + future_values + penalties
+            # print(actionspace)
+            # print(vs)
             physical_dose = float(actionspace[vs.argmax(axis=0)])
+            break
 
         elif fraction == number_of_fractions:
             # in the last fraction value is not relevant
-            best_actions = convert_to_physical(tumor_goal-accumulated_tumor_dose, abt)
+            best_actions = convert_to_physical(remaining_dose, abt)
             if best_actions < min_dose:
                 best_actions = min_dose
             if best_actions > max_dose:
                 best_actions = max_dose
-            last_bedn = bed_calc0(best_actions, abn, actual_sf)
             physical_dose = best_actions
             break
 
