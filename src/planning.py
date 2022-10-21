@@ -87,7 +87,7 @@ def multiple(algorithm, params):
             ] = oar.value_eval(
                 i + 1,
                 number_of_fractions,
-                tumor_doses.sum(),
+                np.round(tumor_doses.sum(),2),
                 sparing_factors[0 : i + 2],
                 alpha,
                 beta,
@@ -172,8 +172,8 @@ def multiple(algorithm, params):
         #     )
 
     return [
-                oar_doses.sum(),
-                tumor_doses.sum(),
+                np.round(oar_doses.sum(), 2),
+                np.round(tumor_doses.sum(), 2),
                 np.array((physical_doses,
                 tumor_doses,
                 oar_doses))
