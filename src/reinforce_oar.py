@@ -85,7 +85,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
     bedn_sf_space = bed_calc_matrix(actionspace, abn, sf)
     _ , bedt_sf_space = np.meshgrid(np.ones(n_sf), bedt_space)
     # note the line below is equivalent but 30% slower:
-    # -bedt_sf_space = bed_calc_matrix(actionspace, abt, np.ones(n_sf))- #
+    # "bedt_sf_space = bed_calc_matrix(actionspace, abt, np.ones(n_sf))" #
 
     # values matrix
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
@@ -164,7 +164,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
             future_values_func = interp1d(bedt, future_values_discrete)
             for bedt_index, bedt_dose in enumerate(bedt):
-                future_bedt = bedt_sf_space + bedt_dose
+                future_bedt = bedt_dose + bedt_sf_space
                 overdose_args = future_bedt > tumor_goal
                 future_bedt[overdose_args] = tumor_limit
                 future_values = future_values_func(future_bedt)
