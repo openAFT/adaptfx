@@ -67,8 +67,8 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
     n_bedsteps = int(bed_diff // sets.bedt_stepsize + 
                     (bed_diff % sets.bedt_stepsize > 0))
     tumor_limit = tumor_goal + sets.bedt_stepsize
-    bedt = np.linspace(accumulated_tumor_dose, tumor_limit, n_bedsteps)
-    n_bedt = len(bedt)
+    bedt_states = np.linspace(accumulated_tumor_dose, tumor_limit, n_bedsteps + 1)
+    n_bedt_states = len(bedt_states)
 
     # actionspace in physical dose
     actions_bedt = np.linspace(0, remaining_dose, n_bedsteps)
@@ -83,15 +83,14 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
     bedt_space = bed_calc0(actionspace, abt)
     # relate actionspace to bed and possible sparing factors
     bedn_sf_space = bed_calc_matrix(actionspace, abn, sf)
-    _ , bedt_sf_space = np.meshgrid(np.ones(n_sf), bedt_space)
     # note the line below is equivalent but 30% slower:
     # "bedt_sf_space = bed_calc_matrix(actionspace, abt, np.ones(n_sf))" #
 
     # values matrix
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
     n_remaining_fractions = number_of_fractions - fraction
-    values = np.zeros((n_remaining_fractions, n_bedt, n_sf))
-    policy = np.zeros((n_remaining_fractions, n_bedt, n_sf))
+    values = np.zeros((n_remaining_fractions, n_bedt_states, n_sf))
+    policy = np.zeros((n_remaining_fractions, n_bedt_states, n_sf))
     
     #initialise physical dose scalar
     physical_dose = 0
@@ -102,7 +101,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             # first state with no prior dose delivered
             # so we dont loop through BEDT
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
-            future_values_func = interp1d(bedt, future_values_discrete)
+            future_values_func = interp1d(bedt_states, future_values_discrete)
             future_values = future_values_func(bedt_space)
             vs = -bedn_space + future_values
             physical_dose = float(actionspace[vs.argmax(axis=0)])
@@ -112,7 +111,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             # state is the actual fraction to calculate
             # but actual fraction is not the last fraction
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
-            future_values_func = interp1d(bedt, future_values_discrete)
+            future_values_func = interp1d(bedt_states, future_values_discrete)
             future_bedt = accumulated_tumor_dose + bedt_space
             future_values = future_values_func(future_bedt)
             overdose_args = (future_bedt > tumor_goal)
@@ -138,7 +137,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
         elif fraction_index == 0:
             # final state to initialise terminal reward
             # dose remaining to be delivered, this is the actionspace in bedt
-            remaining_bedt = tumor_goal - bedt
+            remaining_bedt = tumor_goal - bedt_states
             min_dose_bed = bed_calc0(min_dose, abt)
             max_dose_bed = bed_calc0(max_dose, abt)
             # cut the actionspace to min and max dose constraints
@@ -146,12 +145,12 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             remaining_bedt[remaining_bedt > max_dose_bed] = max_dose_bed
             best_actions = convert_to_physical(remaining_bedt, abt)
             last_bedn = bed_calc_matrix(best_actions, abn, sf)
-            last_bedt = bedt + remaining_bedt
+            last_bedt = bedt_states + remaining_bedt
             penalties = last_bedt - tumor_goal
             penalties[penalties > 0] = -sets.inf_penalty
             # to each best action add the according penalties
             # penalties need to be reshaped as it was not numpy allocated
-            vs = -last_bedn + penalties.reshape(n_bedt, 1)
+            vs = -last_bedn + penalties.reshape(n_bedt_states, 1)
 
             values[fraction_index] = vs
             # policy calculation for each bedt, but sf is not considered
@@ -162,8 +161,41 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             # every other state but the last
             # this calculates the value function in the future fractions
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
-            future_values_func = interp1d(bedt, future_values_discrete)
-            for bedt_index, bedt_dose in enumerate(bedt):
+
+            # ****SCIPY INTERP1D****
+            # future_values_func = interp1d(bedt_states, future_values_discrete)
+            # future_bedt = bedt_states.reshape(n_bedt_states, 1) + bedt_space
+            # overdose_args = future_bedt > tumor_goal
+            # future_bedt[overdose_args] = tumor_limit
+            # future_values = future_values_func(future_bedt)
+            # penalties = np.zeros((n_bedt_states, n_action))
+            # penalties[overdose_args] = -sets.inf_penalty
+            # future_values_state = np.meshgrid(np.ones(n_sf), future_values)[1].reshape(n_bedt_states,n_action,n_sf)
+            # penalties_state = np.meshgrid(np.ones(n_sf), penalties)[1].reshape(n_bedt_states,n_action,n_sf)
+            # vs = -bedn_sf_space + future_values_state + penalties_state
+            
+            # values[fraction_index] = vs.max(axis=1)
+            # policy[fraction_index] = vs.argmax(axis=1)
+
+            # ****NUMPY INTERP****
+            # future_bedt = bedt_states.reshape(n_bedt_states, 1) + bedt_space
+            # overdose_args = future_bedt > tumor_goal
+            # future_bedt[overdose_args] = tumor_limit
+            # future_values = np.interp(future_bedt, bedt_states, future_values_discrete)
+            # penalties = np.zeros((n_bedt_states, n_action))
+            # penalties[overdose_args] = -sets.inf_penalty
+            # future_values_state = np.meshgrid(np.ones(n_sf), future_values)[1].reshape(n_bedt_states,n_action,n_sf)
+            # penalties_state = np.meshgrid(np.ones(n_sf), penalties)[1].reshape(n_bedt_states,n_action,n_sf)
+            # vs = -bedn_sf_space + future_values_state + penalties_state
+            
+            # values[fraction_index] = vs.max(axis=1)
+            # policy[fraction_index] = vs.argmax(axis=1)
+
+            
+            # ****FOR LOOP****
+            future_values_func = interp1d(bedt_states, future_values_discrete)
+            _ , bedt_sf_space = np.meshgrid(np.ones(n_sf), bedt_space)
+            for bedt_index, bedt_dose in enumerate(bedt_states):
                 future_bedt = bedt_dose + bedt_sf_space
                 overdose_args = future_bedt > tumor_goal
                 future_bedt[overdose_args] = tumor_limit
