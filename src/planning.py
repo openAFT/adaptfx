@@ -74,7 +74,7 @@ def multiple(algorithm, keys, settings=C.SETTING_DICT):
 
     for i in range(0, keys.number_of_fractions):
         keys.fraction = i + 1
-        keys.accumulated_tumor_dose = np.round(tumor_doses.sum(),2)
+        keys.accumulated_tumor_dose = tumor_doses.sum()
         keys.sparing_factors_public = keys.sparing_factors[0 : i + 2]
         if algorithm == 'oar':
             [
@@ -156,7 +156,7 @@ def multiple(algorithm, keys, settings=C.SETTING_DICT):
     return [
                 np.round(oar_doses.sum(), 2),
                 np.round(tumor_doses.sum(), 2),
-                np.array((physical_doses,
-                tumor_doses,
-                oar_doses))
+                np.array((np.round(physical_doses,2),
+                    np.round(tumor_doses,2),
+                    np.round(oar_doses,2)))
             ]

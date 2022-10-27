@@ -60,7 +60,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
     if min_dose > max_dose:
         min_dose = max_dose - dose_stepsize
 
-    # tumor bed for tracking dose
+    # tumor bed states for tracking dose
     remaining_dose = tumor_goal - accumulated_tumor_dose
     # include at least one more step for bedt
     bed_diff = remaining_dose + sets.bedt_stepsize
@@ -164,9 +164,9 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             values[fraction_index] = vs.max(axis=1)
             # policy[fraction_index] = vs.argmax(axis=1)
     
-    tumor_dose = np.round(bed_calc0(physical_dose, abt), 2)
-    oar_dose = np.round(bed_calc0(physical_dose, abn, actual_sf), 2)
-    dose = np.round(physical_dose, 2)
+    tumor_dose = bed_calc0(physical_dose, abt)
+    oar_dose = bed_calc0(physical_dose, abn, actual_sf)
+    dose = physical_dose
 
     return [dose, tumor_dose, oar_dose]
         
