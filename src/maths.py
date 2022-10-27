@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy.stats import gamma, truncnorm
+from scipy.interpolate import interp1d
 
 
 def data_fit(data):
@@ -90,7 +91,7 @@ def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
      # get rid of all probabilities below given threshold
     probability = prob[prob > probability_threshold]
     sf = sample_sf[prob > probability_threshold]
-    return sf, probability
+    return [sf, probability]
 
 
 def distribution_update(sparing_factors, alpha, beta):
@@ -159,3 +160,29 @@ def std_calc(measured_data, alpha, beta):
         )  # here i have to check whether it is good.
     std = std_values[np.argmax(likelihood_values)]
     return std
+
+def interpolate(x, x_fit, y_fit, mode='numpy'):
+    """
+    calculates y values from interpolated function y(x)
+
+    Parameters
+    ----------
+    x : array
+        x values for interpolated function
+    x_fit : array
+        observables for interpolation
+    y_fit : array
+        predictors of interpolation
+
+    Returns
+    -------
+    y : array
+        interpolated values, same shape as x
+
+    """
+    if mode == 'numpy':
+        y = np.interp(x, x_fit, y_fit)
+    elif mode == 'scipy':
+        y_func = interp1d(x_fit, y_fit)
+        y = y_func(x)
+    return y

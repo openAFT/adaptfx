@@ -4,7 +4,8 @@ import aft_utils
 import constants as C
 from maths import (std_calc, 
                    truncated_normal,
-                   sf_probdist)
+                   sf_probdist,
+                   interpolate)
 from radiobiology import (bed_calc_matrix,
                           bed_calc0,
                           convert_to_physical)
@@ -43,7 +44,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
         std = fixed_std
     # initialise normal distributed random variable (rv)
     rv = truncated_normal(mean, std, sets.sf_low, sets.sf_high)
-    sf, prob = sf_probdist(rv, sets.sf_low, sets.sf_high,
+    [sf, prob] = sf_probdist(rv, sets.sf_low, sets.sf_high,
                             sets.sf_stepsize, sets.sf_prob_threshold)
     n_sf = len(sf)
 
@@ -101,7 +102,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             # first state with no prior dose delivered
             # so we dont loop through BEDT
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
-            future_values = np.interp(bedt_space, bedt_states, future_values_discrete)
+            future_values = interpolate(bedt_space, bedt_states, future_values_discrete)
             vs = -bedn_space + future_values
             physical_dose = float(actionspace[vs.argmax(axis=0)])
 
@@ -113,7 +114,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             overdose_args = (future_bedt > tumor_goal)
             future_bedt = np.where(overdose_args, tumor_limit, future_bedt)
             penalties = np.where(overdose_args, -sets.inf_penalty, 0)
-            future_values = np.interp(future_bedt, bedt_states, future_values_discrete)
+            future_values = interpolate(future_bedt, bedt_states, future_values_discrete)
             vs = -bedn_space + future_values + penalties
             physical_dose = float(actionspace[vs.argmax(axis=0)])
 
@@ -155,10 +156,12 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             future_bedt = bedt_states.reshape(n_bedt_states, 1) + bedt_space
             overdose_args = future_bedt > tumor_goal
             future_bedt = np.where(overdose_args, tumor_limit, future_bedt)
-            future_values = np.interp(future_bedt, bedt_states, future_values_discrete)
+            future_values = interpolate(future_bedt, bedt_states, future_values_discrete)
             penalties = np.where(overdose_args, -sets.inf_penalty, 0)
-            future_values_state = np.repeat(future_values, n_sf).reshape(n_bedt_states,n_action,n_sf)
-            penalties_state = np.repeat(penalties, n_sf).reshape(n_bedt_states,n_action,n_sf)
+            future_values_state = np.repeat(future_values, n_sf).reshape(
+                                                n_bedt_states,n_action,n_sf)
+            penalties_state = np.repeat(penalties, n_sf).reshape(
+                                                n_bedt_states,n_action,n_sf)
             vs = -bedn_sf_space + future_values_state + penalties_state
             
             values[fraction_index] = vs.max(axis=1)
