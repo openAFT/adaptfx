@@ -98,15 +98,15 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
     # ---------------------------------------------------------------------- #
     remaining_fractions = np.arange(number_of_fractions, fraction - 1, -1)
     for fraction_index, fraction_state in enumerate(remaining_fractions):
-        if fraction_state == 1:
-            # first state with no prior dose delivered
-            # so we dont loop through BEDT
-            future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
-            future_values = interpolate(bedt_space, bedt_states, future_values_discrete)
-            vs = -bedn_space + future_values
-            physical_dose = float(actionspace[vs.argmax(axis=0)])
+        # if fraction_state == 1:
+        #     # first state with no prior dose delivered
+        #     # so we dont loop through BEDT
+        #     future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
+        #     future_values = interpolate(bedt_space, bedt_states, future_values_discrete)
+        #     vs = -bedn_space + future_values
+        #     physical_dose = float(actionspace[vs.argmax(axis=0)])
 
-        elif fraction_state == fraction and fraction != number_of_fractions:
+        if fraction_state == fraction and fraction != number_of_fractions:
             # state is the actual fraction to calculate
             # but actual fraction is not the last fraction
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
@@ -172,4 +172,3 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
     dose = physical_dose
 
     return [dose, tumor_dose, oar_dose]
-        
