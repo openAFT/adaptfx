@@ -34,6 +34,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
     fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
     # prepare distribution
+    for_loop = 0
     actual_sf = sparing_factors_public[-1]
     if not fixed_prob:
         # setup the sparingfactor distribution
@@ -64,16 +65,20 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
     # tumor bed states for tracking dose
     remaining_dose = tumor_goal - accumulated_tumor_dose
     # include at least one more step for bedt
-    bed_diff = remaining_dose + sets.bedt_stepsize
+    state_diff = remaining_dose + sets.state_stepsize
     # define number of bed_dose steps to fulfill stepsize
     # this line just rounds up the number of steps
-    n_bedsteps = int(bed_diff // sets.bedt_stepsize + 
-                    (bed_diff % sets.bedt_stepsize > 0))
-    tumor_limit = tumor_goal + sets.bedt_stepsize
-    bedt_states = np.linspace(accumulated_tumor_dose, tumor_limit, n_bedsteps + 1)
+    n_statesteps = int(state_diff // sets.state_stepsize + 
+                    (state_diff % sets.state_stepsize > 0))
+    state_limit = tumor_goal + sets.state_stepsize
+    bedt_states = np.linspace(accumulated_tumor_dose, state_limit, n_statesteps + 1)
     n_bedt_states = len(bedt_states)
 
     # actionspace in physical dose
+    bed_diff = remaining_dose + sets.bedt_stepsize
+    n_bedsteps = int(bed_diff // sets.bedt_stepsize + 
+                    (bed_diff % sets.bedt_stepsize > 0))
+    tumor_limit = tumor_goal + sets.bedt_stepsize
     actions_bedt = np.linspace(0, remaining_dose, n_bedsteps)
     actions_physical = convert_to_physical(actions_bedt, abt)
     range_condition = (actions_physical >= min_dose) & \
@@ -149,7 +154,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             # _, police = np.meshgrid(np.ones(n_sf), best_actions)
             # policy[fraction_index] = police
 
-        elif fraction_index != 0:
+        elif fraction_index != 0 and not for_loop:
             # every other state but the last
             # this calculates the value function in the future fractions
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
@@ -166,6 +171,22 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             
             values[fraction_index] = vs.max(axis=1)
             # policy[fraction_index] = vs.argmax(axis=1)
+        
+        elif fraction_index != 0 and for_loop:
+            # ****FOR LOOP****
+            future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
+            _ , bedt_sf_space = np.meshgrid(np.ones(n_sf), bedt_space)
+            for bedt_index, bedt_dose in enumerate(bedt_states):
+                future_bedt = bedt_dose + bedt_sf_space
+                overdose_args = future_bedt > tumor_goal
+                future_bedt[overdose_args] = tumor_limit
+                future_values = interpolate(future_bedt, bedt_states, future_values_discrete)
+                penalties = np.zeros((n_action, n_sf))
+                penalties[overdose_args] = sets.inf_penalty
+                # to each action and sparing factor add future values and penalties
+                vs = -bedn_sf_space + future_values + penalties
+
+                values[fraction_index][bedt_index] = vs.max(axis=0)
     
     tumor_dose = bed_calc0(physical_dose, abt)
     oar_dose = bed_calc0(physical_dose, abn, actual_sf)
