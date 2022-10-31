@@ -15,10 +15,11 @@
 		'fixed_std': 0.04,
 		'tumor_goal': 72,
 		'oar_limit': 90,
-		'C': 0.8,
+		'c': 0.8,
 	},
 'settings':
 	{
-		'dose_stepsize': 0.2,
+		'bedt_stepsize': 0.1,
+		'state_stepsize': 0.1
 	}
 }
