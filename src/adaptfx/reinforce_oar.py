@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-import aft_utils
-import constants as C
-from maths import (std_calc, 
-                   truncated_normal,
-                   sf_probdist,
-                   interpolate)
-from radiobiology import (bed_calc_matrix,
-                          bed_calc0,
-                          convert_to_physical)
+import adaptfx.constants as C
+import adaptfx.aft_utils as aft_utils
+from adaptfx.maths import (std_calc, 
+                            truncated_normal,
+                            sf_probdist,
+                            interpolate)
+from adaptfx.radiobiology import (bed_calc_matrix,
+                                    bed_calc0,
+                                    convert_to_physical)
 
 def min_oar_bed(keys, sets=C.SETTING_DICT):
     # check if keys is a dictionary from manual user
@@ -90,7 +90,7 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
     bedn_space = bed_calc0(actionspace, abn, actual_sf)
     bedt_space = bed_calc0(actionspace, abt)
     # relate actionspace to bed and possible sparing factors
-    bedn_sf_space = bed_calc_matrix(actionspace, abn, sf)
+    bedn_sf_space = bed_calc_matrix(actionspace, abn, sf).reshape(1, n_action, n_sf)
 
     # values matrix
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
@@ -162,12 +162,8 @@ def min_oar_bed(keys, sets=C.SETTING_DICT):
             overdose_args = future_bedt > tumor_goal
             future_bedt = np.where(overdose_args, tumor_limit, future_bedt)
             future_values = interpolate(future_bedt, bedt_states, future_values_discrete)
-            penalties = np.where(overdose_args, -sets.inf_penalty, 0)
-            future_values_state = np.repeat(future_values, n_sf).reshape(
-                                                n_bedt_states,n_action,n_sf)
-            penalties_state = np.repeat(penalties, n_sf).reshape(
-                                                n_bedt_states,n_action,n_sf)
-            vs = -bedn_sf_space + future_values_state + penalties_state
+            values_penalties = np.where(overdose_args, future_values-sets.inf_penalty, future_values)
+            vs = -bedn_sf_space + values_penalties.reshape(n_bedt_states, n_action, 1)
             
             values[fraction_index] = vs.max(axis=1)
             # policy[fraction_index] = vs.argmax(axis=1)
