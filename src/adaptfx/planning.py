@@ -8,11 +8,9 @@ sparing factors and accumulated BED
 """
 
 import numpy as np
-import constants as C
-from reinforce_oar import min_oar_bed
-import aft_utils
+import adaptfx
 
-def multiple(algorithm, keys, settings=C.SETTING_DICT):
+def multiple(algorithm, keys, settings=adaptfx.SETTING_DICT):
     """
     calculates whole plan given all sparing factors
 
@@ -62,7 +60,7 @@ def multiple(algorithm, keys, settings=C.SETTING_DICT):
     """
     if isinstance(keys, dict):
         # check if keys is a dictionary from manual user
-        keys = aft_utils.DotDict(keys)
+        keys = adaptfx.DotDict(keys)
     
     # k.tumor_goal=keys.tumor_goal
     # k.oar_limit=keys.oar_limit
@@ -81,7 +79,7 @@ def multiple(algorithm, keys, settings=C.SETTING_DICT):
                 physical_doses[i],
                 tumor_doses[i],
                 oar_doses[i]
-            ] = min_oar_bed(
+            ] = adaptfx.min_oar_bed(
                 keys,
                 settings,
             )

@@ -45,4 +45,4 @@ where = ["src"]
 include = ["*"]
 
 [project.scripts]
-aft = "aft:main"
+aft = "adaptfx.aft:main"

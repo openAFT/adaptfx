@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import argparse
-import constants as C
-import planning
-import aft_messages as m
-import aft_utils
+import adaptfx.constants as C
+import adaptfx.planning as planning
+import adaptfx.aft_messages as m
+import adaptfx.aft_utils as aft_utils
 nme = __name__
 
 class RL_object():
