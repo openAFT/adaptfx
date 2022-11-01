@@ -1,28 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from scipy.stats import gamma, truncnorm
+from scipy.stats import truncnorm
 from scipy.interpolate import interp1d
-
-
-def data_fit(data):
-    """
-    This function fits the alpha and beta value for the prior
-
-    Parameters
-    ----------
-    data : array
-        a nxk matrix with n the amount of patients and k the amount
-        of sparing factors per patient
-
-    Returns
-    -------
-    list
-        alpha and beta hyperparameter
-    """
-    standard_devs = data.std(axis=1)
-    alpha, _, beta = gamma.fit(standard_devs, floc=0)
-    return [alpha, beta]
-
 
 def truncated_normal(mean, std, low, upp):
     """
@@ -92,40 +71,6 @@ def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     probability = prob[prob > probability_threshold]
     sf = sample_sf[prob > probability_threshold]
     return [sf, probability]
-
-
-def distribution_update(sparing_factors, alpha, beta):
-    """
-    Calculates the probability distributions for all
-    fractions based on a 6 sparing factor list
-
-    Parameters
-    ----------
-    sparing_factors : array/list
-        list/array with 6 sparing factors
-    alpha : float
-        shape of inverse-gamma distribution
-    beta : float
-        scale of inverse-gamme distrinbution
-
-    Returns
-    -------
-    list
-        means and stds of all 5 fractions
-
-    """
-    means = np.zeros(len(sparing_factors))
-    stds = np.zeros(len(sparing_factors))
-    for i in range(len(sparing_factors)):
-        means[i] = np.mean(sparing_factors[: (i + 1)])
-        stds[i] = std_calc(sparing_factors[: (i + 1)], alpha, beta)
-    means = np.delete(means, 0)
-    stds = np.delete(
-        stds, 0
-    )   
-    # we get rid of the first value as it is only the planning 
-    # value and not used in a fraction
-    return [means, stds]
 
 
 def std_calc(measured_data, alpha, beta):

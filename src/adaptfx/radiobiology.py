@@ -50,61 +50,6 @@ def bed_calc_matrix(actionspace, ab, sf):
     )  # produces a actions space x sparing factor array
     return BED
 
-
-def max_action(bed, actionspace, goal, abt=10):
-    """
-    Computes the maximal dose that can be delivered to the tumor
-    in each fraction depending on the actual accumulated dose
-
-    Parameters
-    ----------
-    bed : float
-        accumulated tumor dose so far.
-    actionspace : list/array
-        array with all discrete dose steps.
-    goal : float
-        prescribed tumor dose.
-    abt : float, optional
-        alpha beta ratio of tumor. The default is 10.
-
-    Returns
-    -------
-    sizer : integer
-        gives the size of the resized actionspace to reach
-        the prescribed tumor dose.
-
-    """
-    bed_actionspace = BED_calc0(actionspace, abt)
-    max_action = min(max(bed_actionspace), goal - bed)
-    sizer = np.argmin(np.abs(bed_actionspace - max_action))
-    if bed_actionspace[sizer] < max_action:
-        # make sure that with prescribing max_action
-        # reached dose is not below goal
-        sizer += 1
-
-    return sizer
-
-
-def argfind(bedt, value):
-    """
-    This function is used to find the index of certain values
-
-    Parameters
-    ----------
-    bedt : list/array
-        list of tumor BED in which value is searched.
-    value : float
-        item inside list.
-
-    Returns
-    -------
-    index : integer
-        index of value inside list.
-
-    """
-    index = min(range(len(bedt)), key=lambda i: abs(bedt[i] - value))
-    return index
-
 def convert_to_physical(bed, ab, sf=1):
     """
     Converts given BED to the physical dose
