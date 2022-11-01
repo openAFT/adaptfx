@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import argparse
 import adaptfx as afx
+import sys
 nme = __name__
 
 class RL_object():
@@ -27,7 +28,7 @@ class RL_object():
             log_bool = 0
         else:
             if not log_bool in [0,1]:
-                aft_error('invalid "log" flag was set', nme)
+                afx.aft_error('invalid "log" flag was set', nme)
 
         try: # check if log flag is existent and boolean
             debug_bool = input_dict['debug']
@@ -100,7 +101,6 @@ def main():
         '--filename',
         metavar='',
         help='input instruction filename of dictionary',
-        default=None,
         type=str
     )
     parser.add_argument(
@@ -111,7 +111,7 @@ def main():
         default=False,
         type=bool
     )
-    args = parser.parse_args()
+    args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
     rl_test = RL_object(args.filename)
     afx.aft_message('start session...', nme, 1)
     afx.aft_message_list('fractionation plan:', rl_test.optimise(), nme, 1)
