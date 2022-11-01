@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-BEDT_STEPSIZE = 0.5
+DOSE_STEPSIZE = 0.1
 STATE_STEPSIZE = 1
 SF_LOW = 0
 SF_HIGH = 1.7
@@ -31,7 +31,7 @@ FULL_DICT = {'number_of_fractions':None,
 }
 
 SETTING_DICT = {
-        'bedt_stepsize': BEDT_STEPSIZE,
+        'dose_stepsize': DOSE_STEPSIZE,
         'state_stepsize': STATE_STEPSIZE,
         'sf_low': SF_LOW,
         'sf_high': SF_HIGH,
