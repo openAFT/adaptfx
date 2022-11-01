@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-import adaptfx
+from adaptfx import aft_message, aft_error, aft_warning, aft_message
 nme = __name__
 
 def stat_rounding(number, decimal):
@@ -30,7 +30,7 @@ def timing(start=None):
     else:
         stop = time.perf_counter()
         time_elapsed = stat_rounding((stop - start), 4)
-        adaptfx.aft_message(f'process duration: {time_elapsed} s:', nme, 1)
+        aft_message(f'process duration: {time_elapsed} s:', nme, 1)
 
 def key_reader(all_keys, full_dict, user_keys, algorithm):
     """
@@ -62,19 +62,19 @@ def key_reader(all_keys, full_dict, user_keys, algorithm):
             whole_dict[key] = user_keys[key]
         elif key not in user_keys:
             if full_dict[key] == None:
-                adaptfx.aft_error(f'missing mandatory key: "{key}"', nme)
+                aft_error(f'missing mandatory key: "{key}"', nme)
             else:
                 whole_dict[key] = full_dict[key]
 
     for key in user_keys:
         if key not in key_dict and key in full_dict:
-            adaptfx.aft_warning(
+            aft_warning(
                 f'key: "{key}" is not allowed for "{algorithm}"', nme, 0
                 )
         elif key not in full_dict:
-            adaptfx.aft_warning(f'unexpected key: "{key}"', nme, 0)
+            aft_warning(f'unexpected key: "{key}"', nme, 0)
 
-    return whole_dict
+    return dict((k, whole_dict[k]) for k in key_dict)
 
 def setting_reader(all_settings, user_settings):
     """
@@ -102,7 +102,7 @@ def setting_reader(all_settings, user_settings):
     
     for skey in user_settings:
         if skey not in all_settings:
-            adaptfx.aft_warning(f'unexpected setting: "{skey}"', nme, 0)
+            aft_warning(f'unexpected setting: "{skey}"', nme, 0)
 
     return whole_settings
 
