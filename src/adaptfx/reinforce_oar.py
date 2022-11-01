@@ -25,6 +25,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     fixed_mean = keys.fixed_mean
     fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
+    underdose = 10
     # prepare distribution
     actual_sf = sparing_factors_public[-1]
     if not fixed_prob:
@@ -41,8 +42,9 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     n_sf = len(sf)
 
     # actionspace
-    max_physical_dose = afx.convert_to_physical(tumor_goal, abt)
-    dose_stepsize = afx.convert_to_physical(sets.bedt_stepsize, abt)
+    remaining_bed = tumor_goal - accumulated_tumor_dose
+    max_physical_dose = afx.convert_to_physical(remaining_bed, abt)
+    dose_stepsize = afx.convert_to_physical(sets.dose_stepsize, abt)
     if max_dose == -1:
         # automatic max_dose calculation
         max_dose = max_physical_dose
@@ -52,30 +54,22 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
         max_dose = max_physical_dose
     if min_dose > max_dose:
         min_dose = max_dose - dose_stepsize
+    dose_diff = max_dose - min_dose
+    n_action = int(dose_diff // sets.dose_stepsize + 
+                    (dose_diff % sets.dose_stepsize > 0))
+    actionspace = np.linspace(min_dose, max_dose, n_action)
 
     # tumor bed states for tracking dose
-    remaining_dose = tumor_goal - accumulated_tumor_dose
+    tumor_limit = tumor_goal + sets.dose_stepsize
     # include at least one more step for bedt
-    state_diff = remaining_dose + sets.state_stepsize
+    state_limit = tumor_goal + sets.state_stepsize
+    state_diff = state_limit - accumulated_tumor_dose
     # define number of bed_dose steps to fulfill stepsize
     # this line just rounds up the number of steps
-    n_statesteps = int(state_diff // sets.state_stepsize + 
-                    (state_diff % sets.state_stepsize > 0))
-    state_limit = tumor_goal + sets.state_stepsize
-    bedt_states = np.linspace(accumulated_tumor_dose, state_limit, n_statesteps + 1)
-    n_bedt_states = len(bedt_states)
-
-    # actionspace in physical dose
-    bed_diff = remaining_dose + sets.bedt_stepsize
-    n_bedsteps = int(bed_diff // sets.bedt_stepsize + 
-                    (bed_diff % sets.bedt_stepsize > 0))
-    tumor_limit = tumor_goal + sets.bedt_stepsize
-    actions_bedt = np.linspace(0, remaining_dose, n_bedsteps)
-    actions_physical = afx.convert_to_physical(actions_bedt, abt)
-    range_condition = (actions_physical >= min_dose) & \
-                        (actions_physical <= max_dose)
-    actionspace = actions_physical[range_condition]
-    n_action = len(actionspace)
+    # and adds a step
+    n_bedt_states = int(state_diff // sets.state_stepsize + 
+                    (state_diff % sets.state_stepsize > 0)) + 1
+    bedt_states = np.linspace(accumulated_tumor_dose, state_limit, n_bedt_states)
 
     # bed_space to relate actionspace to oar- and tumor-dose
     bedn_space = afx.bed_calc0(actionspace, abn, actual_sf)
@@ -111,7 +105,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
 
         elif fraction == number_of_fractions:
             # in the last fraction value is not relevant
-            best_actions = afx.convert_to_physical(remaining_dose, abt)
+            best_actions = afx.convert_to_physical(remaining_bed, abt)
             if best_actions < min_dose:
                 best_actions = min_dose
             if best_actions > max_dose:
@@ -130,7 +124,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             best_actions = afx.convert_to_physical(remaining_bedt, abt)
             last_bedn = afx.bed_calc_matrix(best_actions, abn, sf)
             bedt_diff = bedt_states + remaining_bedt - tumor_goal
-            penalties = np.where(bedt_diff > 0, -sets.inf_penalty, bedt_diff)
+            penalties = np.where(bedt_diff > 0, -sets.inf_penalty, bedt_diff*underdose)
             # to each best action add the according penalties
             # penalties need to be reshaped as it was not numpy allocated
             vs = -last_bedn + penalties.reshape(n_bedt_states, 1)
