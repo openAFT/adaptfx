@@ -44,32 +44,31 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     # actionspace
     remaining_bed = tumor_goal - accumulated_tumor_dose
     max_physical_dose = afx.convert_to_physical(remaining_bed, abt)
-    dose_stepsize = afx.convert_to_physical(sets.dose_stepsize, abt)
+
     if max_dose == -1:
         # automatic max_dose calculation
         max_dose = max_physical_dose
     elif max_dose > max_physical_dose:
-        # Reduce max_dose to prohibit tumor_goal overshoot
-        # in order to check fewer actions for efficiency
+        # Reduce max_dose to prohibit tumor_goal overshoot (efficiency)
         max_dose = max_physical_dose
+
     if min_dose > max_dose:
-        min_dose = max_dose - dose_stepsize
-    dose_diff = max_dose - min_dose
-    n_action = int(dose_diff // sets.dose_stepsize + 
-                    (dose_diff % sets.dose_stepsize > 0))
-    actionspace = np.linspace(min_dose, max_dose, n_action)
+        min_dose = max_dose - sets.dose_stepsize
+
+    # actionspace in physical dose
+    diff_action = afx.step_round(max_dose-min_dose, sets.dose_stepsize)
+    physical_action = np.arange(min_dose, diff_action + min_dose ,sets.dose_stepsize)
+    # step_round rounds down so we include the maxdose
+    actionspace = np.append(physical_action, max_dose)
+    n_action = len(actionspace)
 
     # tumor bed states for tracking dose
-    tumor_limit = tumor_goal + sets.dose_stepsize
+    tumor_limit = tumor_goal + sets.state_stepsize
     # include at least one more step for bedt
-    state_limit = tumor_goal + sets.state_stepsize
-    state_diff = state_limit - accumulated_tumor_dose
     # define number of bed_dose steps to fulfill stepsize
-    # this line just rounds up the number of steps
-    # and adds a step
-    n_bedt_states = int(state_diff // sets.state_stepsize + 
-                    (state_diff % sets.state_stepsize > 0)) + 1
-    bedt_states = np.linspace(accumulated_tumor_dose, state_limit, n_bedt_states)
+    bedt_states = np.arange(accumulated_tumor_dose,
+                            tumor_limit, sets.state_stepsize)
+    n_bedt_states = len(bedt_states)
 
     # bed_space to relate actionspace to oar- and tumor-dose
     bedn_space = afx.bed_calc0(actionspace, abn, actual_sf)
