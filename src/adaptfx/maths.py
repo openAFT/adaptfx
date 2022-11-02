@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.stats import truncnorm
 from scipy.interpolate import interp1d
+from decimal import Decimal as dec
 
 def truncated_normal(mean, std, low, upp):
     """
@@ -131,3 +132,46 @@ def interpolate(x, x_fit, y_fit, mode='numpy'):
         y_func = interp1d(x_fit, y_fit)
         y = y_func(x)
     return y
+
+def step_round(input_vector, step_size):
+    """
+    round value to custom step_size
+
+    Parameters
+    ----------
+    input_vector : array
+        array to be rounded
+    step_size : array
+        stepsize for rounding
+
+    Returns
+    -------
+    rounded_vector : array
+        rounded values
+
+    """
+    def floor_step_size(input, step):
+        step_size_dec = dec(str(step))
+        rounded_vector = float(int(dec(str(input)) / 
+                            step_size_dec) * step_size_dec)
+        return rounded_vector
+
+    f = np.vectorize(floor_step_size, otypes=[float], excluded=['stepsize'])
+    return f(input_vector, step_size)
+
+def find_exponent(number):
+    """
+    find exponent of number in order of ten
+
+    Parameters
+    ----------
+    number : float
+        number of interest
+
+    Returns
+    -------
+    exponent : int
+        exponent in order of ten
+
+    """
+    return dec(str(number)).normalize().as_tuple().exponent

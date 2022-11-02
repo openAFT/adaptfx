@@ -151,10 +151,13 @@ def multiple(algorithm, keys, settings=afx.SETTING_DICT):
         #         fixed_std,
         #     )
 
+    exponent = afx.find_exponent(settings.dose_stepsize)
+    physical, tumor, oar = np.around(
+        [physical_doses, tumor_doses, oar_doses], -exponent)
+    oar_sum, tumor_sum = np.around(
+        [oar_doses.sum(), tumor_doses.sum()], -exponent)
+
     return [
-                np.round(oar_doses.sum(), 2),
-                np.round(tumor_doses.sum(), 2),
-                np.array((np.round(physical_doses,2),
-                    np.round(tumor_doses,2),
-                    np.round(oar_doses,2)))
+                oar_sum, tumor_sum, 
+                np.array([physical, tumor, oar])
             ]
