@@ -19,7 +19,7 @@
 	},
 'settings':
 	{
-		'bedt_stepsize': 0.1,
-		'state_stepsize': 0.1
+		'dose_stepsize': 0.1,
+		'state_stepsize': 1
 	}
 }
