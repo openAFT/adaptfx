@@ -13,6 +13,8 @@
 		'fixed_prob': 1,
 		'fixed_mean': 0.9,
 		'fixed_std': 0.04,
+		'min_dose': 0,
+		'max_dose': -1,
 		'tumor_goal': 72,
 		'oar_limit': 90,
 		'c': 0.8,
@@ -20,6 +22,7 @@
 'settings':
 	{
 		'dose_stepsize': 0.1,
-		'state_stepsize': 1
+		'state_stepsize': 1,
+		'sf_stepsize': 0.2
 	}
 }
