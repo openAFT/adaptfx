@@ -158,6 +158,6 @@ def multiple(algorithm, keys, settings=afx.SETTING_DICT):
         [oar_doses.sum(), tumor_doses.sum()], -exponent)
 
     return [
-                oar_sum, tumor_sum, 
-                np.array([physical, tumor, oar])
+            oar_sum, tumor_sum,
+            np.array([physical, tumor, oar])
             ]
