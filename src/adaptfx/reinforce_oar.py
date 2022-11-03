@@ -96,9 +96,8 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             future_bedt = accumulated_tumor_dose + bedt_space
             overdose_args = (future_bedt > tumor_goal)
             future_bedt = np.where(overdose_args, tumor_limit, future_bedt)
-            penalties = np.where(overdose_args, -sets.inf_penalty, 0)
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
-            vs = -bedn_space + future_values + penalties
+            vs = -bedn_space + future_values
             # argmax of vs along axis 0 to find best action fot the actual sf
             physical_dose = float(actionspace[vs.argmax(axis=0)])
 
@@ -122,8 +121,9 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             last_actions[last_actions > max_dose_bed] = max_dose_bed
             best_actions = afx.convert_to_physical(last_actions, abt)
             last_bedn = afx.bed_calc_matrix(best_actions, abn, sf)
-            bedt_diff = bedt_states + last_actions - tumor_goal
-            penalties = np.where(bedt_diff > 0, -sets.inf_penalty, bedt_diff*sets.inf_penalty)
+            # this smooths out the penalties in underdose and overdose regions
+            bedt_diff = (bedt_states + last_actions - tumor_goal) * sets.inf_penalty
+            penalties = np.where(bedt_diff > 0, -bedt_diff, bedt_diff)
             # to each best action add the according penalties
             # penalties need to be reshaped for broadcasting
             vs = -last_bedn + penalties.reshape(n_bedt_states, 1)
