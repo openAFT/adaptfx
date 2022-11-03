@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.stats import truncnorm
 from scipy.interpolate import interp1d
+from scipy.optimize import minimize_scalar
 from decimal import Decimal as dec
 
 def truncated_normal(mean, std, low, upp):
@@ -95,16 +96,15 @@ def std_calc(measured_data, alpha, beta):
 
     """
     n = len(measured_data)
-    std_values = np.arange(0.00001, 0.5, 0.00001)
-    likelihood_values = np.zeros(len(std_values))
-    for index, value in enumerate(std_values):
-        likelihood_values[index] = (
-            value ** (alpha - 1)
-            / value ** (n - 1)
-            * np.exp(-1 / beta * value)
-            * np.exp(-np.var(measured_data) / (2 * (value**2 / n)))
-        )  # here i have to check whether it is good.
-    std = std_values[np.argmax(likelihood_values)]
+    variance = np.var(measured_data)
+    # -------------------------------------------------------------------
+    def likelihood(std):
+        L = std ** (alpha - n) * np.exp(- std / beta - 
+                n* variance / (2 * (std **2)))
+        return -L
+    std = minimize_scalar(likelihood, bounds=(0.001, 0.6), 
+                    method='bounded', options={'maxiter':19}).x
+    
     return std
 
 def interpolate(x, x_fit, y_fit, mode='numpy'):
@@ -135,7 +135,7 @@ def interpolate(x, x_fit, y_fit, mode='numpy'):
 
 def step_round(input_vector, step_size):
     """
-    round value to custom step_size
+    round value down to custom step_size
 
     Parameters
     ----------
