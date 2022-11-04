@@ -94,8 +94,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             # but actual fraction is not the last fraction
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
             future_bedt = accumulated_tumor_dose + bedt_space
-            overdose_args = (future_bedt > tumor_goal)
-            future_bedt = np.where(overdose_args, tumor_limit, future_bedt)
+            future_bedt = np.where(future_bedt > tumor_goal, tumor_limit, future_bedt)
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
             vs = -bedn_space + future_values
             # argmax of vs along axis 0 to find best action fot the actual sf
@@ -139,8 +138,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             future_values_discrete = (values[fraction_index - 1] * prob).sum(axis=1)
             # bedt_states is reshaped such that numpy broadcast leads to 2D array
             future_bedt = bedt_states.reshape(n_bedt_states, 1) + bedt_space
-            overdose_args = future_bedt > tumor_goal
-            future_bedt = np.where(overdose_args, tumor_limit, future_bedt)
+            future_bedt = np.where(future_bedt > tumor_goal, tumor_limit, future_bedt)
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
             # dim(bedn_sf_space)=(1,n_action,n_sf),dim(future_values)=(n_states,n_action)
             # every row of values_penalties is transposed and copied n_sf times
