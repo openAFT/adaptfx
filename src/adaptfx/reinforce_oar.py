@@ -142,12 +142,9 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             overdose_args = future_bedt > tumor_goal
             future_bedt = np.where(overdose_args, tumor_limit, future_bedt)
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
-            # combine future values and penalties into one array (efficiency)
-            values_penalties = np.where(overdose_args,
-                future_values-sets.inf_penalty, future_values)
-            # dim(bedn_sf_space)=(1,n_action,n_sf),dim(values_penalties)=(n_states,n_action)
+            # dim(bedn_sf_space)=(1,n_action,n_sf),dim(future_values)=(n_states,n_action)
             # every row of values_penalties is transposed and copied n_sf times
-            vs = -bedn_sf_space + values_penalties.reshape(n_bedt_states, n_action, 1)
+            vs = -bedn_sf_space + future_values.reshape(n_bedt_states, n_action, 1)
             # check vs along the sf axis
             values[fraction_index] = vs.max(axis=1)
             # policy[fraction_index] = vs.argmax(axis=1)
