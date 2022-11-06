@@ -26,7 +26,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     fixed_mean = keys.fixed_mean
     fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
-    policy_plot = 0
+    policy_plot = 1
     # prepare distribution
     actual_sf = sparing_factors_public[-1]
     if not fixed_prob:
@@ -107,7 +107,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
 
             if policy_plot:
                 # for the policy plot
-                vs_full = -bedn_sf_space.reshape(n_action, n_sf) + future_values.reshape(n_action, 1)
+                vs_full = (-bedn_sf_space+ future_values.reshape(1, n_action, 1))[0]
                 # check vs along the sf axis
                 values[fraction_index][0] = vs_full.max(axis=0)
                 policy[fraction_index][0] = actionspace[vs_full.argmax(axis=0)]
