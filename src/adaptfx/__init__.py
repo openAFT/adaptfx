@@ -11,11 +11,13 @@ from .maths import *
 from .planning import *
 from .radiobiology import *
 from .reinforce_oar import *
+from .reinforce_frac import *
 
 __all__ = ['bed_calc_matrix',
             'convert_to_physical',
             'multiple',
             'min_oar_bed',
+            'min_n_frac',
             'timing']
 
 
