@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy.stats import truncnorm
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, interp2d, RegularGridInterpolator
 from scipy.optimize import minimize_scalar
 from decimal import Decimal as dec
 
@@ -107,7 +107,7 @@ def std_calc(measured_data, alpha, beta):
     
     return std
 
-def interpolate(x, x_fit, y_fit, mode='numpy'):
+def interpolate(x, x_pred, y_reg):
     """
     calculates y values from interpolated function y(x)
 
@@ -116,9 +116,9 @@ def interpolate(x, x_fit, y_fit, mode='numpy'):
     x : array
         x values for interpolated function
     x_fit : array
-        observables for interpolation
+        x predictor for interpolation
     y_fit : array
-        predictors of interpolation
+        y regressand predictors of interpolation
 
     Returns
     -------
@@ -126,11 +126,7 @@ def interpolate(x, x_fit, y_fit, mode='numpy'):
         interpolated values, same shape as x
 
     """
-    if mode == 'numpy':
-        y = np.interp(x, x_fit, y_fit)
-    elif mode == 'scipy':
-        y_func = interp1d(x_fit, y_fit)
-        y = y_func(x)
+    y = np.interp(x, x_pred, y_reg)
     return y
 
 def step_round(input_vector, step_size):
@@ -175,3 +171,26 @@ def find_exponent(number):
 
     """
     return dec(str(number)).normalize().as_tuple().exponent
+
+def obj_interpolate(x_pred, y_pred, z_reg):
+    """
+    creates linear interpolation object from x, y predictors
+    and z regressor
+
+    Parameters
+    ----------
+    x_pred : array
+        x predictor for interpolated function
+    y_pred : array
+        y predictor for interpolated function
+    z_reg : array
+        regressand for interpolation
+
+    Returns
+    -------
+    y_func(x,y) : scipy.interpolate._interpolate.interp2d
+        scipy interpolation object
+
+    """
+    func = interp2d(x_pred, y_pred, z_reg)
+    return func
