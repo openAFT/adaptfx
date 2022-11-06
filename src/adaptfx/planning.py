@@ -104,28 +104,15 @@ def multiple(algorithm, keys, settings=afx.SETTING_DICT):
         #         fixed_mean,
         #         fixed_std,
         #     )
-        # elif algorithm == 'frac':
-        #     [
-        #         physical_dose,
-        #         tumor_dose,
-        #         oar_dose
-        #     ] = frac.value_eval(
-        #         looper + 1,
-        #         number_of_fractions,
-        #         accumulated_tumor_dose,
-        #         sparing_factors[0 : looper + 2],
-        #         alpha,
-        #         beta,
-        #         tumor_goal,
-        #         abt,
-        #         abn,
-        #         C,
-        #         min_dose,
-        #         max_dose,
-        #         fixed_prob,
-        #         fixed_mean,
-        #         fixed_std,
-        #     )
+        elif algorithm == 'frac':
+            [
+                physical_doses[i],
+                tumor_doses[i],
+                oar_doses[i]
+            ] = afx.min_n_frac(
+                keys,
+                settings
+            )
 
         # elif algorithm == 'tumor_oar':
         #     [
