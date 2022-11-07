@@ -91,8 +91,8 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     # ---------------------------------------------------------------------- #
     remaining_fractions = np.arange(number_of_fractions, fraction - 1, -1)
     remaining_index = remaining_fractions - fraction
-    # note that lowest fraction_state is one not zero
-    # and remaining_index counts in python indices
+    # note that lowest fraction_state is one
+    # but the lowest fraction_index is zero
     for fraction_index, fraction_state in zip(remaining_index, remaining_fractions):
         if fraction_state == fraction and fraction != number_of_fractions:
             # state is the actual fraction to calculate
