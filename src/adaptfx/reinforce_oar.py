@@ -26,7 +26,9 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     fixed_mean = keys.fixed_mean
     fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
-    policy_plot = 1
+    # check in which fraction policy should be returned
+    policy_plot = 1 if sets.plot_policy == fraction else 0
+    
     # prepare distribution
     actual_sf = sparing_factors_public[-1]
     if not fixed_prob:
@@ -86,7 +88,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
         policy = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
     
     # initialise physical dose scalar (the optimal action)
-    physical_dose = 0
+    optimal_action = 0
     # ---------------------------------------------------------------------- #
     remaining_fractions = np.arange(number_of_fractions, fraction - 1, -1)
     remaining_index = remaining_fractions - fraction
@@ -103,7 +105,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
             vs = -bedn_space + future_values
             # argmax of vs along axis 0 to find best action fot the actual sf
-            physical_dose = float(actionspace[vs.argmax(axis=0)])
+            optimal_action = float(actionspace[vs.argmax(axis=0)])
 
             if policy_plot:
                 # for the policy plot
@@ -116,7 +118,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             # in the last fraction value is not relevant
             # max_dose is the already calculated remaining dose
             # this should compensate the discretisation of the state space
-            physical_dose = max(min_dose, max_dose)
+            optimal_action = max(min_dose, max_dose)
 
         elif fraction_state == number_of_fractions:
             # final state to initialise terminal reward
@@ -127,8 +129,8 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             # cut the actionspace to min and max dose constraints
             last_actions[last_actions < min_dose_bed] = min_dose_bed
             last_actions[last_actions > max_dose_bed] = max_dose_bed
-            physical_dose = afx.convert_to_physical(last_actions, abt)
-            last_bedn = afx.bed_calc_matrix(physical_dose, abn, sf)
+            optimal_action = afx.convert_to_physical(last_actions, abt)
+            last_bedn = afx.bed_calc_matrix(optimal_action, abn, sf)
             # this smooths out the penalties in underdose and overdose regions
             bedt_diff = (bedt_states + last_actions - tumor_goal) * sets.inf_penalty
             penalties = np.where(bedt_diff > 0, -bedt_diff, bedt_diff)
@@ -139,7 +141,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
 
             if policy_plot:
                 # policy calculation for each bedt, but sf is not considered
-                _, police = np.meshgrid(np.ones(n_sf), physical_dose)
+                _, police = np.meshgrid(np.ones(n_sf), optimal_action)
                 policy[fraction_index] = police
 
         elif fraction_state != number_of_fractions:
@@ -159,7 +161,11 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             if policy_plot:
                 policy[fraction_index] = actionspace[vs.argmax(axis=1)]
     
-    tumor_dose = afx.bed_calc0(physical_dose, abt)
-    oar_dose = afx.bed_calc0(physical_dose, abn, actual_sf)
+    tumor_dose = afx.bed_calc0(optimal_action, abt)
+    oar_dose = afx.bed_calc0(optimal_action, abn, actual_sf)
 
-    return [physical_dose, tumor_dose, oar_dose]
+    output = {'physical_dose': optimal_action, 'tumor_dose': tumor_dose, 
+        'oar_dose': oar_dose, 'sf': sf, 'states': bedt_states}
+    if policy_plot:
+        output['policy'] = policy
+    return afx.DotDict(output)

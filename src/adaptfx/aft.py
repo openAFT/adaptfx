@@ -68,7 +68,7 @@ class RL_object():
         try: # check if settings exist and is a dictionnary
             user_settings = input_dict['settings']
         except KeyError:
-            afx.aft_message('no "settings" were given, set to default', nme)
+            afx.aft_message('no "settings" were given, set to default', nme, 1)
             settings = afx.SETTING_DICT
             afx.aft_message_dict('settings', settings, nme, 1)
         else:

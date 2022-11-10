@@ -37,7 +37,9 @@ SETTING_DICT = {
         'sf_high': SF_HIGH,
         'sf_stepsize': SF_STEPSIZE,
         'sf_prob_threshold': SF_PROB_THRESHOLD,
-        'inf_penalty': INF_PENALTY
+        'inf_penalty': INF_PENALTY,
+        'plot_policy': 0,
+        'plot_values': 0
 }
 
 OAR_LIST = ['number_of_fractions',
@@ -94,5 +96,5 @@ TUMOR_OAR_LIST = ['number_of_fractions',
         'fixed_mean',
         'fixed_std']
 
-KEY_DICT = {'oar':OAR_LIST, 'tumor':TUMOR_LIST, 'frac':FRAC_LIST, 'tumor_oar':TUMOR_OAR_LIST}
+KEY_DICT = {'oar':OAR_LIST, 'oar_old':OAR_LIST, 'tumor':TUMOR_LIST, 'frac':FRAC_LIST, 'frac_old':FRAC_LIST, 'tumor_oar':TUMOR_OAR_LIST}
     
