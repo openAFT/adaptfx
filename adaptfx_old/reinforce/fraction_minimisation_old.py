@@ -8,104 +8,94 @@ number of fractions used for the treatment.
 
 import numpy as np
 from scipy.interpolate import interp1d
-from maths import std_calc, truncated_normal, sf_probdist
-from radiobiology import bed_calc_matrix, bed_calc0, max_action, convert_to_physical
+from adaptfx import std_calc, truncated_normal, sf_probdist, bed_calc_matrix, bed_calc0, convert_to_physical, SETTING_DICT, DotDict
 
-def value_eval(
-    fraction,
-    number_of_fractions,
-    accumulated_tumor_dose,
-    sparing_factors,
-    alpha,
-    beta,
-    tumor_goal,
-    abt,
-    abn,
-    c,
-    min_dose=0,
-    max_dose=22.3,
-    fixed_prob=0,
-    fixed_mean=0,
-    fixed_std=0,
-):
+BED_calc_matrix = bed_calc_matrix
+BED_calc0 = bed_calc0
+
+def max_action(bed, actionspace, goal, abt=10):
     """
-    calculates the optimal dose for the desired fraction.
+    Computes the maximal dose that can be delivered to the tumor
+    in each fraction depending on the actual accumulated dose
 
     Parameters
     ----------
-    fraction : integer
-        Number of the actual fraction.
-    number_of_fractions : integer
-        number of fractions that will be delivered.
-    accumulated_tumor_dose : float
-        accumulated tumor BED.
-    sparing_factors : list/array
-        list or array of all observed sparing factors. Include planning
-        session sparing factor!.
-    alpha : float
-        alpha hyperparameter of std prior derived from previous patients.
-    beta : float
-        beta hyperparameter of std prior derived from previous patients
-    tumor_goal : float
-        prescribed tumor BED.
+    bed : float
+        accumulated tumor dose so far.
+    actionspace : list/array
+        array with all discrete dose steps.
+    goal : float
+        prescribed tumor dose.
     abt : float, optional
-        alpha beta ratio of the tumor. The default is 10.
-    abn : float, optional
-        alpha beta ratio of the organ at risk. The default is 3.
-    C: float
-        fixed constant to penalise for each additional fraction that is used
-    min_dose : float
-        minimal physical doses to be delivered in one fraction.
-        The doses are aimed at PTV 95.
-    max_dose : float
-        maximal physical doses to be delivered in one fraction.
-        The doses are aimed at PTV 95.
-    fixed_prob : int
-        this variable is to turn on a fixed probability distribution.
-        If the variable is not used (0), then the probability will be updated.
-        If the variable is turned to (1), the inserted mean and std will be used
-        for a fixed sparing factor distribution. Then alpha and beta are unused.
-    fixed_mean: float
-        mean of the fixed sparing factor normal distribution.
-    std_fixed: float
-        standard deviation of the fixed sparing factor normal distribution.
+        alpha beta ratio of tumor. The default is 10.
 
     Returns
     -------
-    list
+    sizer : integer
+        gives the size of the resized actionspace to reach
+        the prescribed tumor dose.
 
     """
-    
+    bed_actionspace = bed_calc0(actionspace, abt)
+    max_action = min(max(bed_actionspace), goal - bed)
+    sizer = np.argmin(np.abs(bed_actionspace - max_action))
+    if bed_actionspace[sizer] < max_action:
+        # make sure that with prescribing max_action
+        # reached dose is not below goal
+        sizer += 1
+
+    return sizer
+
+def min_n_frac_old(keys, sets=SETTING_DICT):
+    fraction = keys.fraction
+    number_of_fractions = keys.number_of_fractions
+    accumulated_tumor_dose = keys.accumulated_tumor_dose
+    sparing_factors_public = keys.sparing_factors_public
+    alpha = keys.alpha
+    beta = keys.beta
+    tumor_goal = keys.tumor_goal
+    c = keys.c
+    abt = keys.abt
+    abn = keys.abn
+    min_dose = keys.min_dose
+    max_dose = keys.max_dose
+    fixed_prob = keys.fixed_prob
+    fixed_mean = keys.fixed_mean
+    fixed_std = keys.fixed_std
+    # ---------------------------------------------------------------------- #
+    # check in which fraction policy should be returned
+    policy_plot = 1 if sets.plot_policy == fraction else 0
+
     if fixed_prob != 1:
         mean = np.mean(
-            sparing_factors
+            sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_calc(sparing_factors, alpha, beta)
+        standard_deviation = std_calc(sparing_factors_public, alpha, beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
-    X = get_truncated_normal(mean=mean, sd=standard_deviation, low=0.01, upp=1.3)
-    bedt = np.arange(accumulated_tumor_dose, tumor_goal, 1)
-    bedt = np.concatenate(
-        (bedt, [tumor_goal, tumor_goal + 1])
+    X = truncated_normal(mean=mean, std=standard_deviation, low=0.01, upp=1.3)
+    bedt_states = np.arange(accumulated_tumor_dose, tumor_goal, 1)
+    bedt_states = np.concatenate(
+        (bedt_states, [tumor_goal, tumor_goal + 1])
     )  # add an extra step outside of our prescribed tumor dose which will be penalised to make sure that we aim at the prescribe tumor dose
-    prob = np.array(probdist(X))
-    sf = np.arange(0.01, 1.71, 0.01)
-    sf = sf[prob > 0.00001]
-    prob = prob[prob > 0.00001]
+    [sf, prob] = sf_probdist(X, sets.sf_low, sets.sf_high,
+        sets.sf_stepsize, sets.sf_prob_threshold)
     # we prepare an empty values list and open an action space which is equal to all the dose numbers that can be given in one fraction
     values = np.zeros(
-        (number_of_fractions - fraction, len(bedt), len(sf))
+        (number_of_fractions - fraction, len(bedt_states), len(sf))
     )  # 2d values list with first indice being the BED and second being the sf
     max_physical_dose = convert_to_physical(tumor_goal, abt)
-    if max_dose > max_physical_dose:  
+    if max_dose == -1:
+        max_dose = max_physical_dose
+    elif max_dose > max_physical_dose:
         # if the max dose is too large we lower it, so we dont needlessly check too many actions
         max_dose = max_physical_dose
     if min_dose > max_dose:
         min_dose = max_dose - 0.1
     actionspace = np.arange(min_dose, max_dose + 0.1, 0.1)
     # now we set up the policy array which has len(BEDT)*len(sf)*len(actionspace) entries. We give each action the same probability to start with
-    policy = np.zeros((number_of_fractions - fraction, len(bedt), len(sf)))
+    policy = np.zeros((number_of_fractions - fraction, len(bedt_states), len(sf)))
 
     for state, fraction_state in enumerate(
         np.arange(number_of_fractions, fraction -1, -1)
@@ -114,10 +104,10 @@ def value_eval(
             state == number_of_fractions - 1 #fraction_state == 1
         ):  # first state with no prior dose delivered so we dont loop through BEDT
             bedn = bed_calc_matrix(
-                sparing_factors[-1], abn, actionspace
+                sparing_factors_public[-1], abn, actionspace
             )  # calculate all delivered doses to the Normal tissues (the penalty)
             future_bedt = bed_calc0(actionspace, abt)
-            future_values_func = interp1d(bedt, (values[state - 1] * prob).sum(axis=1))
+            future_values_func = interp1d(bedt_states, (values[state - 1] * prob).sum(axis=1))
             future_values = future_values_func(
                 future_bedt
             )  # for each action and sparing factor calculate the penalty of the action and add the future value we will only have as many future values as we have actions (not sparing dependent)
@@ -129,7 +119,7 @@ def value_eval(
             accumulated_tumor_dose >= tumor_goal
         ):
             best_action = 0
-            last_BEDN = bed_calc0(best_action, abn, sparing_factors[-1])
+            last_BEDN = bed_calc0(best_action, abn, sparing_factors_public[-1])
             policy4 = 0
             break
         elif (
@@ -138,14 +128,14 @@ def value_eval(
             actionspace_clipped = actionspace[
                 0 : max_action(accumulated_tumor_dose, actionspace, tumor_goal) + 1
             ]
-            bedn = bed_calc_matrix(sparing_factors[-1], abn, actionspace_clipped)
+            bedn = bed_calc_matrix(sparing_factors_public[-1], abn, actionspace_clipped)
             future_bedt = accumulated_tumor_dose + bed_calc0(actionspace_clipped, abt)
             future_bedt[future_bedt > tumor_goal] = tumor_goal + 1
             penalties = np.zeros(future_bedt.shape)
             c_penalties = np.zeros(future_bedt.shape)
             penalties[future_bedt > tumor_goal] = 0 #overdosing is indirectly penalised with BEDN
             c_penalties[future_bedt < tumor_goal] = -c
-            future_values_func = interp1d(bedt, (values[state - 1] * prob).sum(axis=1))
+            future_values_func = interp1d(bedt_states, (values[state - 1] * prob).sum(axis=1))
             future_values = future_values_func(
                 future_bedt
             )  # for each action and sparing factor calculate the penalty of the action and add the future value we will only have as many future values as we have actions (not sparing dependent)
@@ -161,13 +151,13 @@ def value_eval(
                 best_action = min_dose
             if best_action > max_dose:
                 best_action = max_dose
-            last_BEDN = bed_calc0(best_action, abn, sparing_factors[-1])
+            last_BEDN = bed_calc0(best_action, abn, sparing_factors_public[-1])
             policy4 = best_action * 10
         else:
             future_value_prob = (values[state - 1] * prob).sum(axis=1)
-            future_values_func = interp1d(bedt, future_value_prob)
+            future_values_func = interp1d(bedt_states, future_value_prob)
             for tumor_index, tumor_value in enumerate(
-                bedt
+                bedt_states
             ):  # this and the next for loop allow us to loop through all states
                 actionspace_clipped = actionspace[
                     0 : max_action(tumor_value, actionspace, tumor_goal) + 1
@@ -219,11 +209,18 @@ def value_eval(
 
                 policy[state][tumor_index] = best_action
                 values[state][tumor_index] = valer
+
+    if sets.plot_policy or sets.plot_value:
+        policy = np.concatenate([np.zeros((1, len(bedt_states), len(sf))), policy[::-1]])
+        values = np.concatenate([np.zeros((1, len(bedt_states), len(sf))), values[::-1]])
     if fraction != number_of_fractions:
-        physical_dose = actionspace[policy4]
+        optimal_action = actionspace[policy4]
     if fraction == number_of_fractions:
-        physical_dose = policy4 / 10
-    tumor_dose = bed_calc0(physical_dose, abt)
-    oar_dose = bed_calc0(physical_dose, abn, sparing_factors[-1])
-    return [physical_dose, tumor_dose, oar_dose]
-    # return [physical_dose, tumor_dose, oar_dose, policy, sf, BEDT]
+        optimal_action = policy4 / 10
+    tumor_dose = bed_calc0(optimal_action, abt)
+    oar_dose = bed_calc0(optimal_action, abn, sparing_factors_public[-1])
+    output = DotDict({'physical_dose': optimal_action, 'tumor_dose': tumor_dose, 
+        'oar_dose': oar_dose, 'sf': sf, 'states': bedt_states})
+    if policy_plot:
+        output['policy'] = policy
+    return output
