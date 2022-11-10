@@ -10,7 +10,8 @@ The instruction file is simply a python dictionary with parameters. This diction
 ```
 $ aft -f <instruction_file>
 ```
-As an example in the first keys of the dictionary the user specifies:
+As an example the user specifies following elements of the dictionary:
+`'algorithm'`, `'single_fraction'`, `'debug'`, `'log'`, `'keys'`, `'settings'`,
 
 ```
 # instruction_file
@@ -19,7 +20,7 @@ As an example in the first keys of the dictionary the user specifies:
 'single_fraction' : 0,
 'debug': 1,
 'log': 0,
-'parameters': 
+'keys': 
 	{
 	'number_of_fractions': 6,
 	'sparing_factors': [0.98, 0.97, 0.8, 0.83, 0.8, 0.85, 0.94],
@@ -31,27 +32,46 @@ As an example in the first keys of the dictionary the user specifies:
 	'tumor_goal': 72,
 	'oar_limit': 90,
 	'C': 0.8,
-	}
+	},
+'settings' :
+    {
+    'dose_stepsize': 0.1,
+    'state_stepsize': 1,
+    'sf_low': 0,
+    'sf_high': 1.7,
+    'sf_stepsize': 0.01,
+    'sf_prob_threshold': 1e-5,
+    'inf_penalty': 1e5,
+    'plot_policy': 0,
+    'plot_values': 0
+    }
 }
 ```
 
 ```
-key
--------
+MAIN ENTRIES
+----------------
 algorithm: frac, oar, tumor, tumor_oar
     type of algorithm
-    default: 
+    frac : minimise number of fractions
+    oar: minimise oar BED, with tumor constraint
+    tumor : maximise tumor BED, with oar constraint
+    tumor_oar : minimise oar and maximise tumor BED simultaneously
 debug: 0, 1
     show more information (for developers)
     default: 0
 log: 0,1
     log output to a file
     default: 0
+keys: dict
+    algorithm instruction
+settings: dict
+    algorithm settings
 ```
 
 ```
-Parameters
-----------
+GENERAL KEYS
+----------------
 number_of_fractions : integer
     number of fractions that will be delivered.
 sparing_factors : list/array
@@ -80,9 +100,12 @@ fixed_mean: float
     mean of the fixed sparing factor normal distribution.
 fixed_std: float
     standard deviation of the fixed sparing factor normal distribution.
+```
 
-if single_fraction
-----------
+
+```
+SINGLE FRACTION
+----------------
 fraction : integer
     number of actual fraction
 accumulated_oar_dose : float
@@ -90,18 +113,39 @@ accumulated_oar_dose : float
 accumulated_tumor_dose : float
     accumulated tumor BED (from previous fractions).
 
-if tumor
-----------
+MAXIMISE TUMOR BED
+----------------
 oar_limit : float
     upper BED limit of OAR.
 
-if oar
-----------
+MINIMISE OAR BED
+----------------
 tumor_goal : float
     prescribed tumor BED.
 
-if frac
-----------
+MINIMISE NUMBER OF FRACTION
+----------------
 c: float
     fixed constant to penalise for each additional fraction that is used.
+```
+
+```
+SETTINGS
+----------------
+dose_stepsize : float
+    stepsize of the actionspace.
+state_stepsize : float
+    stepsize of the BED states.
+sf_low : float
+    lower bound of the possible sparing factors.
+sf_high : float
+    upper bound of the possible sparing factors.
+sf_stepsize: float
+    stepsize of the sparing factor stepsize.
+sf_prob_threshold': float
+    probability threshold of the sparing factor occuring according to the gaussian parameters.
+inf_penalty : float
+    infinite penalty for certain undesired states.
+plot_policy : int
+    in which fraction should policy be plotted (zero being none).
 ```
