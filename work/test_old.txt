@@ -1,7 +1,7 @@
 # test file for whole plan with fraction number minimisation
 
 {
-'algorithm': 'oar_old',
+'algorithm': 'oar',
 'debug': 0,
 'log': 0,
 'keys': 
@@ -15,6 +15,7 @@
 		'fixed_std': 0.04,
 		'min_dose': 0,
 		'max_dose': -1,
+		'oar_limit': 90,
 		'tumor_goal': 72,
 	}
 }
