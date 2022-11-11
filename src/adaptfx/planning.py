@@ -28,15 +28,21 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
     for i in range(0, keys.number_of_fractions):
         keys.fraction = i + 1
         keys.accumulated_tumor_dose = tumor_doses.sum()
+        keys.accumulated_oar_dose = oar_doses.sum()
         keys.sparing_factors_public = keys.sparing_factors[0 : i + 2]
         if algorithm == 'oar':
             output = afx.min_oar_bed(keys, sets)
-        elif algorithm == 'oar_old':
-            output = afx.min_oar_bed_old(keys, sets)
         elif algorithm == 'frac':
             output = afx.min_n_frac(keys, sets)
+            
+        elif algorithm == 'oar_old':
+            output = afx.min_oar_bed_old(keys, sets)
         elif algorithm == 'frac_old':
             output = afx.min_n_frac_old(keys, sets)
+        elif algorithm == 'tumor_old':
+            output = afx.max_tumor_bed_old(keys, sets)
+        elif algorithm == 'tumor_oar_old':
+            output = afx.min_oar_max_tumor_old(keys, sets)
         else:
             afx.aft_error('no valid algorithm given', nme)
             

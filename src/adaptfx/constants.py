@@ -96,5 +96,10 @@ TUMOR_OAR_LIST = ['number_of_fractions',
         'fixed_mean',
         'fixed_std']
 
-KEY_DICT = {'oar':OAR_LIST, 'oar_old':OAR_LIST, 'tumor':TUMOR_LIST, 'frac':FRAC_LIST, 'frac_old':FRAC_LIST, 'tumor_oar':TUMOR_OAR_LIST}
+KEY_DICT = {
+        'oar': OAR_LIST, 'oar_old': OAR_LIST, 
+        'tumor': TUMOR_LIST, 'tumor_old': TUMOR_LIST,
+        'frac': FRAC_LIST, 'frac_old': FRAC_LIST,
+        'tumor_oar': TUMOR_OAR_LIST, 'tumor_oar_old': TUMOR_OAR_LIST
+        }
     

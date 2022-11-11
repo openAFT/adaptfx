@@ -11,8 +11,7 @@ from .maths import *
 from .planning import *
 from .radiobiology import *
 from .visualiser import *
-from .reinforce_oar import *
-from .reinforce_frac import *
+from .reinforce import *
 from .reinforce_old import *
 
 __all__ = ['bed_calc_matrix',
