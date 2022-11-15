@@ -25,8 +25,8 @@ classifiers = [
 dependencies = [
     "numpy",
     "scipy",
+    "matplotlib",
 ]
-
 dynamic = ["version"]
 
 [project.urls]
@@ -34,11 +34,11 @@ source = "https://github.com/openAFT/adaptfx"
 
 
 [tool.setuptools_scm]
-write_to = "src/_version.py"
+write_to = "src/adaptfx/_version.py"
 local_scheme = "no-local-version"
 
 [tool.setuptools.dynamic]
-version = {attr = "src._version.version"}
+version = {attr = "adaptfx._version.version"}
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -8,20 +8,7 @@ For this adaptive approach a reinforcement learning algorithm based on dynamic p
 
 ## Installation
 
-To install the `adaptfx` package, it is recommended to create a virtual environment using the `venv` module:
-
-```
-$ python3.10 -m venv adaptfx_env
-```
-
-activate the virtual environment
-
-```
-$ cd adaptfx_env
-$ source bin/activate
-```
-
-then install the `adaptfx` package with either method.
+To install the `adaptfx` package, use either of the methods below:
 
 ### Method 1: pip
 
@@ -37,7 +24,7 @@ $ cd adaptfx
 $ pip3 install .
 ```
 
-the command line tool (CLI) is then available which can be used via
+the command line tool (CLI) is then available and can be used via
 
 ```
 $ aft [options] <instructions_file>
