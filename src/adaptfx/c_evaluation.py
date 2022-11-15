@@ -1,5 +1,5 @@
 import numpy as np
-import reinforce.plan as plan
+from adaptfx import multiple
 import scipy.optimize as opt
 import h5py as hdf
 import matplotlib.pyplot as plt
@@ -17,7 +17,7 @@ def B_noaft(sf, d, para):
 
 def B_aft(algorithm, para):
     # BED^N calculation for 1 therapy
-    relay = plan.multiple(algorithm, para)
+    relay = multiple(algorithm, para)
     return relay[0]
 
 def d_T(n, abt, goal):
@@ -116,7 +116,7 @@ params = {
             'fixed_mean': 0.9,
             'fixed_std': 0.04,
             'tumor_goal': 72,
-            'OAR_limit': None,
+            'oar_limit': None,
             'C': None,
             'alpha': None,
             'beta': None,
@@ -150,21 +150,25 @@ instance.para = params
 sf_fit, _ = Bn_fit(instance.B_func, bn[0], bn[2])
 sf_fit_no, _ = Bn_fit(instance.B_func, bn[0], bn[1])
 x = np.arange(2, N_max, 0.3)
-c = valid_c[2][1]
+c = valid_c[2][0]
+c_no = valid_c[1][0]
 
 c_opt_no = c_find_root(N_target, sf_fit_no, instance.B_func)
 print(c_opt_no)
-c_opt = c_find_root(N_target, sf_fit, instance.B_func)
-print(c_opt)
+# c_opt = c_find_root(N_target, sf_fit, instance.B_func)
+# print(c_opt)
 
 if plot:
-    fn1 = Fn(N_max, c, bn)
+    fn1 = Fn(N_max, c_no, bn)
+    # fn2 = Fn(N_max, c, bn)
     plt.scatter(bn[0], bn[1], label='no aft', marker='x')
-    plt.scatter(bn[0], bn[2], label='aft', marker='x')
-    plt.scatter(fn1[0], fn1[2], label='aftlow', marker='1')
+    # plt.scatter(bn[0], bn[2], label='aft', marker='x')
     plt.scatter(fn1[0], fn1[1], label='noaftlow', marker='1')
-    plt.plot(x, instance.B_func(x, sf_fit, c))
+    # plt.scatter(fn2[0], fn2[1], label='aftlow', marker='1')
+    plt.plot(x, instance.B_func(x, sf_fit_no))
     plt.plot(x, instance.B_func(x, sf_fit_no, c))
 
+    plt.ylabel('cost')
+    plt.xlabel('fraction $n$')
     plt.legend()
     plt.show()

@@ -1,0 +1,29 @@
+# test file for whole plan with fraction number minimisation
+
+{
+'algorithm': 'frac',
+'debug': 0,
+'log': 0,
+'keys': 
+	{
+		'number_of_fractions': 6,
+		'sparing_factors': [0.98, 0.97, 0.8, 0.83, 0.8, 0.85, 0.94],
+		'alpha': 'invalid',
+		'beta': 'invalid',
+		'fixed_prob': 1,
+		'fixed_mean': 0.9,
+		'fixed_std': 0.04,
+		'min_dose': 0,
+		'max_dose': -1,
+		'tumor_goal': 72,
+		'c': 10,
+	},
+'settings':
+	{
+		'dose_stepsize': 0.01,
+		'state_stepsize': 0.5,
+		'sf_stepsize': 0.008,
+		'sf_low': 0.08,
+		'sf_high': 1.0
+	}
+}

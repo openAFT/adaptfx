@@ -23,10 +23,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "click",
     "numpy",
     "scipy",
-    "pandas",
 ]
 
 dynamic = ["version"]
@@ -47,4 +45,4 @@ where = ["src"]
 include = ["*"]
 
 [project.scripts]
-aft = "console.aft:main"
+aft = "adaptfx.aft:main"

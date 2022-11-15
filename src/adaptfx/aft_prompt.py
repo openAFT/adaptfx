@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import logging
 import os
@@ -32,10 +33,10 @@ def logging_init(filename, log, debug):
     if log:
         # create logfile name
         basename = "{0}".format(*filename.rsplit('.', 1))
-        # search for existing filename
+        # search for existing filename ...
         i = 1
         while os.path.exists("{0}_{1}.{2}".format(basename, i, 'log')):
-            # exponential search
+            # exponential search if many files exist
             i *= 2
         a, b = (i // 2, i)
         while a+1 < b:
@@ -44,6 +45,7 @@ def logging_init(filename, log, debug):
                 a, b = (c, b)
             else:
                 a, b = (a,c)
+        # ... end of search
         log_filename = "{0}_{1}.{2}".format(basename, b, 'log')
         logging.basicConfig(
             format=format_file,
@@ -102,11 +104,9 @@ def aft_warning(warning, name, mode=0):
         
     """
     log_name = logging.getLogger(name)
-    if mode == 0:
-        log_name.warning(warning)
     if mode == 1:
         print('AFT>')
-        log_name.warning(warning)
+    log_name.warning(warning)
 
 def aft_message(message, name, mode=0):
     """
@@ -125,11 +125,9 @@ def aft_message(message, name, mode=0):
         
     """
     log_name = logging.getLogger(name)
-    if mode == 0:
-        log_name.info(message)
-    elif mode == 1:
+    if mode == 1:
         print('AFT>')
-        log_name.info(message)
+    log_name.info(message)
 
 def aft_message_info(message, info, name, mode=0):
     """
@@ -150,11 +148,9 @@ def aft_message_info(message, info, name, mode=0):
         
     """
     log_name = logging.getLogger(name)
-    if mode == 0:
-        log_name.info(f'{message} {info}')
-    elif mode == 1:
+    if mode == 1:
         print('AFT>')
-        log_name.info(f'{message} {info}')
+    log_name.info(f'{message} {info}')
 
 def aft_message_dict(message, dict, name, mode=0):
     """
@@ -175,15 +171,11 @@ def aft_message_dict(message, dict, name, mode=0):
         
     """
     log_name = logging.getLogger(name)
-    if mode == 0:
-        log_name.info(message)
-        for key, value in dict.items():
-            log_name.info(f'|{key: <19}| {value}')
     if mode == 1:
         print('AFT>')
-        log_name.info(message)
-        for key, value in dict.items():
-            log_name.info(f'|{key: <19}| {value}')
+    log_name.info(message)
+    for key, value in dict.items():
+        log_name.info(f'|{key: <22}| {value}')
         
 def aft_message_list(message, struct, name, mode=0):
     """
@@ -204,10 +196,7 @@ def aft_message_list(message, struct, name, mode=0):
         
     """
     log_name = logging.getLogger(name)
-    if mode == 0:
-        log_name.info(message)
-        log_name.info('%s', struct)
-    elif mode == 1:
+    if mode == 1:
         print('AFT>')
-        log_name.info(message)
-        log_name.info('%s', struct)
+    log_name.info(message)
+    log_name.info('%s', struct)

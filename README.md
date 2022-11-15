@@ -83,7 +83,7 @@ src
 
 ## Description
 
-In the `reinforce` module one can find all relevant code to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumor biological effective dose (tumor BED) and OAR BED (maximizing tumor BED while minimizing OAR BED). 
+In the `reinforce` module one can find all relevant code to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumor biological effective dose (tumor BED) and OAR BED (maximising tumor BED while minimising OAR BED). 
 
 ### The 2D algorithms
 
