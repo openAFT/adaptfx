@@ -95,6 +95,10 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     # note that lowest fraction_state is one not zero
     # and remaining_index counts in python indices
     for fraction_index, fraction_state in zip(remaining_index, remaining_fractions):
+        if remaining_bed <= 0:
+            optimal_action = 0
+            break
+
         if fraction_state == fraction and fraction != number_of_fractions:
             # state is the actual fraction to calculate
             # e.g. in the first fraction_state there is no prior dose delivered
@@ -263,6 +267,10 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     # note that lowest fraction_state is one
     # but the lowest fraction_index is zero
     for fraction_index, fraction_state in zip(remaining_index, remaining_fractions):
+        if remaining_bed <= 0:
+            optimal_action = 0
+            break
+        
         if fraction_state == fraction and fraction != number_of_fractions:
             # state is the actual fraction to calculate
             # e.g. in the first fraction_state there is no prior dose delivered
