@@ -175,7 +175,7 @@ def aft_message_dict(message, dict, name, mode=0):
         print('AFT>')
     log_name.info(message)
     for key, value in dict.items():
-        log_name.info(f'|{key: <19}| {value}')
+        log_name.info(f'|{key: <22}| {value}')
         
 def aft_message_list(message, struct, name, mode=0):
     """
