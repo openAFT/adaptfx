@@ -30,7 +30,7 @@ the command line tool (CLI) is then available and can be used via
 $ aft [options] <instructions_file>
 ```
 
-for more information on the usage of the CLI, read the manual.
+for more information on the usage of the CLI, read the [manual](MANUAL.md).
 
 The user can also decide to use the scripts from `reinforce` in their python scripts e.g.
 
