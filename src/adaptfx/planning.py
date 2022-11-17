@@ -24,9 +24,9 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
     if keys.fraction != 0:
         # if only a specific fraction should be calculated
         fractions_list = np.array([keys.fraction])
-        physical_doses = np.array([0])
-        tumor_doses = np.array([0])
-        oar_doses = np.array([0])
+        physical_doses = np.zeros(1)
+        tumor_doses = np.zeros(1)
+        oar_doses = np.zeros(1)
     else:
         # for calculation whole treatment in retrospect
         fractions_list = np.arange(1, keys.number_of_fractions + 1, 1)
@@ -59,10 +59,10 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         tumor_doses[i] = output.tumor_dose
         oar_doses[i] = output.oar_dose
 
-        keys.accumulated_tumor_dose = tumor_doses.sum() + first_tumor_dose
-        keys.accumulated_oar_dose = oar_doses.sum() + first_oar_dose
+        keys.accumulated_tumor_dose = np.nansum(tumor_doses) + first_tumor_dose
+        keys.accumulated_oar_dose = np.nansum(oar_doses) + first_oar_dose
     
-        if sets.plot_policy == keys.fraction !=0:
+        if sets.plot_policy == keys.fraction and sets.plot_policy !=0:
             # user specifies to plot policy number, if equal to fraction plot
             # if both zero than the user doesn't want to plot policy
             afx.policy_plot(output.sf, output.states, output.policy, plot='True')
@@ -71,9 +71,9 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
     physical, tumor, oar = np.around(
         [physical_doses, tumor_doses, oar_doses], -exponent)
     oar_sum, tumor_sum = np.around(
-        [oar_doses.sum(), tumor_doses.sum()], -exponent)
+        [np.nansum(oar_doses), np.nansum(tumor_doses)], -exponent)
 
     return [
             oar_sum, tumor_sum,
-            np.vstack([physical, tumor, oar])
+            np.vstack([physical, oar, tumor])
             ]
