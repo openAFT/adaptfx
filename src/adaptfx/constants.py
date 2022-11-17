@@ -10,27 +10,24 @@ INF_PENALTY = 1e4
 # keys
 ALPHA_BETA_TUMOR = 10
 ALPHA_BETA_OAR = 3
-MIN_DOSE = 0
-MAX_DOSE = -1
-FIXED_PROB = 0
 
 FULL_DICT = {'number_of_fractions':None,
         'fraction': 0,
         'sparing_factors': None,
-        'alpha':None,
-        'beta':None,
-        'tumor_goal':None,
-        'oar_limit':None,
-        'c':None,
+        'alpha': None,
+        'beta': None,
+        'tumor_goal': None,
+        'oar_limit': None,
+        'c': None,
         'abt':ALPHA_BETA_TUMOR,
         'abn':ALPHA_BETA_OAR,
         'accumulated_oar_dose': 0,
         'accumulated_tumor_dose': 0,
-        'min_dose':MIN_DOSE,
-        'max_dose':MAX_DOSE,
-        'fixed_prob':FIXED_PROB,
-        'fixed_mean':None,
-        'fixed_std':None
+        'min_dose': 0,
+        'max_dose': -1,
+        'fixed_prob': 0,
+        'fixed_mean': None,
+        'fixed_std': None
 }
 
 SETTING_DICT = {
@@ -44,12 +41,11 @@ SETTING_DICT = {
         'plot_policy': 0
 }
 
-OAR_LIST = ['number_of_fractions',
+STANDARD_LIST = ['number_of_fractions',
         'fraction',
         'sparing_factors',
         'alpha',
         'beta',
-        'tumor_goal',
         'abt',
         'abn',
         'accumulated_oar_dose',
@@ -60,55 +56,13 @@ OAR_LIST = ['number_of_fractions',
         'fixed_mean',
         'fixed_std']
 
-TUMOR_LIST = ['number_of_fractions',
-        'fraction',
-        'sparing_factors',
-        'alpha',
-        'beta',
-        'oar_limit',
-        'abt',
-        'abn',
-        'accumulated_oar_dose',
-        'accumulated_tumor_dose',
-        'min_dose',
-        'max_dose',
-        'fixed_prob',
-        'fixed_mean',
-        'fixed_std']
+OAR_LIST = STANDARD_LIST + ['tumor_goal']
 
-FRAC_LIST = ['number_of_fractions',
-        'fraction',
-        'sparing_factors',
-        'alpha',
-        'beta',
-        'tumor_goal',
-        'c',
-        'abt',
-        'abn',
-        'accumulated_oar_dose',
-        'accumulated_tumor_dose',
-        'min_dose',
-        'max_dose',
-        'fixed_prob',
-        'fixed_mean',
-        'fixed_std']
+TUMOR_LIST = STANDARD_LIST + ['oar_limit']
 
-TUMOR_OAR_LIST = ['number_of_fractions',
-        'fraction',
-        'sparing_factors',
-        'alpha',
-        'beta',
-        'tumor_goal',
-        'oar_limit',
-        'abt',
-        'abn',
-        'accumulated_oar_dose',
-        'accumulated_tumor_dose',
-        'min_dose',
-        'max_dose',
-        'fixed_prob',
-        'fixed_mean',
-        'fixed_std']
+FRAC_LIST = STANDARD_LIST + ['tumor_goal', 'c']
+
+TUMOR_OAR_LIST = STANDARD_LIST + ['tumor_goal', 'oar_limit']
 
 KEY_DICT = {
         'oar': OAR_LIST, 'oar_old': OAR_LIST, 
@@ -116,4 +70,3 @@ KEY_DICT = {
         'frac': FRAC_LIST, 'frac_old': FRAC_LIST,
         'tumor_oar': TUMOR_OAR_LIST, 'tumor_oar_old': TUMOR_OAR_LIST
         }
-    
