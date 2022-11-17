@@ -53,14 +53,10 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
         max_dose = max_physical_dose
     # Reduce max_dose to prohibit tumor_goal overshoot (efficiency)
     max_dose = min(max_dose, max_physical_dose)
-    min_dose = max(0, min(min_dose, max_dose - sets.dose_stepsize))
-    if min_dose < keys.min_dose:
-        # in case dose_stepsize was set too large
-        afx.aft_warning(f'lowered min_dose to {min_dose} (stepsize too large)', nme)
 
     # actionspace in physical dose
     diff_action = afx.step_round(max_dose-min_dose, sets.dose_stepsize)
-    physical_action = np.arange(min_dose, diff_action + min_dose ,sets.dose_stepsize)
+    physical_action = np.arange(min_dose, diff_action + min_dose, sets.dose_stepsize)
     # step_round rounds down so we include the maxdose
     actionspace = np.append(physical_action, max_dose)
     n_action = len(actionspace)
@@ -87,8 +83,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     if policy_plot:
         policy = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
     
-    # initialise physical dose scalar (the optimal action)
-    optimal_action = 0
+    finished = False
     # ---------------------------------------------------------------------- #
     remaining_fractions = np.arange(number_of_fractions, fraction - 1, -1)
     remaining_index = remaining_fractions - fraction
@@ -96,10 +91,10 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     # and remaining_index counts in python indices
     for fraction_index, fraction_state in zip(remaining_index, remaining_fractions):
         if remaining_bed <= 0:
-            optimal_action = 0
+            finished = True
             break
 
-        if fraction_state == fraction and fraction != number_of_fractions:
+        elif fraction_state == fraction and fraction != number_of_fractions:
             # state is the actual fraction to calculate
             # e.g. in the first fraction_state there is no prior dose delivered
             # and future_bedt is equal to bedt_space
@@ -109,7 +104,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
             vs = -bedn_space + future_values
             # argmax of vs along axis 0 to find best action fot the actual sf
-            optimal_action = float(actionspace[vs.argmax(axis=0)])
+            action_index = vs.argmax(axis=0)
 
             if policy_plot:
                 # for the policy plot
@@ -122,7 +117,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             # in the last fraction value is not relevant
             # max_dose is the already calculated remaining dose
             # this should compensate the discretisation of the state space
-            optimal_action = max(min_dose, max_dose)
+            action_index = np.where(actionspace == max(min_dose, max_dose))
 
         elif fraction_state == number_of_fractions:
             # final state to initialise terminal reward
@@ -133,8 +128,8 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             # cut the actionspace to min and max dose constraints
             last_actions[last_actions < min_dose_bed] = min_dose_bed
             last_actions[last_actions > max_dose_bed] = max_dose_bed
-            optimal_action = afx.convert_to_physical(last_actions, abt)
-            last_bedn = afx.bed_calc_matrix(optimal_action, abn, sf)
+            last_physical_actions = afx.convert_to_physical(last_actions, abt)
+            last_bedn = afx.bed_calc_matrix(last_physical_actions, abn, sf)
             # this smooths out the penalties in underdose and overdose regions
             bedt_diff = (bedt_states + last_actions - tumor_goal) * sets.inf_penalty
             penalties = np.where(bedt_diff > 0, -bedt_diff, bedt_diff)
@@ -145,8 +140,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
 
             if policy_plot:
                 # policy calculation for each bedt, but sf is not considered
-                _, police = np.meshgrid(np.ones(n_sf), optimal_action)
-                policy[fraction_index] = police
+                policy[fraction_index] += last_physical_actions.reshape(n_bedt_states, 1)
 
         elif fraction_state != number_of_fractions:
             # every other state but the last
@@ -164,12 +158,13 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
 
             if policy_plot:
                 policy[fraction_index] = actionspace[vs.argmax(axis=1)]
-    
-    tumor_dose = afx.bed_calc0(optimal_action, abt)
-    oar_dose = afx.bed_calc0(optimal_action, abn, actual_sf)
 
-    output = {'physical_dose': optimal_action, 'tumor_dose': tumor_dose, 
-        'oar_dose': oar_dose, 'sf': sf, 'states': bedt_states}
+    if finished:
+        output = {'physical_dose': np.nan, 'tumor_dose': np.nan, 
+            'oar_dose': np.nan, 'sf': sf, 'states': bedt_states}
+    else:
+        output = {'physical_dose': actionspace[action_index], 'tumor_dose': bedt_space[action_index], 
+            'oar_dose': bedn_space[action_index], 'sf': sf, 'states': bedt_states}
     if policy_plot:
         output['policy'] = policy
     return afx.DotDict(output)
@@ -226,13 +221,10 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     # Reduce max_dose to prohibit tumor_goal overshoot (efficiency)
     max_dose = min(max_dose, max_physical_dose)
     min_dose = max(0, min(min_dose, max_dose - sets.dose_stepsize))
-    if min_dose < keys.min_dose:
-        # in case dose_stepsize was set too large
-        afx.aft_warning(f'lowered min_dose to {min_dose} (stepsize too large)', nme)
 
     # actionspace in physical dose
     diff_action = afx.step_round(max_dose-min_dose, sets.dose_stepsize)
-    pre_actionspace = np.arange(min_dose, diff_action + min_dose ,sets.dose_stepsize)
+    pre_actionspace = np.arange(min_dose, diff_action + min_dose, sets.dose_stepsize)
     # step_round rounds down so we include the maxdose
     actionspace = np.append(pre_actionspace, max_dose)
     n_action = len(actionspace)
@@ -271,7 +263,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             optimal_action = 0
             break
         
-        if fraction_state == fraction and fraction != number_of_fractions:
+        elif fraction_state == fraction and fraction != number_of_fractions:
             # state is the actual fraction to calculate
             # e.g. in the first fraction_state there is no prior dose delivered
             # and future_bedt is equal to bedt_space
