@@ -10,14 +10,20 @@ The instruction file is simply a python dictionary with parameters. This diction
 ```
 $ aft -f <instruction_file>
 ```
-As an example the user specifies following elements of the dictionary:
-`'algorithm'`, `'single_fraction'`, `'debug'`, `'log'`, `'keys'`, `'settings'`,
+The user specifies following elements of the dictionary for the main entries: 
+- `'algorithm'`
+- `'single_fraction'`
+- `'debug'`
+- `'log'`
+- `'keys'`
+- `'settings'`
+
+Each entry of the dictionary is either a parameter or a dictionary itself. Outlined is an example instruction file.
 
 ```
 # instruction_file
 {
 'algorithm': 'frac',
-'single_fraction' : 0,
 'debug': 1,
 'log': 0,
 'keys': 
@@ -31,7 +37,7 @@ As an example the user specifies following elements of the dictionary:
 	'fixed_std': 0.04,
 	'tumor_goal': 72,
 	'oar_limit': 90,
-	'C': 0.8,
+	'c': 0.8,
 	},
 'settings' :
     {
@@ -40,13 +46,12 @@ As an example the user specifies following elements of the dictionary:
     'sf_low': 0,
     'sf_high': 1.7,
     'sf_stepsize': 0.01,
-    'sf_prob_threshold': 1e-5,
-    'inf_penalty': 1e5,
-    'plot_policy': 0,
-    'plot_values': 0
+    'sf_prob_threshold': 1e-5
     }
 }
 ```
+
+## Main entries
 
 ```
 MAIN ENTRIES
@@ -69,24 +74,33 @@ settings: dict
     algorithm settings
 ```
 
+## General entries: keys
 ```
 GENERAL KEYS
 ----------------
 number_of_fractions : integer
     number of fractions that will be delivered.
+fraction : int
+    if only a single fraction should be calculated.
+    default: 0
 sparing_factors : list/array
     list/array with all observed sparing factors.
 alpha : float
     shape of inverse-gamma distribution.
 beta : float
-    scale of inverse-gamme distrinbution.
+    scale of inverse-gamme distribution.
 abt : float
     alpha-beta ratio of tumor.
 abn : float
     alpha-beta ratio of OAR.
+accumulated_oar_dose : float
+    accumulated OAR BED (from previous fractions).
+accumulated_tumor_dose : float
+    accumulated tumor BED (from previous fractions).
 min_dose : float
     minimal physical doses to be delivered in one fraction.
     The doses are aimed at PTV 95.
+    default: 0
 max_dose : float
     maximal physical doses to be delivered in one fraction.
     The doses are aimed at PTV 95. If -1 the dose is adapted to the remaining dose tumor dose to be delivered or the remaining OAR dose allowed to be presribed.
@@ -102,17 +116,9 @@ fixed_std: float
     standard deviation of the fixed sparing factor normal distribution.
 ```
 
+## Specific entries according to algorithm type
 
 ```
-SINGLE FRACTION
-----------------
-fraction : integer
-    number of actual fraction
-accumulated_oar_dose : float
-    accumulated OAR BED (from previous fractions).
-accumulated_tumor_dose : float
-    accumulated tumor BED (from previous fractions).
-
 MAXIMISE TUMOR BED
 ----------------
 oar_limit : float
@@ -129,6 +135,8 @@ c: float
     fixed constant to penalise for each additional fraction that is used.
 ```
 
+## General settings for calculation
+
 ```
 SETTINGS
 ----------------
@@ -143,9 +151,9 @@ sf_high : float
 sf_stepsize: float
     stepsize of the sparing factor stepsize.
 sf_prob_threshold': float
-    probability threshold of the sparing factor occuring according to the gaussian parameters.
+    probability threshold of the sparing factor occuring.
 inf_penalty : float
     infinite penalty for certain undesired states.
 plot_policy : int
-    in which fraction should policy be plotted (zero being none).
+    in which fraction should current and future policies be plotted.
 ```
