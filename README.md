@@ -8,7 +8,19 @@ For this adaptive approach a reinforcement learning algorithm based on dynamic p
 
 ## Installation
 
-To install the `adaptfx` package, use either of the methods below:
+It is recommended to create a virtual environment using the `venv` module:
+
+```
+$ python3.10 -m venv adaptfx_env
+```
+
+activate the virtual environment
+```
+$ cd adaptfx_env
+$ source bin/activate
+```
+
+To install the `adaptfx` package, use either of the methods below.
 
 ### Method 1: pip
 
@@ -49,23 +61,20 @@ $ sudo apt install python3-tk
 The package is organized under the `src` folder. The relevant scripts that calculate the fractionation schemes are located in `reinforce`. 
 
 ```
-src
-├── common
-│  ├── constants.py
-│  ├── maths.py
-│  └── radiobiology.py
-├── console
-│  └── aft.py
-├── const_eval.py
-├── handler
+adaptfx
+├── adaptfx_old
+├── src/adaptfx
+│  ├── aft_propmt.py
 │  ├── aft_utils.py
-│  └── messages.py
-└── reinforce
-   ├── fraction_minimisation.py
-   ├── oar_minimisation.py
-   ├── plan.py
-   ├── track_tumor_oar.py
-   └── tumor_maximisation.py
+│  ├── aft.py
+│  ├── constants.py
+│  ├── c_evaluation.py
+│  ├── maths.py
+│  ├── planning.py
+│  ├── radiobiology.py
+│  ├── reinforce.py
+│  └── visualiser.py
+└── work
 ```
 
 ## Description
