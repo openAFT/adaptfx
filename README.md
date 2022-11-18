@@ -4,7 +4,7 @@
 
 `adaptfx` is a python package distributed on PyPI, which allows to calculate dose fractionation schemes in Adaptive Radiotherapy. Using MR guidance in Adaptive Radiotherapy, treatment plans can be on-line adapted to inter-fractional motion of tumors and organs at risk (OAR). When standard treatments deliver the same dose in each fraction, Adaptive Fractionation exploits the inter-fractional motion by delivering dose adaptively to daily tumor and OAR distance.
 
-For this adaptive approach a Reinforcement Learning algorithm based on dynamic programming was developed.. This package was built to provide the toolbox initially developed by Pérez Haas et al. [[1](https://www.estro.org/Congresses/ESTRO-2022/562/inter-fractionmotionandadaptiveradiotherapy/5249/adaptivefractionationatthemr-linacbasedonadynamicp)]. It allows calculation of Adaptive Dose Fractionation discussed in the initial (not-yet) published paper and brings newer applicable features to the user.
+For this adaptive approach a Reinforcement Learning algorithm based on dynamic programming was developed.. This package was built to provide the toolbox initially developed by Pérez Haas et al. [[1]([https://www.estro.org/Congresses/ESTRO-2022/562/inter-fractionmotionandadaptiveradiotherapy/5249/adaptivefractionationatthemr-linacbasedonadynamicp)](https://www.sciencedirect.com/science/article/pii/S0167814022027244)]. It allows calculation of Adaptive Dose Fractionation discussed in the initial (not-yet) published paper and brings newer applicable features to the user.
 
 ## Installation
 
