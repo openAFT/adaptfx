@@ -84,9 +84,7 @@ class RL_object():
         self.settings = afx.DotDict(settings)
 
     def optimise(self):
-        doses = afx.multiple(self.algorithm, self.keys, self.settings)
-
-        return doses
+        return afx.multiple(self.algorithm, self.keys, self.settings)
 
 def main():
     """
