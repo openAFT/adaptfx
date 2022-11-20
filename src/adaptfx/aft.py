@@ -112,9 +112,9 @@ def main():
         type=bool
     )
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
-    rl_test = RL_object(args.filename)
+    plan = RL_object(args.filename)
     afx.aft_message('start session...', nme, 1)
-    afx.aft_message_list('fractionation plan:', rl_test.optimise(), nme, 1)
+    afx.aft_message_list('fractionation plan:', plan.optimise(), nme, 1)
     afx.timing(start)
     afx.aft_message('close session...', nme, 1)
 
