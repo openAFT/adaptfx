@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from decimal import Decimal
 import adaptfx as afx
 nme = __name__
 
@@ -45,7 +46,11 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     n_sf = len(sf)
 
     # actionspace
-    remaining_bed = tumor_goal - accumulated_tumor_dose
+    exp = afx.find_exponent(sets.dose_stepsize)
+    accumulated_tumor_dose = np.round(accumulated_tumor_dose, -exp)
+    remaining_bed = np.round(tumor_goal - accumulated_tumor_dose, -exp)
+    n_bedsteps = int(np.round(remaining_bed / sets.dose_stepsize, 0))
+    n_statesteps = int(np.round(remaining_bed / sets.state_stepsize, 0))
     max_physical_dose = afx.convert_to_physical(remaining_bed, abt)
 
     if max_dose == -1:
@@ -54,28 +59,27 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     # Reduce max_dose to prohibit tumor_goal overshoot (efficiency)
     max_dose = min(max_dose, max_physical_dose)
 
-    # actionspace in physical dose
-    diff_action = afx.step_round(max_dose-min_dose, sets.dose_stepsize)
-    physical_action = np.arange(min_dose, diff_action + min_dose, sets.dose_stepsize)
-    # step_round rounds down so we include the maxdose
-    actionspace = np.append(physical_action, max_dose)
+    # actionspace in bed dose
+    bedt_space = np.linspace(0, remaining_bed, n_bedsteps + 1)
+    actionspace = afx.convert_to_physical(bedt_space, abt)
+    range_action = (actionspace >= min_dose) & (actionspace <= max_dose)
+    actionspace = actionspace[range_action]
+    # bed_space to relate actionspace to oar- and tumor-dose
+    bedt_space = bedt_space[range_action]
+    bedn_space = afx.bed_calc0(actionspace, abn, actual_sf)
     n_action = len(actionspace)
 
     # tumor bed states for tracking dose
     tumor_limit = tumor_goal + sets.state_stepsize
     # include at least one more step for bedt
     # define number of bed_dose steps to fulfill stepsize
-    bedt_states = np.arange(accumulated_tumor_dose,
-        tumor_limit, sets.state_stepsize)
+    bedt_states = np.linspace(accumulated_tumor_dose,
+        tumor_goal, n_statesteps + 1)
     n_bedt_states = len(bedt_states)
-
-    # bed_space to relate actionspace to oar- and tumor-dose
-    bedn_space = afx.bed_calc0(actionspace, abn, actual_sf)
-    bedt_space = afx.bed_calc0(actionspace, abt)
+    
     # relate actionspace to bed and possible sparing factors
     # necessary reshape for broadcasting in value calculation
     bedn_sf_space = afx.bed_calc_matrix(actionspace, abn, sf).reshape(1, n_action, n_sf)
-
     # values matrix
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
     n_remaining_fractions = number_of_fractions - fraction
@@ -101,6 +105,8 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             future_values_discrete = (values[fraction_index + 1] * prob).sum(axis=1)
             future_bedt = accumulated_tumor_dose + bedt_space
             future_bedt = np.where(future_bedt > tumor_goal, tumor_limit, future_bedt)
+            # for discrete matching
+            # future_values = future_values_discrete[np.where(np.isclose(bedt_states, future_bedt))]
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
             vs = -bedn_space + future_values
             # argmax of vs along axis 0 to find best action fot the actual sf
@@ -117,21 +123,25 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             # in the last fraction value is not relevant
             # max_dose is the already calculated remaining dose
             # this should compensate the discretisation of the state space
-            action_index = np.where(actionspace == max(min_dose, max_dose))
+            action_index = np.abs(remaining_bed - bedt_space).argmin()
 
         elif fraction_state == number_of_fractions:
             # final state to initialise terminal reward
             # dose remaining to be delivered, this is the actionspace in bedt
-            last_actions = tumor_goal - bedt_states
-            min_dose_bed = afx.bed_calc0(min_dose, abt)
-            max_dose_bed = afx.bed_calc0(max_dose, abt)
+            last_bed_actions = np.round(tumor_goal - bedt_states, -exp)
+            last_actions = afx.convert_to_physical(last_bed_actions, abt)
+            last_bed_actions = np.where(last_actions > max_dose, bedt_space[-1], last_bed_actions)
+            last_bed_actions = np.where(last_actions < min_dose, bedn_space[0], last_bed_actions)
+            last_actions = np.where(last_actions > max_dose, actionspace[-1], last_actions)
+            last_actions = np.where(last_actions < min_dose, actionspace[0], last_actions)
+            # last_bed_actions = np.linspace(remaining_bed, min_dose, n_statesteps + 1)
+            # last_actions = afx.convert_to_physical(last_bed_actions, abt)
+            # last_bed_actions = last_bed_actions[last_actions >= min_dose]
+            # last_actions = last_actions[last_actions >= min_dose]
             # cut the actionspace to min and max dose constraints
-            last_actions[last_actions < min_dose_bed] = min_dose_bed
-            last_actions[last_actions > max_dose_bed] = max_dose_bed
-            last_physical_actions = afx.convert_to_physical(last_actions, abt)
-            last_bedn = afx.bed_calc_matrix(last_physical_actions, abn, sf)
+            last_bedn = afx.bed_calc_matrix(last_actions, abn, sf)
             # this smooths out the penalties in underdose and overdose regions
-            bedt_diff = (bedt_states + last_actions - tumor_goal) * sets.inf_penalty
+            bedt_diff = (bedt_states + last_bed_actions - tumor_goal) * sets.inf_penalty
             penalties = np.where(bedt_diff > 0, -bedt_diff, bedt_diff)
             # to each best action add the according penalties
             # penalties need to be reshaped for broadcasting
@@ -140,13 +150,17 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
 
             if policy_plot:
                 # policy calculation for each bedt, but sf is not considered
-                policy[fraction_index] += last_physical_actions.reshape(n_bedt_states, 1)
+                policy[fraction_index] += last_actions.reshape(n_bedt_states, 1)
 
         elif fraction_state != number_of_fractions:
             # every other state but the last
             # this calculates the value function in the future fractions
             future_values_discrete = (values[fraction_index + 1] * prob).sum(axis=1)
             # bedt_states is reshaped such that numpy broadcast leads to 2D array
+            # discrete matching
+            # index_matrix = np.arange(n_bedt_states).reshape(n_bedt_states, 1) + np.arange(n_action)
+            # future_index = np.where(index_matrix > n_bedt_states -1, n_bedt_states -1, index_matrix)
+            # future_values = future_values_discrete[future_index]
             future_bedt = bedt_states.reshape(n_bedt_states, 1) + bedt_space
             future_bedt = np.where(future_bedt > tumor_goal, tumor_limit, future_bedt)
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
