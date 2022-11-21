@@ -16,9 +16,14 @@ class RL_object():
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
             input_dict= eval(read_in)
+        except TypeError:
+            if isinstance(instruction_filename, dict):
+                input_dict = instruction_filename
+            else:
+                afx.aft_error(f'"{instruction_filename}" not a filename or dict', nme)
         except SyntaxError:
             afx.aft_error(f'Dictionary Syntax Error in: "{instruction_filename}"', nme)
-        except:
+        except OSError:
             afx.aft_error(f'No such file: "{instruction_filename}"', nme)
 
         try: # check if log flag is existent and boolean
@@ -84,7 +89,17 @@ class RL_object():
         self.settings = afx.DotDict(settings)
 
     def optimise(self):
-        return afx.multiple(self.algorithm, self.keys, self.settings)
+        self.doses, output = afx.multiple(self.algorithm, self.keys, self.settings)
+        if self.settings.plot_policy != 0:
+            self.sf = output.sf
+            self.states = output.states
+            self.policy = output.policy
+    
+    def plot(self):
+        if self.settings.plot_policy != 0:
+            afx.policy_plot(self.sf, self.states, self.policy, plot=True)
+        else:
+            afx.aft_message('nothing to plot', nme, 1)
 
 def main():
     """
@@ -112,8 +127,10 @@ def main():
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
     plan = RL_object(args.filename)
     afx.aft_message('start session...', nme, 1)
-    afx.aft_message_list('fractionation plan:', plan.optimise(), nme, 1)
+    plan.optimise()
     afx.timing(start)
+    afx.aft_message_list('fractionation plan:', plan.doses, nme, 1)
+    plan.plot()
     afx.aft_message('close session...', nme, 1)
 
 

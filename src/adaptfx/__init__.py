@@ -7,6 +7,7 @@ Created on Wed Sep 7 15:28:02 2022
 from .constants import FULL_DICT, SETTING_DICT, KEY_DICT
 from .aft_prompt import *
 from .aft_utils import *
+from .aft import RL_object
 from .maths import *
 from .planning import *
 from .radiobiology import *
