@@ -37,6 +37,8 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
     first_tumor_dose = keys.accumulated_tumor_dose
     first_oar_dose = keys.accumulated_tumor_dose
 
+    policy_of_interest = None
+
     for i, keys.fraction in enumerate(fractions_list):
         keys.sparing_factors_public = keys.sparing_factors[0 : keys.fraction + 1]
         if algorithm == 'oar':
@@ -65,7 +67,8 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         if sets.plot_policy == keys.fraction and sets.plot_policy !=0:
             # user specifies to plot policy number, if equal to fraction plot
             # if both zero than the user doesn't want to plot policy
-            afx.policy_plot(output.sf, output.states, output.policy, plot='True')
+            policy_of_interest = output
+            # afx.policy_plot(output.sf, output.states, output.policy, plot='True')
 
     exponent = afx.find_exponent(sets.dose_stepsize)
     physical, tumor, oar = np.around(
@@ -76,4 +79,4 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
     return [
             oar_sum, tumor_sum,
             np.vstack([physical, oar, tumor])
-            ]
+            ], policy_of_interest

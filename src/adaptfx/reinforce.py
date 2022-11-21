@@ -75,6 +75,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     # define number of bed_dose steps to fulfill stepsize
     bedt_states = np.linspace(accumulated_tumor_dose,
         tumor_goal, n_statesteps + 1)
+    remaining_states = bedt_states - accumulated_tumor_dose
     n_bedt_states = len(bedt_states)
     
     # relate actionspace to bed and possible sparing factors
@@ -177,10 +178,10 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
 
     if finished:
         output = {'physical_dose': np.nan, 'tumor_dose': np.nan, 
-            'oar_dose': np.nan, 'sf': sf, 'states': bedt_states}
+            'oar_dose': np.nan, 'sf': sf, 'states': remaining_states}
     else:
         output = {'physical_dose': actionspace[action_index], 'tumor_dose': bedt_space[action_index], 
-            'oar_dose': bedn_space[action_index], 'sf': sf, 'states': bedt_states}
+            'oar_dose': bedn_space[action_index], 'sf': sf, 'states': remaining_states}
     if policy_plot:
         output['policy'] = policy
     return afx.DotDict(output)
@@ -258,6 +259,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     # define number of bed_dose steps to fulfill stepsize
     bedt_states = np.linspace(accumulated_tumor_dose,
         tumor_goal, n_statesteps + 1)
+    remaining_states = bedt_states - accumulated_tumor_dose
     n_bedt_states = len(bedt_states)
     
     # relate actionspace to bed and possible sparing factors
@@ -362,10 +364,10 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
 
     if finished:
         output = {'physical_dose': np.nan, 'tumor_dose': np.nan, 
-            'oar_dose': np.nan, 'sf': sf, 'states': bedt_states}
+            'oar_dose': np.nan, 'sf': sf, 'states': remaining_states}
     else:
         output = {'physical_dose': actionspace[action_index], 'tumor_dose': bedt_space[action_index], 
-            'oar_dose': bedn_space[action_index], 'sf': sf, 'states': bedt_states}
+            'oar_dose': bedn_space[action_index], 'sf': sf, 'states': remaining_states}
     if policy_plot:
         output['policy'] = policy
     return afx.DotDict(output)
