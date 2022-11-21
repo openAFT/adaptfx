@@ -15,7 +15,14 @@
 		'fixed_std': 0.04,
 		'min_dose': 0,
 		'max_dose': -1,
-		'oar_limit': 90,
+		'c': 2,
 		'tumor_goal': 72,
+	},
+'settings':
+	{
+		'dose_stepsize': 0.2,
+		'state_stepsize': 0.2,
+		'sf_stepsize': 0.004,
+		'plot_policy': 1
 	}
 }
