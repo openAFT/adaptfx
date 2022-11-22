@@ -4,7 +4,9 @@
 
 `adaptfx` is a python package to calculate adaptive fractionation schemes. Using magnetic resonance (MR) guidance in radiotherapy, treatment plans can be adapted daily to a patient's geometry, thereby exploiting inter-fractional motion of tumors and organs at risk (OAR). This can improve OAR sparing or tumor coverage, compared to standard fractionation schemes, which simply apply a predefined dose every time.
 
+
 For this adaptive approach a reinforcement learning algorithm based on dynamic programming was initially developed by Pérez Haas et al. [[1]](#1). The package is actively maintained and frequently extended as part of our ongoing research on the topic
+
 
 ## Installation
 
@@ -134,4 +136,4 @@ The algorithms allow to choose some extra parameters to specify extra constraint
 
 <a id="1">[1]</a>
 Yoel Samuel Pérez Haas, Roman Ludwig, Riccardo Dal Bello, Lan Wenhong, Stephanie Tanadini-Lang, Jan Unkelbach;
-[**Adaptive fractionation at the MR-Linac based on a dynamic programming approach**](https://www.estro.org/Congresses/ESTRO-2022/562/inter-fractionmotionandadaptiveradiotherapy/5249/adaptivefractionationatthemr-linacbasedonadynamicp), _ESTRO 2022_, OC-0944
+[**Adaptive fractionation at the MR-Linac based on a dynamic programming approach**](https://www.sciencedirect.com/science/article/pii/S0167814022027244), _ESTRO 2022_, OC-0944
