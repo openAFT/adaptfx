@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools >= 65",
+    "setuptools >= 59",
     "setuptools_scm",
     "wheel",
 ]
@@ -23,12 +23,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "click",
     "numpy",
     "scipy",
-    "pandas",
+    "matplotlib",
 ]
-
 dynamic = ["version"]
 
 [project.urls]
@@ -36,15 +34,15 @@ source = "https://github.com/openAFT/adaptfx"
 
 
 [tool.setuptools_scm]
-write_to = "src/_version.py"
+write_to = "src/adaptfx/_version.py"
 local_scheme = "no-local-version"
 
 [tool.setuptools.dynamic]
-version = {attr = "src._version.version"}
+version = {attr = "adaptfx._version.version"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["*"]
 
 [project.scripts]
-aft = "console.aft:main"
+aft = "adaptfx.aft:main"
