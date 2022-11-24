@@ -6,11 +6,11 @@ One should perform calculations in a working folder e.g. `adaptfx/work`. There t
 
 ## Format of the instruction file
 The user specifies following elements of the dictionary for the main entries: 
-- `'ALGORITHM'`
-- `'DEBUG'`
-- `'LOG'`
-- `'KEYS'`
-- `'SETTINGS'`
+- `'algorithm'`
+- `'debug'`
+- `'log'`
+- `'keys'`
+- `'settings'`
 
 Each entry of the dictionary is either a parameter or a dictionary itself. In the next section explained are the main entries.
 
@@ -137,6 +137,8 @@ Outlined is an example instruction file for fraction minimisation. It simply is 
 	'sparing_factors': [0.98, 0.97, 0.8, 0.83, 0.8, 0.85, 0.94],
 	'alpha': None,
 	'beta': None,
+    'abt': 10,
+    'abn': 3,
 	'fixed_prob': 1,
 	'fixed_mean': 0.9,
 	'fixed_std': 0.04,
@@ -145,16 +147,17 @@ Outlined is an example instruction file for fraction minimisation. It simply is 
 	},
 'settings':
     {
-    'dose_stepsize': 0.1,
-    'state_stepsize': 1,
+    'dose_stepsize': 0.5,
+    'state_stepsize': 0.5,
     'sf_low': 0,
     'sf_high': 1.7,
     'sf_stepsize': 0.01,
-    'sf_prob_threshold': 1e-5
+    'sf_prob_threshold': 1e-5,
+    'plot_policy': 0
     }
 }
 ```
-This dictionary is called in the CLI as:
+This dictionary stored in a `.txt` file can be called in with the CLI as:
 
 ```
 $ aft -f <instruction_file>
