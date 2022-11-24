@@ -144,7 +144,7 @@ Outlined is an example instruction file for fraction minimisation. It simply is 
 	'fixed_std': 0.04,
 	'tumor_goal': 72,
 	'c': 0.8,
-	},
+    },
 'settings':
     {
     'dose_stepsize': 0.5,
