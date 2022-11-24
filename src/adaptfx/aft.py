@@ -29,7 +29,7 @@ class RL_object():
         try: # check if log flag is existent and boolean
             log_bool = input_dict['log']
         except KeyError:
-            afx.aft_message('no "log" flag was given, set to 0', nme)
+            afx.aft_warning('no "log" flag was given, set to 0', nme)
             log_bool = 0
         else:
             if not log_bool in [0,1]:
@@ -38,7 +38,7 @@ class RL_object():
         try: # check if log flag is existent and boolean
             debug_bool = input_dict['debug']
         except KeyError:
-            afx.aft_message('no "debug" flag was given, set to 0', nme)
+            afx.aft_warning('no "debug" flag was given, set to 0', nme)
             debug_bool = 0
         else:
             if not debug_bool in [0,1]:

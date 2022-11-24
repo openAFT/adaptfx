@@ -2,60 +2,21 @@
 
 ## Working tree
 
-One should perform calculations in a working folder. There instruction files should be specified by the user and `adaptfx` will automatically produce log files if the user wishes to.
+One should perform calculations in a working folder e.g. `adaptfx/work`. There the instruction files can be specified by the user and `adaptfx` will automatically produce log files if the user wishes to.
 
 ## Format of the instruction file
-The instruction file is simply a python dictionary with parameters. This dictionary is called in the CLI as:
-
-```
-$ aft -f <instruction_file>
-```
 The user specifies following elements of the dictionary for the main entries: 
-- `'algorithm'`
-- `'single_fraction'`
-- `'debug'`
-- `'log'`
-- `'keys'`
-- `'settings'`
+- `'ALGORITHM'`
+- `'DEBUG'`
+- `'LOG'`
+- `'KEYS'`
+- `'SETTINGS'`
 
-Each entry of the dictionary is either a parameter or a dictionary itself. Outlined is an example instruction file.
-
-```
-# instruction_file
-{
-'algorithm': 'frac',
-'debug': 1,
-'log': 0,
-'keys': 
-	{
-	'number_of_fractions': 6,
-	'sparing_factors': [0.98, 0.97, 0.8, 0.83, 0.8, 0.85, 0.94],
-	'alpha': None,
-	'beta': None,
-	'fixed_prob': 1,
-	'fixed_mean': 0.9,
-	'fixed_std': 0.04,
-	'tumor_goal': 72,
-	'oar_limit': 90,
-	'c': 0.8,
-	},
-'settings' :
-    {
-    'dose_stepsize': 0.1,
-    'state_stepsize': 1,
-    'sf_low': 0,
-    'sf_high': 1.7,
-    'sf_stepsize': 0.01,
-    'sf_prob_threshold': 1e-5
-    }
-}
-```
+Each entry of the dictionary is either a parameter or a dictionary itself. In the next section explained are the main entries.
 
 ## Main entries
 
 ```
-MAIN ENTRIES
-----------------
 algorithm: frac, oar, tumor, tumor_oar
     type of algorithm
     frac : minimise number of fractions
@@ -74,9 +35,9 @@ settings: dict
     algorithm settings
 ```
 
-## General entries: keys
+## Optimisation parameters
 ```
-GENERAL KEYS
+keys
 ----------------
 number_of_fractions : integer
     number of fractions that will be delivered.
@@ -103,7 +64,9 @@ min_dose : float
     default: 0
 max_dose : float
     maximal physical doses to be delivered in one fraction.
-    The doses are aimed at PTV 95. If -1 the dose is adapted to the remaining dose tumor dose to be delivered or the remaining OAR dose allowed to be presribed.
+    The doses are aimed at PTV 95. If -1 the dose is adapted to the
+    remaining dose tumor dose to be delivered or the remaining OAR dose 
+    allowed to be prescribed.
     default: -1
 fixed_prob : int
     this variable is to turn on a fixed probability distribution.
@@ -119,17 +82,17 @@ fixed_std: float
 ## Specific entries according to algorithm type
 
 ```
-MAXIMISE TUMOR BED
+maximise tumor BED
 ----------------
 oar_limit : float
     upper BED limit of OAR.
 
-MINIMISE OAR BED
+minimise oar BED
 ----------------
 tumor_goal : float
     prescribed tumor BED.
 
-MINIMISE NUMBER OF FRACTION
+minimise number of fractions
 ----------------
 c: float
     fixed constant to penalise for each additional fraction that is used.
@@ -138,7 +101,7 @@ c: float
 ## General settings for calculation
 
 ```
-SETTINGS
+settings
 ----------------
 dose_stepsize : float
     stepsize of the actionspace.
@@ -156,4 +119,43 @@ inf_penalty : float
     infinite penalty for certain undesired states.
 plot_policy : int
     in which fraction should current and future policies be plotted.
+```
+
+# Example
+
+Outlined is an example instruction file for fraction minimisation. It simply is a python dictionary with parameters.
+
+```
+# instruction_file
+{
+'algorithm': 'frac',
+'debug': 1,
+'log': 0,
+'keys':
+    {
+	'number_of_fractions': 6,
+	'sparing_factors': [0.98, 0.97, 0.8, 0.83, 0.8, 0.85, 0.94],
+	'alpha': None,
+	'beta': None,
+	'fixed_prob': 1,
+	'fixed_mean': 0.9,
+	'fixed_std': 0.04,
+	'tumor_goal': 72,
+	'c': 0.8,
+	},
+'settings':
+    {
+    'dose_stepsize': 0.1,
+    'state_stepsize': 1,
+    'sf_low': 0,
+    'sf_high': 1.7,
+    'sf_stepsize': 0.01,
+    'sf_prob_threshold': 1e-5
+    }
+}
+```
+This dictionary is called in the CLI as:
+
+```
+$ aft -f <instruction_file>
 ```
