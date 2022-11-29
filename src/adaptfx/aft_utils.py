@@ -54,6 +54,7 @@ def key_reader(all_keys, full_dict, user_keys, algorithm):
         all keys copied from parameters
         
     """
+    aft_message('loading keys...', nme, 1)
     whole_dict = full_dict.copy()
     key_dict = all_keys[algorithm]
 
@@ -94,6 +95,7 @@ def setting_reader(all_settings, user_settings):
         all settings
         
     """
+    aft_message('loading settings...', nme, 1)
     whole_settings = all_settings.copy()
 
     for skey in all_settings:

@@ -3,7 +3,10 @@ import sys
 import logging
 import os
 
-def logging_init(filename, log, debug):
+prompt = 'AFT> '
+empty = ''
+
+def logging_init(filename, log, level):
     """
     log initialisation to write to filename
 
@@ -21,14 +24,18 @@ def logging_init(filename, log, debug):
     None
         
     """
-    if debug:
+    if level == 0:
         format_file = '%(asctime)s [%(levelname)s] [%(name)s]: %(message)s'
-        format_out = 'AFT> [%(levelname)s] [%(name)s]: %(message)s'
+        format_out = prompt + '[%(levelname)s] [%(name)s]: %(message)s'
         log_level = logging.DEBUG
-    else:
+    elif level == 1:
         format_file = '%(asctime)s [%(levelname)s]: %(message)s'
-        format_out = 'AFT> [%(levelname)s]: %(message)s'
+        format_out = prompt + '[%(levelname)s]: %(message)s'
         log_level = logging.INFO
+    elif level == 2:
+        format_file = '%(asctime)s [%(levelname)s]: %(message)s'
+        format_out = '[%(levelname)s]: %(message)s'
+        log_level = logging.ERROR
     
     if log:
         # create logfile name
@@ -82,7 +89,6 @@ def aft_error(error, name):
         
     """
     log_name = logging.getLogger(name)
-    print('AFT>')
     log_name.error(error)
     log_name.info('exiting Session...')
     sys.exit()
@@ -105,7 +111,7 @@ def aft_warning(warning, name, mode=0):
     """
     log_name = logging.getLogger(name)
     if mode == 1:
-        print('AFT>')
+        log_name.info(empty)
     log_name.warning(warning)
 
 def aft_message(message, name, mode=0):
@@ -126,7 +132,7 @@ def aft_message(message, name, mode=0):
     """
     log_name = logging.getLogger(name)
     if mode == 1:
-        print('AFT>')
+        log_name.info(empty)
     log_name.info(message)
 
 def aft_message_info(message, info, name, mode=0):
@@ -149,7 +155,7 @@ def aft_message_info(message, info, name, mode=0):
     """
     log_name = logging.getLogger(name)
     if mode == 1:
-        print('AFT>')
+        log_name.info(empty)
     log_name.info(f'{message} {info}')
 
 def aft_message_dict(message, dict, name, mode=0):
@@ -172,7 +178,7 @@ def aft_message_dict(message, dict, name, mode=0):
     """
     log_name = logging.getLogger(name)
     if mode == 1:
-        print('AFT>')
+        log_name.info(empty)
     log_name.info(message)
     for key, value in dict.items():
         log_name.info(f'|{key: <22}| {value}')
@@ -197,6 +203,6 @@ def aft_message_list(message, struct, name, mode=0):
     """
     log_name = logging.getLogger(name)
     if mode == 1:
-        print('AFT>')
+        log_name.info(empty)
     log_name.info(message)
     log_name.info('%s', struct)

@@ -2,7 +2,7 @@
 
 {
 'algorithm': 'oar',
-'debug': 0,
+'level': 1,
 'log': 0,
 'keys': 
 	{
