@@ -35,7 +35,7 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         oar_doses = np.zeros(keys.number_of_fractions)
 
     first_tumor_dose = keys.accumulated_tumor_dose
-    first_oar_dose = keys.accumulated_tumor_dose
+    first_oar_dose = keys.accumulated_oar_dose
 
     policy_of_interest = None
 
