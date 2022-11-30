@@ -44,7 +44,7 @@ class RL_object():
                 afx.aft_error('invalid "debug" flag was set', nme)
 
         afx.logging_init(instruction_filename, log_bool, log_level)
-        afx.aft_message_info('debug mode:', log_level, nme, 0)
+        afx.aft_message_info('log level:', log_level, nme, 0)
         afx.aft_message_info('log to file:', log_bool, nme, 0)
 
         try: # check if algorithm key matches known types
