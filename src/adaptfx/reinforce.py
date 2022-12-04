@@ -129,8 +129,9 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             # dose remaining to be delivered, this is the actionspace in bedt
             last_bed_actions = np.round(tumor_goal - bedt_states, -exp)
             last_actions = afx.convert_to_physical(last_bed_actions, abt)
+            # cut the actionspace to min and max dose constraints
             last_bed_actions = np.where(last_actions > max_dose, bedt_space[-1], last_bed_actions)
-            last_bed_actions = np.where(last_actions < min_dose, bedn_space[0], last_bed_actions)
+            last_bed_actions = np.where(last_actions < min_dose, bedt_space[0], last_bed_actions)
             last_actions = np.where(last_actions > max_dose, actionspace[-1], last_actions)
             last_actions = np.where(last_actions < min_dose, actionspace[0], last_actions)
             # cut the actionspace to min and max dose constraints
@@ -307,7 +308,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             last_actions = afx.convert_to_physical(last_bed_actions, abt)
             # cut the actionspace to min and max dose constraints
             last_bed_actions = np.where(last_actions > max_dose, bedt_space[-1], last_bed_actions)
-            last_bed_actions = np.where(last_actions < min_dose, bedn_space[0], last_bed_actions)
+            last_bed_actions = np.where(last_actions < min_dose, bedt_space[0], last_bed_actions)
             last_actions = np.where(last_actions > max_dose, actionspace[-1], last_actions)
             last_actions = np.where(last_actions < min_dose, actionspace[0], last_actions)
             last_bedn = afx.bed_calc_matrix(last_actions, abn, sf)
