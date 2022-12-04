@@ -13,12 +13,13 @@ def B_noaft(sf, d, para):
     # with static dose
     sf = sf[1:]
     b = sf*d * (1+sf*d/para['abn'])
-    return np.sum(b)
+    oar_bed = np.sum(b)
+    return oar_bed
 
 def B_aft(algorithm, para):
     # BED^N calculation for 1 therapy
-    relay = multiple(algorithm, para)
-    return relay[0]
+    oar_bed = multiple(algorithm, para)[0]
+    return oar_bed
 
 def d_T(n, abt, goal):
     dose = (np.sqrt(n*abt*(n*abt+4*goal)) - n*abt) / (2*n)
@@ -111,12 +112,14 @@ def c_find_root(n_targ, sf, func):
 
 params = {
             'number_of_fractions': 0,
+            'fraction': 0,
             'sparing_factors': None,
             'fixed_prob': 1,
             'fixed_mean': 0.9,
-            'fixed_std': 0.04,
+            'fixed_std': 0.01,
             'tumor_goal': 72,
-            'oar_limit': None,
+            'accumulated_oar_dose': 0,
+            'accumulated_tumor_dose': 0,
             'C': None,
             'alpha': None,
             'beta': None,
@@ -127,7 +130,7 @@ params = {
             }
 
 N_max = 12
-N_target = 8
+N_target = 5
 C_list = np.arange(1,7,0.05)
 num_samples = 1000
 filename = 'work/BED_t72_n12_1000.hdf5'
