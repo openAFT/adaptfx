@@ -42,7 +42,12 @@ def policy_plot(sfs, states, policies, plot=False):
     im = cm.ScalarMappable(cmap=colormap, norm=normaliser)
 
     # loop through the axes
-    axs = ax.ravel()
+    try:
+        axs = ax.ravel()
+    except:
+        # in case ax is a 1x1 subplot
+        axs = np.array([ax])
+        
     for i, pol in enumerate(policies):
         axs[i].imshow(pol, interpolation=None, origin='upper',
             norm=normaliser, cmap=colormap, aspect='auto',
