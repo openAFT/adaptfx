@@ -124,6 +124,9 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             # this should compensate the discretisation of the state space
             action_index = np.abs(remaining_bed - bedt_space).argmin()
 
+            if policy_plot:
+                policy[fraction_index][0] = bedt_space[action_index]
+
         elif fraction_state == number_of_fractions:
             # final state to initialise terminal reward
             # dose remaining to be delivered, this is the actionspace in bedt
@@ -235,6 +238,8 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
 
     # actionspace in bed dose
     bedt_space = np.linspace(0, remaining_bed, n_bedsteps + 1)
+    if remaining_bed <= min_dose:
+        bedt_space = np.array([min_dose])
     actionspace = afx.convert_to_physical(bedt_space, abt)
     range_action = (actionspace >= min_dose) & (actionspace <= max_dose)
     actionspace = actionspace[range_action]
@@ -278,6 +283,11 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             # e.g. in the first fraction_state there is no prior dose delivered
             # and future_bedt is equal to bedt_space
             future_values_discrete = (values[fraction_index + 1] * prob).sum(axis=1)
+
+            # index = number_of_fractions - fraction_state - 1
+            # spec_range = (bedt_states < (tumor_goal - index * min_dose)) & (bedt_states > (tumor_goal - (index + 1) * min_dose))
+            # future_values_discrete = np.where(spec_range, (tumor_goal - min_dose - bedt_states) * sets.inf_penalty, future_values_discrete)
+
             future_bedt = accumulated_tumor_dose + bedt_space
             future_bedt = np.where(future_bedt > tumor_goal, tumor_limit, future_bedt)
             c_penalties = np.where(np.round(future_bedt, -exp) < tumor_goal, -c, 0)
@@ -290,7 +300,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
 
             if policy_plot:
                 # for the policy plot
-                vs_full = (-bedn_sf_space+ future_values.reshape(1, n_action, 1))[0]
+                vs_full = (-bedn_sf_space + future_values.reshape(1, n_action, 1))[0]
                 # check vs along the sf axis
                 values[fraction_index][0] = vs_full.max(axis=0)
                 policy[fraction_index][0] = bedt_space[vs_full.argmax(axis=0)]
@@ -300,6 +310,9 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             # max_dose is the already calculated remaining dose
             # this should compensate the discretisation of the state space
             action_index = np.abs(remaining_bed - bedt_space).argmin()
+            
+            if policy_plot:
+                policy[fraction_index][0] = bedt_space[action_index]
 
         elif fraction_state == number_of_fractions:
             # final state to initialise terminal reward
@@ -329,6 +342,11 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             # every other state but the last
             # this calculates the value function in the future fractions
             future_values_discrete = (values[fraction_index + 1] * prob).sum(axis=1)
+
+            # index = number_of_fractions - fraction_state - 1
+            # spec_range = (bedt_states < (tumor_goal - index * min_dose)) & (bedt_states > (tumor_goal - (index + 1) * min_dose))
+            # future_values_discrete = np.where(spec_range, -np.abs(tumor_goal - min_dose - bedt_states) * sets.inf_penalty, future_values_discrete)
+
             # bedt_states is reshaped such that numpy broadcast leads to 2D array
             future_bedt = bedt_states.reshape(n_bedt_states, 1) + bedt_space
             future_bedt = np.round(np.where(future_bedt > tumor_goal, tumor_limit, future_bedt), -exp)
@@ -350,5 +368,6 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
         output = {'physical_dose': actionspace[action_index], 'tumor_dose': bedt_space[action_index], 
             'oar_dose': bedn_space[action_index], 'sf': sf, 'states': remaining_states}
     if policy_plot:
+        # policy = np.where((policy - remaining_states[::-1].reshape(1, n_bedt_states, 1)) > 0, 0, policy)
         output['policy'] = policy
     return afx.DotDict(output)
