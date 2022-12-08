@@ -66,6 +66,10 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     actionspace = actionspace[range_action]
     # bed_space to relate actionspace to oar- and tumor-dose
     bedt_space = bedt_space[range_action]
+    if not range_action.any():
+        # check if actionspace is empty
+        bedt_space = np.array([min_dose])
+        actionspace = afx.convert_to_physical(bedt_space, abt)
     bedn_space = afx.bed_calc0(actionspace, abn, actual_sf)
     n_action = len(actionspace)
 
@@ -140,9 +144,8 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             # cut the actionspace to min and max dose constraints
             last_bedn = afx.bed_calc_matrix(last_actions, abn, sf)
             # this smooths out the penalties in underdose and overdose regions
-            bedt_diff_pre = (bedt_states + last_bed_actions - tumor_goal)
-            bedt_diff = np.where(np.round(bedt_diff_pre, -exp)==0, 0, bedt_diff_pre*sets.inf_penalty)
-            penalties = np.where(bedt_diff > 0, -bedt_diff, bedt_diff)
+            bedt_diff_pre = np.round(bedt_states + last_bed_actions - tumor_goal, -exp)
+            penalties = np.where(bedt_diff_pre == 0, 0, -np.abs(bedt_diff_pre) * sets.inf_penalty)
             # to each best action add the according penalties
             # penalties need to be reshaped for broadcasting
             vs = -last_bedn + penalties.reshape(n_bedt_states, 1)
@@ -238,13 +241,15 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
 
     # actionspace in bed dose
     bedt_space = np.linspace(0, remaining_bed, n_bedsteps + 1)
-    if remaining_bed <= min_dose:
-        bedt_space = np.array([min_dose])
     actionspace = afx.convert_to_physical(bedt_space, abt)
     range_action = (actionspace >= min_dose) & (actionspace <= max_dose)
     actionspace = actionspace[range_action]
     # bed_space to relate actionspace to oar- and tumor-dose
     bedt_space = bedt_space[range_action]
+    if not range_action.any():
+        # check if actionspace is empty
+        bedt_space = np.array([min_dose])
+        actionspace = afx.convert_to_physical(bedt_space, abt)
     bedn_space = afx.bed_calc0(actionspace, abn, actual_sf)
     n_action = len(actionspace)
 
@@ -326,9 +331,8 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             last_actions = np.where(last_actions < min_dose, actionspace[0], last_actions)
             last_bedn = afx.bed_calc_matrix(last_actions, abn, sf)
             # this smooths out the penalties in underdose and overdose regions
-            bedt_diff_pre = (bedt_states + last_bed_actions - tumor_goal)
-            bedt_diff = np.where(np.round(bedt_diff_pre, -exp)==0, 0, bedt_diff_pre*sets.inf_penalty)
-            penalties = np.where(bedt_diff > 0, -bedt_diff, bedt_diff)
+            bedt_diff_pre = np.round(bedt_states + last_bed_actions - tumor_goal, -exp)
+            penalties = np.where(bedt_diff_pre == 0, 0, -np.abs(bedt_diff_pre) * sets.inf_penalty)
             # to each best action add the according penalties
             # penalties need to be reshaped for broadcasting
             vs = -last_bedn + penalties.reshape(n_bedt_states, 1)
