@@ -70,7 +70,7 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
             policy_of_interest = output
             # afx.policy_plot(output.sf, output.states, output.policy, plot='True')
 
-    exponent = afx.find_exponent(sets.dose_stepsize)
+    exponent = afx.find_exponent(sets.dose_stepsize) - 1
     physical, tumor, oar = np.around(
         [physical_doses, tumor_doses, oar_doses], -exponent)
     oar_sum, tumor_sum = np.around(
