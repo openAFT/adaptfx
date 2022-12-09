@@ -271,6 +271,9 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     values = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
     if policy_plot:
         policy = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
+
+    if policy_plot:
+        remains = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
     
     finished = False
     # ---------------------------------------------------------------------- #
@@ -362,6 +365,13 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
                 policy[fraction_index] = bedt_space[vs.argmax(axis=1)]
                 # ensure that for the goal reached the value/poliy is zero (min_dose)
                 policy[fraction_index][bedt_states==tumor_goal] = 0
+
+            if policy_plot:
+                future_remains_discrete = (remains[fraction_index + 1] * prob).sum(axis=1)
+                fut_sth = policy[fraction_index] + (bedt_states).reshape(n_bedt_states, 1)
+                remain_values = afx.interpolate(fut_sth, bedt_states, future_remains_discrete)
+                current_remains = np.where(np.abs(policy[fraction_index] - remaining_states[::-1].reshape(n_bedt_states, 1)) <= 0.00001, 0, 1)
+                remains[fraction_index] = current_remains + remain_values
 
     if finished:
         output = {'physical_dose': np.nan, 'tumor_dose': np.nan, 
