@@ -288,11 +288,6 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             # e.g. in the first fraction_state there is no prior dose delivered
             # and future_bedt is equal to bedt_space
             future_values_discrete = (values[fraction_index + 1] * prob).sum(axis=1)
-
-            # index = number_of_fractions - fraction_state - 1
-            # spec_range = (bedt_states < (tumor_goal - index * min_dose)) & (bedt_states > (tumor_goal - (index + 1) * min_dose))
-            # future_values_discrete = np.where(spec_range, (tumor_goal - min_dose - bedt_states) * sets.inf_penalty, future_values_discrete)
-
             future_bedt = accumulated_tumor_dose + bedt_space
             future_bedt = np.where(future_bedt > tumor_goal, tumor_limit, future_bedt)
             c_penalties = np.where(np.round(future_bedt, -exp) < tumor_goal, -c, 0)
@@ -331,26 +326,25 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             last_actions = np.where(last_actions < min_dose, actionspace[0], last_actions)
             last_bedn = afx.bed_calc_matrix(last_actions, abn, sf)
             # this smooths out the penalties in underdose and overdose regions
-            bedt_diff_pre = np.round(bedt_states + last_bed_actions - tumor_goal, -exp)
-            penalties = np.where(bedt_diff_pre == 0, 0, -np.abs(bedt_diff_pre) * sets.inf_penalty)
+            bedt_diff = np.round(bedt_states + last_bed_actions - tumor_goal, -exp)
+            penalties = np.where(bedt_diff == 0, 0, -np.abs(bedt_diff) * sets.inf_penalty)
             # to each best action add the according penalties
             # penalties need to be reshaped for broadcasting
             vs = -last_bedn + penalties.reshape(n_bedt_states, 1)
             values[fraction_index] = vs
+            # ensure that for the goal reached the value/poliy is zero (min_dose)
+            values[fraction_index][bedt_states==tumor_goal] = 0
 
             if policy_plot:
                 # policy calculation for each bedt, but sf is not considered
                 policy[fraction_index] += last_bed_actions.reshape(n_bedt_states, 1)
+                # ensure that for the goal reached the value/poliy is zero (min_dose)
+                policy[fraction_index][bedt_states==tumor_goal] = 0
 
         elif fraction_state != number_of_fractions:
             # every other state but the last
             # this calculates the value function in the future fractions
             future_values_discrete = (values[fraction_index + 1] * prob).sum(axis=1)
-
-            # index = number_of_fractions - fraction_state - 1
-            # spec_range = (bedt_states < (tumor_goal - index * min_dose)) & (bedt_states > (tumor_goal - (index + 1) * min_dose))
-            # future_values_discrete = np.where(spec_range, -np.abs(tumor_goal - min_dose - bedt_states) * sets.inf_penalty, future_values_discrete)
-
             # bedt_states is reshaped such that numpy broadcast leads to 2D array
             future_bedt = bedt_states.reshape(n_bedt_states, 1) + bedt_space
             future_bedt = np.round(np.where(future_bedt > tumor_goal, tumor_limit, future_bedt), -exp)
@@ -361,9 +355,13 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             vs = -bedn_sf_space + future_values.reshape(n_bedt_states, n_action, 1) + c_penalties
             # check vs along the sf axis
             values[fraction_index] = vs.max(axis=1)
+            # ensure that for the goal reached the value/poliy is zero (min_dose)
+            values[fraction_index][bedt_states==tumor_goal] = 0
 
             if policy_plot:
                 policy[fraction_index] = bedt_space[vs.argmax(axis=1)]
+                # ensure that for the goal reached the value/poliy is zero (min_dose)
+                policy[fraction_index][bedt_states==tumor_goal] = 0
 
     if finished:
         output = {'physical_dose': np.nan, 'tumor_dose': np.nan, 
