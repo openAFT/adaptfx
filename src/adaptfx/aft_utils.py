@@ -110,32 +110,31 @@ def setting_reader(all_settings, user_settings):
 
 class DotDict(dict):
     """
-    object with dot.notation to
+    object with nested dot.notation to
     access dictionary attributes
     """
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__  # type: ignore
-    __delattr__ = dict.__delitem__  # type: ignore
+    MARKER = object()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for k, v in self.items():
-            if isinstance(v, dict):
-                self[k] = DotDict(v)
+    def __init__(self, value=None):
+        if value is None:
+            pass
+        elif isinstance(value, dict):
+            for key in value:
+                self.__setitem__(key, value[key])
+        else:
+            raise TypeError('expected dict')
 
-    def lookup(self, dotkey):
-        """
-        lookup value in a nested structure with a single key
-        """
-        path = list(reversed(dotkey.split(".")))
-        v = self
-        while path:
-            key = path.pop()
-            if isinstance(v, dict):
-                v = v[key]
-            elif isinstance(v, list):
-                v = v[int(key)]
-            else:
-                raise KeyError(key)
-        return v
+    def __setitem__(self, key, value):
+        if isinstance(value, dict) and not isinstance(value, DotDict):
+            value = DotDict(value)
+        super(DotDict, self).__setitem__(key, value)
 
+    def __getitem__(self, key):
+        return self.get(key)
+    
+    def __delitem__(self, key):
+        # found = self.get(key, DotDict.MARKER)
+        # if found is DotDict.MARKER:
+        super(DotDict, self).__delitem__(key)
+
+    __setattr__, __getattr__, __delattr__ = __setitem__, __getitem__, __delitem__
