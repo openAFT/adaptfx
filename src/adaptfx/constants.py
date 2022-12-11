@@ -38,7 +38,9 @@ SETTING_DICT = {
         'sf_stepsize': SF_STEPSIZE,
         'sf_prob_threshold': SF_PROB_THRESHOLD,
         'inf_penalty': INF_PENALTY,
-        'plot_policy': 0
+        'plot_policy': 0,
+        'plot_values': 0,
+        'plot_remains': 0,
 }
 
 STANDARD_LIST = ['number_of_fractions',
