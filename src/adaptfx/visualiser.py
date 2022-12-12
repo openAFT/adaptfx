@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize as normalise
 import matplotlib.cm as cm
 
-def policy_plot(sfs, states, policies, plot=False):
+def policy_plot(sfs, states, policies, fractions, plot=True):
     """
     creates a subplot grid for the policy in each fraction that is given
 
@@ -52,7 +52,7 @@ def policy_plot(sfs, states, policies, plot=False):
         axs[i].imshow(pol, interpolation=None, origin='upper',
             norm=normaliser, cmap=colormap, aspect='auto',
             extent=[x_min, x_max, y_min, y_max])
-        # axs[i].set_title(str(i))
+        axs[i].set_title(fractions[i])
             
     fig.supxlabel('sparing factor')
     fig.supylabel('remaining BED')

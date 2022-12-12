@@ -92,13 +92,13 @@ class RL_object():
         sf = self.output.sf
         states = self.output.states
         if self.settings.plot_policy:
-            afx.policy_plot(sf, states, self.output.policy, plot=True)
+            afx.policy_plot(sf, states, self.output.policy, self.output.policy_list)
         if self.settings.plot_values:
-            afx.policy_plot(sf, states, self.output.values, plot=True)
+            afx.policy_plot(sf, states, self.output.value, self.output.values_list)
         if self.settings.plot_remains:
-            afx.policy_plot(sf, states, self.output.remains, plot=True)
-        # else:
-        #     afx.aft_message('nothing to plot', nme, 1)
+            afx.policy_plot(sf, states, self.output.remains, self.output.remains_list)
+        if not (self.settings.plot_policy + self.settings.plot_values + self.settings.plot_remains):
+            afx.aft_message('nothing to plot', nme, 1)
 
 def main():
     """
@@ -128,7 +128,11 @@ def main():
     afx.aft_message('start session...', nme, 1)
     plan.optimise()
     afx.timing(start)
-    afx.aft_message_list('fractionation plan:', plan.output.doses, nme, 1)
+    afx.aft_message_list('physical dose:', plan.output.physical_doses, nme, 1)
+    afx.aft_message_list('tumor dose:', plan.output.tumor_doses, nme)
+    afx.aft_message_list('oar dose:', plan.output.oar_doses, nme)
+    afx.aft_message_list('accumulated dose:', \
+        [plan.output.oar_sum, plan.output.tumor_sum], nme, 1)
     plan.plot()
     afx.aft_message('close session...', nme, 1)
 
