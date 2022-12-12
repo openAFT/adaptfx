@@ -69,13 +69,19 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
             # if both zero than the user doesn't want to plot policy
             output_whole.policy = output.policy
         if sets.plot_values == keys.fraction:
-            output_whole.values = output.values
+            output_whole.value = output.value
         if sets.plot_remains == keys.fraction:
             output_whole.remains = output.remains
 
-    exponent = afx.find_exponent(sets.dose_stepsize) - 1
+    # store sparing factor, states and fractions list for the plots
     output_whole.sf, output_whole.states = output.sf, output.states
-    output_whole.doses = np.around(
+    output_whole.policy_list = fractions_list[sets.plot_policy - 1:]
+    output_whole.values_list = fractions_list[sets.plot_values - 1:]
+    output_whole.remains_list = fractions_list[sets.plot_remains - 1:]
+
+    # store doses
+    exponent = afx.find_exponent(sets.dose_stepsize) - 1
+    [output_whole.physical_doses, output_whole.tumor_doses, output_whole.oar_doses] = np.around(
         [physical_doses, tumor_doses, oar_doses], -exponent)
     output_whole.oar_sum, output_whole.tumor_sum = np.around(
         [np.nansum(oar_doses), np.nansum(tumor_doses)], -exponent)

@@ -388,7 +388,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     if policy_plot:
         output.policy = policy
     if values_plot:
-        output.values = values
+        output.value = values
     if remains_plot:
         output.remains = remains
 
