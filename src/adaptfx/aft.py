@@ -86,17 +86,19 @@ class RL_object():
         self.settings = afx.DotDict(settings)
 
     def optimise(self):
-        self.doses, output = afx.multiple(self.algorithm, self.keys, self.settings)
-        if self.settings.plot_policy != 0:
-            self.sf = output.sf
-            self.states = output.states
-            self.policy = output.policy
+        self.output = afx.multiple(self.algorithm, self.keys, self.settings)
     
     def plot(self):
-        if self.settings.plot_policy != 0:
-            afx.policy_plot(self.sf, self.states, self.policy, plot=True)
-        else:
-            afx.aft_message('nothing to plot', nme, 1)
+        sf = self.output.sf
+        states = self.output.states
+        if self.settings.plot_policy:
+            afx.policy_plot(sf, states, self.output.policy, plot=True)
+        if self.settings.plot_values:
+            afx.policy_plot(sf, states, self.output.values, plot=True)
+        if self.settings.plot_remains:
+            afx.policy_plot(sf, states, self.output.remains, plot=True)
+        # else:
+        #     afx.aft_message('nothing to plot', nme, 1)
 
 def main():
     """
@@ -126,7 +128,7 @@ def main():
     afx.aft_message('start session...', nme, 1)
     plan.optimise()
     afx.timing(start)
-    afx.aft_message_list('fractionation plan:', plan.doses, nme, 1)
+    afx.aft_message_list('fractionation plan:', plan.output.doses, nme, 1)
     plan.plot()
     afx.aft_message('close session...', nme, 1)
 

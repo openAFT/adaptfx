@@ -37,7 +37,7 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
     first_tumor_dose = keys.accumulated_tumor_dose
     first_oar_dose = keys.accumulated_oar_dose
 
-    policy_of_interest = None
+    output_whole = afx.DotDict({})
 
     for i, keys.fraction in enumerate(fractions_list):
         keys.sparing_factors_public = keys.sparing_factors[0 : keys.fraction + 1]
@@ -64,19 +64,20 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         keys.accumulated_tumor_dose = np.nansum(tumor_doses) + first_tumor_dose
         keys.accumulated_oar_dose = np.nansum(oar_doses) + first_oar_dose
     
-        if sets.plot_policy == keys.fraction and sets.plot_policy !=0:
+        if sets.plot_policy == keys.fraction:
             # user specifies to plot policy number, if equal to fraction plot
             # if both zero than the user doesn't want to plot policy
-            policy_of_interest = output
-            # afx.policy_plot(output.sf, output.states, output.policy, plot='True')
+            output_whole.policy = output.policy
+        if sets.plot_values == keys.fraction:
+            output_whole.values = output.values
+        if sets.plot_remains == keys.fraction:
+            output_whole.remains = output.remains
 
     exponent = afx.find_exponent(sets.dose_stepsize) - 1
-    physical, tumor, oar = np.around(
+    output_whole.sf, output_whole.states = output.sf, output.states
+    output_whole.doses = np.around(
         [physical_doses, tumor_doses, oar_doses], -exponent)
-    oar_sum, tumor_sum = np.around(
+    output_whole.oar_sum, output_whole.tumor_sum = np.around(
         [np.nansum(oar_doses), np.nansum(tumor_doses)], -exponent)
 
-    return [
-            oar_sum, tumor_sum,
-            np.vstack([physical, oar, tumor])
-            ], policy_of_interest
+    return output_whole

@@ -379,12 +379,17 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
                 policy[fraction_index] = current_policy
                 remains[fraction_index] = current_remains + future_remains
 
-    if finished:
-        output = {'physical_dose': np.nan, 'tumor_dose': np.nan, 
-            'oar_dose': np.nan, 'sf': sf, 'states': remaining_states}
-    else:
-        output = {'physical_dose': actionspace[action_index], 'tumor_dose': bedt_space[action_index], 
-            'oar_dose': bedn_space[action_index], 'sf': sf, 'states': remaining_states}
+    output = afx.DotDict({'sf': sf, 'states': remaining_states})
+
+    output.physical_dose = actionspace[action_index] if not finished else np.nan
+    output.tumor_dose = bedt_space[action_index] if not finished else np.nan
+    output.oar_dose = bedn_space[action_index] if not finished else np.nan
+
     if policy_plot:
-        output['policy'] = policy
-    return afx.DotDict(output)
+        output.policy = policy
+    if values_plot:
+        output.values = values
+    if remains_plot:
+        output.remains = remains
+
+    return output
