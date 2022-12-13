@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize as normalise
 import matplotlib.cm as cm
 
-def policy_plot(sfs, states, policies, fractions, plot=True):
+def plot_val(sfs, states, policies, fractions):
     """
     creates a subplot grid for the policy in each fraction that is given
 
@@ -58,8 +58,8 @@ def policy_plot(sfs, states, policies, fractions, plot=True):
     fig.supylabel('remaining BED')
     fig.tight_layout()
     fig.colorbar(mappable=im, ax=axs.tolist())
-    
-    if plot:
-        plt.show()
 
     return fig
+
+def show_plot():
+    plt.show()

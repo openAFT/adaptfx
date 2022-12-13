@@ -44,8 +44,8 @@ class RL_object():
                 afx.aft_error('invalid "debug" flag was set', nme)
 
         afx.logging_init(instruction_filename, log_bool, log_level)
-        afx.aft_message_info('log level:', log_level, nme, 0)
-        afx.aft_message_info('log to file:', log_bool, nme, 0)
+        afx.aft_message_info('log level:', log_level, nme)
+        afx.aft_message_info('log to file:', log_bool, nme)
 
         try: # check if algorithm key matches known types
             algorithm = input_dict['algorithm']
@@ -55,7 +55,7 @@ class RL_object():
             if algorithm not in afx.KEY_DICT:
                 afx.aft_error(f'unknown "algorithm" type: "{algorithm}"', nme)
             else:
-                afx.aft_message_info('algorithm:', algorithm, nme, 0)
+                afx.aft_message_info('algorithm:', algorithm, nme)
 
         try: # check if keys exists and is a dictionnary
             raw_keys = input_dict['keys']
@@ -82,6 +82,8 @@ class RL_object():
             afx.aft_message_dict('settings', settings, nme, 1)
 
         self.algorithm = algorithm
+        self.log = log_bool
+        self.log_level = log_level
         self.keys = afx.DotDict(keys)
         self.settings = afx.DotDict(settings)
 
@@ -92,12 +94,15 @@ class RL_object():
         sf = self.output.sf
         states = self.output.states
         if self.settings.plot_policy:
-            afx.policy_plot(sf, states, self.output.policy, self.output.policy_list)
+            afx.plot_val(sf, states, self.output.policy, self.output.policy_list)
         if self.settings.plot_values:
-            afx.policy_plot(sf, states, self.output.value, self.output.values_list)
+            afx.plot_val(sf, states, self.output.value, self.output.values_list)
         if self.settings.plot_remains:
-            afx.policy_plot(sf, states, self.output.remains, self.output.remains_list)
-        if not (self.settings.plot_policy + self.settings.plot_values + self.settings.plot_remains):
+            afx.plot_val(sf, states, self.output.remains, self.output.remains_list)
+
+        if (self.settings.plot_policy + self.settings.plot_values + self.settings.plot_remains):
+            afx.show_plot()
+        else:
             afx.aft_message('nothing to plot', nme, 1)
 
 def main():
@@ -123,16 +128,22 @@ def main():
         default=False,
         type=bool
     )
+    # In case there is no input show help
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
     plan = RL_object(args.filename)
+
     afx.aft_message('start session...', nme, 1)
     plan.optimise()
     afx.timing(start)
+
+    # show retrospective dose prescribtion
     afx.aft_message_list('physical dose:', plan.output.physical_doses, nme, 1)
     afx.aft_message_list('tumor dose:', plan.output.tumor_doses, nme)
     afx.aft_message_list('oar dose:', plan.output.oar_doses, nme)
-    afx.aft_message_list('accumulated dose:', \
-        [plan.output.oar_sum, plan.output.tumor_sum], nme, 1)
+
+    # show accumulated dose
+    afx.aft_message_info('accumulated oar dose:', plan.output.oar_sum, nme, 1)
+    afx.aft_message_info('accumulated tumor dose:', plan.output.tumor_sum, nme)
     plan.plot()
     afx.aft_message('close session...', nme, 1)
 
