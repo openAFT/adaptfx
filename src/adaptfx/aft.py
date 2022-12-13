@@ -91,16 +91,16 @@ class RL_object():
         self.output = afx.multiple(self.algorithm, self.keys, self.settings)
     
     def plot(self):
-        sf = self.output.sf
-        states = self.output.states
+        out = self.output
+        sets = self.settings
         if self.settings.plot_policy:
-            afx.plot_val(sf, states, self.output.policy, self.output.policy_list)
+            afx.plot_val(out.policy.sf, out.policy.states, out.policy.val, out.policy.fractions)
         if self.settings.plot_values:
-            afx.plot_val(sf, states, self.output.value, self.output.values_list)
+            afx.plot_val(out.value.sf, out.value.states, out.value.val, out.value.fractions)
         if self.settings.plot_remains:
-            afx.plot_val(sf, states, self.output.remains, self.output.remains_list)
+            afx.plot_val(out.remains.sf, out.remains.states, out.remains.val, out.remains.fractions)
 
-        if (self.settings.plot_policy + self.settings.plot_values + self.settings.plot_remains):
+        if sets.plot_policy or sets.plot_values or sets.plot_remains:
             afx.show_plot()
         else:
             afx.aft_message('nothing to plot', nme, 1)

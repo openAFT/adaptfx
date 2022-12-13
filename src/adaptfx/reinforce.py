@@ -270,8 +270,9 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
     n_remaining_fractions = number_of_fractions - fraction
     values = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
-    policy = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
-    remains = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
+    if policy_plot or remains_plot or values_plot:
+        policy = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
+        remains = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
     
     finished = False
     # ------------------------------------------------------------------------------------- #
@@ -379,17 +380,26 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
                 policy[fraction_index] = current_policy
                 remains[fraction_index] = current_remains + future_remains
 
-    output = afx.DotDict({'sf': sf, 'states': remaining_states})
+    output = afx.DotDict({})
 
     output.physical_dose = actionspace[action_index] if not finished else np.nan
     output.tumor_dose = bedt_space[action_index] if not finished else np.nan
     output.oar_dose = bedn_space[action_index] if not finished else np.nan
 
     if policy_plot:
-        output.policy = policy
+        output.policy = {}
+        output.policy.val = policy
+        output.policy.sf = sf
+        output.policy.states = remaining_states
     if values_plot:
-        output.value = values
+        output.value = {}
+        output.value.val = values
+        output.value.sf = sf
+        output.value.states = remaining_states
     if remains_plot:
-        output.remains = remains
+        output.remains = {}
+        output.remains.val = remains
+        output.remains.sf = sf
+        output.remains.states = remaining_states
 
     return output

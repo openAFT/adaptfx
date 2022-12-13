@@ -63,21 +63,18 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
 
         keys.accumulated_tumor_dose = np.nansum(tumor_doses) + first_tumor_dose
         keys.accumulated_oar_dose = np.nansum(oar_doses) + first_oar_dose
-    
+
+        # user specifies to plot policy number, if equal to fraction plot
+        # if both zero than the user doesn't want to plot policy
         if sets.plot_policy == keys.fraction:
-            # user specifies to plot policy number, if equal to fraction plot
-            # if both zero than the user doesn't want to plot policy
             output_whole.policy = output.policy
+            output_whole.policy.fractions = fractions_list[sets.plot_policy - 1:]
         if sets.plot_values == keys.fraction:
             output_whole.value = output.value
+            output_whole.value.fractions = fractions_list[sets.plot_values - 1:]
         if sets.plot_remains == keys.fraction:
             output_whole.remains = output.remains
-
-    # store sparing factor, states and fractions list for the plots
-    output_whole.sf, output_whole.states = output.sf, output.states
-    output_whole.policy_list = fractions_list[sets.plot_policy - 1:]
-    output_whole.values_list = fractions_list[sets.plot_values - 1:]
-    output_whole.remains_list = fractions_list[sets.plot_remains - 1:]
+            output_whole.remains.fractions = fractions_list[sets.plot_remains - 1:]
 
     # store doses
     exponent = afx.find_exponent(sets.dose_stepsize) - 1
