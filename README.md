@@ -10,7 +10,7 @@
     2. [3D Algorithms](#the-3d-algorithms)
     3. [Discrete Value Function](#discrete-value-function)
     4. [GUI](#gui)
-    5. [$t$-Distribution](#t-distribution)
+    5. [t-Distribution](#t-distribution)
     6. [Additional Data](#additional-data)
 5. [Extended Function](#extended-functionality)
 6. [Troubleshooting](#troubleshooting)
@@ -187,7 +187,7 @@ Collecting tkinter
 No matching distribution found for tkinter
 ```
 
-**Solution:** on Fedora Linux and derivative distribution one could solve this by either installing python tkinter
+**Solution:** on Fedora Linux and derivative distributions one could solve this by either installing python tkinter
 
 ```
 sudo dnf install python3-tkinter
