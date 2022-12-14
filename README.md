@@ -1,5 +1,22 @@
 # The `adaptfx` package
 
+## Content
+
+1. [About](#about)  
+2. [Installation](#installation)  
+3. [Package Structure](#package-structure)  
+4. [Describtion](#description)  
+    1. [2D Algorithms](#the-2d-algorithms)
+    2. [3D Algorithms](#the-3d-algorithms)
+    3. [Discrete Value Function](#discrete-value-function)
+    4. [GUI](#gui)
+    5. [$t$-Distribution](#t-distribution)
+    6. [Additional Data](#additional-data)
+5. [Extended Function](#extended-functionality)
+6. [Troubleshooting](#troubleshooting)
+
+---
+
 ## About
 
 `adaptfx` is a python package to calculate adaptive fractionation schemes. Using magnetic resonance (MR) guidance in radiotherapy, treatment plans can be adapted daily to a patient's geometry, thereby exploiting inter-fractional motion of tumors and organs at risk (OAR). This can improve OAR sparing or tumor coverage, compared to standard fractionation schemes, which simply apply a predefined dose every time.
@@ -49,7 +66,8 @@ for more information on the usage of the CLI, read the [manual](MANUAL.md).
 The user can also decide to use the scripts from `reinforce` in their python scripts e.g.
 
 ```python
-import reinforce.tumor_maximisation as tumor_max
+import adapatfx as afx
+plan_output = afx.multiple('oar', keys)
 ```
 
 `adaptfx` also provides a GUI. However, it depends on `Tkinter`. It often comes installed, but if not you can find the relevant installation instructions [here](https://tkdocs.com/tutorial/install.html). E.g. in python and on Ubuntu, you would install it via
@@ -113,11 +131,11 @@ A last addition is made with graphical user interfaces that facilitate the use o
 > :warning: Note:\
 > The interfaces are not optimized, and thus it is not recommended using them to further develop extensions.
 
-### T-distribution
+### $t$-Distribution
 
 Apart from using a gamma prior for the standard deviation, a full Bayesian approach can be done with a conjugate prior for the variance.
-In the t-distribution folder the same algorithms as in the paper are applied, but instead of using the gamma prior, the probability distribution is estimated from an updated t-distribution by using an inverse-gamma prior for the variance.
-The results are slightly different when alternative priors are applied. Since the t-distribution estimates larger standard deviations, more sparing factors are relevant and thus the state space is increased which results in a longer computation time.
+In the $t$-distribution folder the same algorithms as in the paper are applied, but instead of using the gamma prior, the probability distribution is estimated from an updated $t$-distribution by using an inverse-gamma prior for the variance.
+The results are slightly different when alternative priors are applied. Since the $t$-distribution estimates larger standard deviations, more sparing factors are relevant and thus the state space is increased which results in a longer computation time.
 
 ### Additional Data
 
@@ -135,7 +153,7 @@ The algorithms allow to choose some extra parameters to specify extra constraint
 
 ### No module named `_ctypes` on install
 
-*Problem:* on Linux distributions it happens that the `pip install .` command fails with the message:
+**Problem:** on Linux distributions it happens that the `pip install .` command fails with the message:
 
 ```
 Traceback (most recent call last):
@@ -147,7 +165,7 @@ Traceback (most recent call last):
 ImportError: No module named '_ctypes'
 ```
 
-*Solution:* with the specific package manager of the Linux distribution install `libffi-dev` development tool. E.g. in Fedora Linux and derivatives install this tool
+**Solution:** with the specific package manager of the Linux distribution install `libffi-dev` development tool. E.g. in Fedora Linux and derivatives install this tool
 
 ```
 sudo dnf install libffi-devel
@@ -160,7 +178,7 @@ sudo apt install libffi-dev
 
 ### No GUI backend for `matplotlib`
 
-*Problem:* on Linux or MacOS it could be that once `aft` is run the plots are not shown and there is an error message:
+**Problem:** on Linux or MacOS it could be that once `aft` is run the plots are not shown and there is an error message:
 
 
 ```
@@ -169,7 +187,7 @@ Collecting tkinter
 No matching distribution found for tkinter
 ```
 
-*Solution:* on Fedora Linux and derivative distribution one could solve this by either installing python tkinter
+**Solution:** on Fedora Linux and derivative distribution one could solve this by either installing python tkinter
 
 ```
 sudo dnf install python3-tkinter
