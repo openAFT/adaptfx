@@ -23,7 +23,7 @@ algorithm: frac, oar, tumor, tumor_oar
     oar: minimise oar BED, with tumor constraint
     tumor : maximise tumor BED, with oar constraint
     tumor_oar : minimise oar and maximise tumor BED simultaneously
-debug: 0, 1
+debug: 0, 1, 2
     show more information (for developers)
     default: 0
 log: 0,1
@@ -94,6 +94,8 @@ tumor_goal : float
 
 minimise number of fractions
 ----------------
+tumor_goal : float
+    prescribed tumor BED.
 c: float
     fixed constant to penalise for each additional fraction that is used.
 ```
@@ -119,6 +121,10 @@ inf_penalty : float
     infinite penalty for certain undesired states.
 plot_policy : int
     in which fraction should current and future policies be plotted.
+plot_values : int
+    in which fraction should current and future value function be plotted.
+plot_remains : int
+    in which fraction should current and future expected remaining number of fractions be plotted.
 ```
 
 # Example
