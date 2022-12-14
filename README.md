@@ -133,6 +133,63 @@ The algorithms allow to choose some extra parameters to specify extra constraint
 - Fix a minimum and maximum dose: Limits the action space by forcing a minimum and maximum dose for each fraction. (e.g. 4-16 Gy)
 - Calculate optimal fraction size by tracking tumor BED: The 2D GUI has an additional extension, where one can optimize the optimal dose based on the prescribed tumor dose. (E.g., the clinician prescribes a tumor BED of 72 Gy. The program will try to minimize the OAR BED while aiming at the 72 Gy BED prescribed dose.)
 
+## Troubleshooting
+
+### No module named `_ctypes` on install
+
+*Problem:* on Linux distributions it happens that the `pip install .` command fails with the message:
+
+```
+Traceback (most recent call last):
+   File "<stdin>", line 1, in <module>
+   File "/usr/local/lib/python3.10/some/module", line 10, in <module>
+   import ctypes
+   File "/usr/local/lib/python3.10/ctypes/__init__.py", line 7, in <module>
+      from _ctypes import Union, Structure, Array
+ImportError: No module named '_ctypes'
+```
+
+*Solution:* with the specific package manager of the Linux distribution install `libffi-dev` development tool. E.g. in Fedora Linux and derivatives install this tool
+
+```
+sudo dnf install libffi-devel
+```
+
+On Ubuntu:
+```
+sudo apt install libffi-dev
+```
+
+### No GUI backend for `matplotlib`
+
+*Problem:* on Linux or MacOS it could be that once `aft` is run the plots are not shown and there is an error message:
+
+
+```
+Collecting tkinter
+  Could not find a version that satisfies the requirement tkinter (from versions: )
+No matching distribution found for tkinter
+```
+
+*Solution:* on Fedora Linux and derivative distribution one could solve this by either installing python tkinter
+
+```
+sudo dnf install python3-tkinter
+```
+
+or on Ubuntu
+
+```
+sudo apt-get install python3-tk
+```
+
+or use pyqt and install via pip
+
+```
+pip install pyqt5
+```
+
+
 ## References
 
 <a id="1">[1]</a>
