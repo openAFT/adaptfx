@@ -309,7 +309,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
                 future_remains_discrete = (remains[fraction_index + 1] * prob).sum(axis=1)
                 future_bedt_opt = current_policy + accumulated_tumor_dose
                 future_remains = afx.interpolate(future_bedt_opt, bedt_states, future_remains_discrete)
-                current_remains = np.where((current_policy - remaining_bed) > -1e-4, 0, 1)
+                current_remains = np.where((current_policy - remaining_bed) >= 0, 0, 1)
                 # write to arrays
                 policy[fraction_index][0] = current_policy
                 values[fraction_index][0] = vs_full.max(axis=0)
@@ -375,7 +375,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
                 future_remains_discrete = (remains[fraction_index + 1] * prob).sum(axis=1)
                 future_bedt_opt = current_policy + (bedt_states).reshape(n_bedt_states, 1)
                 future_remains = afx.interpolate(future_bedt_opt, bedt_states, future_remains_discrete)
-                current_remains = np.where((current_policy - remaining_states[::-1].reshape(n_bedt_states, 1)) > -1e-4, 0, 1)
+                current_remains = np.where((current_policy - remaining_states[::-1].reshape(n_bedt_states, 1)) >= 0, 0, 1)
                 # write to arrays
                 policy[fraction_index] = current_policy
                 remains[fraction_index] = current_remains + future_remains
