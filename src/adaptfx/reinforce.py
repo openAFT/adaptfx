@@ -26,9 +26,11 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     fixed_mean = keys.fixed_mean
     fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
-    # check in which fraction policy should be returned
+    # check in which fraction data should be returned for plotting
     policy_plot = 1 if sets.plot_policy == fraction else 0
-    
+    values_plot = 1 if sets.plot_values == fraction else 0
+    remains_plot = 1 if sets.plot_remains == fraction else 0
+
     # prepare distribution
     actual_sf = sparing_factors_public[fraction]
     if not fixed_prob:
@@ -52,8 +54,8 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     n_statesteps = int(np.round(remaining_bed / sets.state_stepsize, 0))
     max_physical_dose = afx.convert_to_physical(remaining_bed, abt)
 
+    # automatic max_dose calculation
     if max_dose == -1:
-        # automatic max_dose calculation
         max_dose = max_physical_dose
     # Reduce max_dose to prohibit tumor_goal overshoot (efficiency)
     max_dose = min(max_dose, max_physical_dose)
@@ -88,11 +90,12 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
     n_remaining_fractions = number_of_fractions - fraction
     values = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
-    if policy_plot:
+    if policy_plot or remains_plot:
         policy = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
+        remains = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
     
     finished = False
-    # ---------------------------------------------------------------------- #
+    # ------------------------------------------------------------------------------------- #
     remaining_fractions = np.arange(number_of_fractions, fraction - 1, -1)
     remaining_index = remaining_fractions - fraction
     # note that lowest fraction_state is one not zero
@@ -114,12 +117,19 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             # argmax of vs along axis 0 to find best action fot the actual sf
             action_index = vs.argmax(axis=0)
 
-            if policy_plot:
+            if policy_plot or values_plot or remains_plot:
                 # for the policy plot
-                vs_full = (-bedn_sf_space+ future_values.reshape(1, n_action, 1))[0]
+                vs_full = (-bedn_sf_space + future_values.reshape(1, n_action, 1))[0]
                 # check vs along the sf axis
+                current_policy = bedt_space[vs_full.argmax(axis=0)]
+                future_remains_discrete = (remains[fraction_index + 1] * prob).sum(axis=1)
+                future_bedt_opt = current_policy + accumulated_tumor_dose
+                future_remains = afx.interpolate(future_bedt_opt, bedt_states, future_remains_discrete)
+                current_remains = np.where((current_policy - remaining_bed) >= 0, 0, 1)
+                # write to arrays
+                policy[fraction_index][0] = current_policy
                 values[fraction_index][0] = vs_full.max(axis=0)
-                policy[fraction_index][0] = bedt_space[vs_full.argmax(axis=0)]
+                remains[fraction_index][0] = current_remains + future_remains
 
         elif fraction == number_of_fractions:
             # in the last fraction value is not relevant
@@ -140,19 +150,22 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             last_bed_actions = np.where(last_actions < min_dose, bedt_space[0], last_bed_actions)
             last_actions = np.where(last_actions > max_dose, actionspace[-1], last_actions)
             last_actions = np.where(last_actions < min_dose, actionspace[0], last_actions)
-            # cut the actionspace to min and max dose constraints
             last_bedn = afx.bed_calc_matrix(last_actions, abn, sf)
             # this smooths out the penalties in underdose and overdose regions
-            bedt_diff_pre = np.round(bedt_states + last_bed_actions - tumor_goal, -exp)
-            penalties = np.where(bedt_diff_pre == 0, 0, -np.abs(bedt_diff_pre) * sets.inf_penalty)
+            bedt_diff = np.round(bedt_states + last_bed_actions - tumor_goal, -exp)
+            penalties = np.where(bedt_diff == 0, 0, -np.abs(bedt_diff) * sets.inf_penalty)
             # to each best action add the according penalties
             # penalties need to be reshaped for broadcasting
             vs = -last_bedn + penalties.reshape(n_bedt_states, 1)
             values[fraction_index] = vs
+            # ensure that for the goal reached the value/poliy is zero (min_dose)
+            values[fraction_index][bedt_states==tumor_goal] = 0
 
             if policy_plot:
                 # policy calculation for each bedt, but sf is not considered
                 policy[fraction_index] += last_bed_actions.reshape(n_bedt_states, 1)
+                # ensure that for the goal reached the value/poliy is zero (min_dose)
+                policy[fraction_index][bedt_states==tumor_goal] = 0
 
         elif fraction_state != number_of_fractions:
             # every other state but the last
@@ -167,19 +180,44 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             vs = -bedn_sf_space + future_values.reshape(n_bedt_states, n_action, 1)
             # check vs along the sf axis
             values[fraction_index] = vs.max(axis=1)
+            # ensure that for the goal reached the value/poliy is zero (min_dose)
+            values[fraction_index][bedt_states==tumor_goal] = 0
 
-            if policy_plot:
-                policy[fraction_index] = bedt_space[vs.argmax(axis=1)]
+            if policy_plot or remains_plot:
+                current_policy = bedt_space[vs.argmax(axis=1)]
+                # ensure that for the goal reached the value/poliy is zero (min_dose)
+                current_policy[bedt_states == tumor_goal] = 0
+                future_remains_discrete = (remains[fraction_index + 1] * prob).sum(axis=1)
+                future_bedt_opt = current_policy + (bedt_states).reshape(n_bedt_states, 1)
+                future_remains = afx.interpolate(future_bedt_opt, bedt_states, future_remains_discrete)
+                current_remains = np.where((current_policy - remaining_states[::-1].reshape(n_bedt_states, 1)) >= 0, 0, 1)
+                # write to arrays
+                policy[fraction_index] = current_policy
+                remains[fraction_index] = current_remains + future_remains
 
-    if finished:
-        output = {'physical_dose': np.nan, 'tumor_dose': np.nan, 
-            'oar_dose': np.nan, 'sf': sf, 'states': remaining_states}
-    else:
-        output = {'physical_dose': actionspace[action_index], 'tumor_dose': bedt_space[action_index], 
-            'oar_dose': bedn_space[action_index], 'sf': sf, 'states': remaining_states}
+    output = afx.DotDict({})
+
+    output.physical_dose = actionspace[action_index] if not finished else np.nan
+    output.tumor_dose = bedt_space[action_index] if not finished else np.nan
+    output.oar_dose = bedn_space[action_index] if not finished else np.nan
+
     if policy_plot:
-        output['policy'] = policy
-    return afx.DotDict(output)
+        output.policy = {}
+        output.policy.val = policy
+        output.policy.sf = sf
+        output.policy.states = remaining_states
+    if values_plot:
+        output.value = {}
+        output.value.val = values
+        output.value.sf = sf
+        output.value.states = remaining_states
+    if remains_plot:
+        output.remains = {}
+        output.remains.val = remains
+        output.remains.sf = sf
+        output.remains.states = remaining_states
+
+    return output
 
 
 def min_n_frac(keys, sets=afx.SETTING_DICT):
@@ -270,7 +308,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
     n_remaining_fractions = number_of_fractions - fraction
     values = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
-    if policy_plot or remains_plot or values_plot:
+    if policy_plot or remains_plot:
         policy = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
         remains = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
     
@@ -345,7 +383,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             # ensure that for the goal reached the value/poliy is zero (min_dose)
             values[fraction_index][bedt_states==tumor_goal] = 0
 
-            if policy_plot or values_plot:
+            if policy_plot:
                 # policy calculation for each bedt, but sf is not considered
                 policy[fraction_index] += last_bed_actions.reshape(n_bedt_states, 1)
                 # ensure that for the goal reached the value/poliy is zero (min_dose)
@@ -368,7 +406,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             # ensure that for the goal reached the value/poliy is zero (min_dose)
             values[fraction_index][bedt_states==tumor_goal] = 0
 
-            if policy_plot or values_plot or remains_plot:
+            if policy_plot or remains_plot:
                 current_policy = bedt_space[vs.argmax(axis=1)]
                 # ensure that for the goal reached the value/poliy is zero (min_dose)
                 current_policy[bedt_states == tumor_goal] = 0
