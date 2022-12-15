@@ -6,16 +6,16 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Upload Python Package
+name: Upload Python Package Pre-Release
 
 on:
   release:
-    types: [released]
+    types: [prereleased]
     
 jobs:
   deploy:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
     - name: build and publish package
       env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKE }}
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
       run: |
           python3 -m build
-          python3 -m twine upload dist/*  
+          python3 -m twine upload --repository testpypi dist/*   
