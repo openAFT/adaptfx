@@ -129,42 +129,10 @@ plot_remains : int
 
 # Example
 
-Outlined is an example instruction file for fraction minimisation. It simply is a python dictionary with parameters.
+Outlined is an example instruction file for fraction minimisation. It simply is a `.json` that is translated into a python dictionary with. An example can be found [here](work/oar_example.json)
+
+This `.json` file can be called in with the CLI as:
 
 ```
-# instruction_file
-{
-'algorithm': 'frac',
-'debug': 1,
-'log': 0,
-'keys':
-    {
-	'number_of_fractions': 6,
-	'sparing_factors': [0.98, 0.97, 0.8, 0.83, 0.8, 0.85, 0.94],
-	'alpha': None,
-	'beta': None,
-    'abt': 10,
-    'abn': 3,
-	'fixed_prob': 1,
-	'fixed_mean': 0.9,
-	'fixed_std': 0.04,
-	'tumor_goal': 72,
-	'c': 0.8,
-    },
-'settings':
-    {
-    'dose_stepsize': 0.5,
-    'state_stepsize': 0.5,
-    'sf_low': 0,
-    'sf_high': 1.7,
-    'sf_stepsize': 0.01,
-    'sf_prob_threshold': 1e-5,
-    'plot_policy': 0
-    }
-}
-```
-This dictionary stored in a `.txt` file can be called in with the CLI as:
-
-```
-$ aft -f <instruction_file>
+$ aft -f work/oar_example.json
 ```

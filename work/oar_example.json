@@ -1,0 +1,32 @@
+{
+"algorithm": "oar",
+"level": 1,
+"log": 0,
+"keys": 
+	{
+	"number_of_fractions": 6,
+	"fraction": 0,
+	"sparing_factors": [0.98, 0.97, 0.8, 0.83, 0.8, 0.85, 0.94],
+	"alpha": "invalid",
+	"beta": "invalid",
+	"fixed_prob": 1,
+	"fixed_mean": 0.9,
+	"fixed_std": 0.04,
+	"accumulated_oar_dose": 0,
+	"accumulated_tumor_dose": 0,
+	"min_dose": 0,
+	"max_dose": -1,
+	"tumor_goal": 72,
+	"c": 0
+	},
+"settings":
+	{
+	"dose_stepsize": 0.5,
+	"state_stepsize": 0.5,
+	"sf_stepsize": 0.01,
+	"sf_low": 0.7,
+	"sf_high": 1.1,
+	"sf_prob_threshold": 0,
+	"plot_policy": 1
+	}
+}

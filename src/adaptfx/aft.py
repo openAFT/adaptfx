@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import argparse
+import json
 import adaptfx as afx
 import sys
 nme = __name__
@@ -14,7 +15,7 @@ class RL_object():
         try: # check if file can be opened
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
-            input_dict= eval(read_in)
+            input_dict= json.loads(read_in)
         except TypeError:
             if isinstance(instruction_filename, dict):
                 input_dict = instruction_filename
