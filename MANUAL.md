@@ -6,11 +6,11 @@ One should perform calculations in a working folder e.g. `adaptfx/work`. There t
 
 ## Format of the instruction file
 The user specifies following elements of the dictionary for the main entries: 
-- `'algorithm'`
-- `'debug'`
-- `'log'`
-- `'keys'`
-- `'settings'`
+- `"algorithm"`
+- `"debug"`
+- `"log"`
+- `"keys"`
+- `"settings"`
 
 Each entry of the dictionary is either a parameter or a dictionary itself. In the next section explained are the main entries.
 
@@ -23,9 +23,11 @@ algorithm: frac, oar, tumor, tumor_oar
     oar: minimise oar BED, with tumor constraint
     tumor : maximise tumor BED, with oar constraint
     tumor_oar : minimise oar and maximise tumor BED simultaneously
-debug: 0, 1, 2
-    show more information (for developers)
-    default: 0
+level: 0, 1, 2
+    quiet mode, 0 (for scripting)
+    normal mode, 1
+    debug mode, 2 (for developing)
+    default: 1
 log: 0,1
     log output to a file
     default: 0
@@ -47,9 +49,11 @@ fraction : int
 sparing_factors : list/array
     list/array with all observed sparing factors.
 alpha : float
-    shape of inverse-gamma distribution.
+    shape of inverse-gamma distribution, for prior.
+    mandatory if fixed_prob set to 0.
 beta : float
-    scale of inverse-gamme distribution.
+    scale of inverse-gamme distribution, for prior.
+    mandatory if fixed_prob set to 0.
 abt : float
     alpha-beta ratio of tumor.
 abn : float

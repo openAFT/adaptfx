@@ -29,19 +29,19 @@ class RL_object():
         try: # check if log flag is existent and boolean
             log_bool = input_dict['log']
         except KeyError as log_err:
-            afx.aft_warning(f'no {log_err} flag was given, set to 0', nme)
-            log_bool = 0
+            log_bool = afx.LOG_BOOL
+            afx.aft_warning(f'no {log_err} flag was given, set to {log_bool}', nme)
         else:
-            if not log_bool in [0,1]:
+            if not log_bool in afx.LOG_BOOL_LIST:
                 afx.aft_error('invalid "log" flag was set', nme)
 
         try: # check if log flag is existent and boolean
             log_level = input_dict['level']
         except KeyError as level_err:
-            afx.aft_warning(f'no {level_err} mode was given, set to 1', nme)
-            log_level = 1
+            log_level = afx.LOG_LEVEL
+            afx.aft_warning(f'no {level_err} mode was given, set to {log_level}', nme)
         else:
-            if not log_level in [0,1,2]:
+            if not log_level in afx.LOG_LEVEL_LIST:
                 afx.aft_error('invalid "debug" flag was set', nme)
 
         afx.logging_init(instruction_filename, log_bool, log_level)

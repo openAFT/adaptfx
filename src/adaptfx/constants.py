@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+# log settings
+LOG_BOOL = 0
+LOG_BOOL_LIST = [0,1]
+LOG_LEVEL = 1
+LOG_LEVEL_LIST = [0,1,2]
+
+# dose, sf
 DOSE_STEPSIZE = 0.1
 STATE_STEPSIZE = 1
 SF_LOW = 0
@@ -28,7 +35,7 @@ FULL_DICT = {'number_of_fractions':None,
         'fixed_prob': 0,
         'fixed_mean': None,
         'fixed_std': None
-}
+        }
 
 SETTING_DICT = {
         'dose_stepsize': DOSE_STEPSIZE,
@@ -41,9 +48,10 @@ SETTING_DICT = {
         'plot_policy': 0,
         'plot_values': 0,
         'plot_remains': 0,
-}
+        }
 
-STANDARD_LIST = ['number_of_fractions',
+STANDARD_LIST = [
+        'number_of_fractions',
         'fraction',
         'sparing_factors',
         'alpha',
@@ -56,7 +64,8 @@ STANDARD_LIST = ['number_of_fractions',
         'max_dose',
         'fixed_prob',
         'fixed_mean',
-        'fixed_std']
+        'fixed_std'
+        ]
 
 OAR_LIST = STANDARD_LIST + ['tumor_goal']
 

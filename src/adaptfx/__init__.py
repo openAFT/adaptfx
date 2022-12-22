@@ -4,6 +4,7 @@ this folder holds the adaptfx package
 Created on Wed Sep 7 15:28:02 2022
 @author: janicweber
 """
+from .constants import LOG_BOOL, LOG_LEVEL, LOG_BOOL_LIST, LOG_LEVEL_LIST
 from .constants import FULL_DICT, SETTING_DICT, KEY_DICT
 from .aft_prompt import *
 from .aft_utils import *
