@@ -25,6 +25,10 @@ class RL_object():
             afx.aft_error(f'error in "{instruction_filename}", {syntax_err}', nme)
         except OSError:
             afx.aft_error(f'No such file: "{instruction_filename}"', nme)
+        except ValueError as decode_err:
+            afx.aft_error(f'decode error in "{instruction_filename}", {decode_err}', nme)
+        except:
+            afx.aft_error(f'error in "{instruction_filename}", {sys.exc_info()}', nme)
 
         try: # check if log flag is existent and boolean
             log_bool = input_dict['log']
