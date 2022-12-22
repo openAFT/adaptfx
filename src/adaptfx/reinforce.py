@@ -90,7 +90,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
     n_remaining_fractions = number_of_fractions - fraction
     values = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
-    if policy_plot or remains_plot:
+    if policy_plot or values_plot or remains_plot:
         policy = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
         remains = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
     
@@ -308,7 +308,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
     n_remaining_fractions = number_of_fractions - fraction
     values = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
-    if policy_plot or remains_plot:
+    if policy_plot or values_plot or remains_plot:
         policy = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
         remains = np.zeros((n_remaining_fractions + 1, n_bedt_states, n_sf))
     
