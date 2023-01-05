@@ -209,5 +209,5 @@ pip install pyqt5
 ## References
 
 <a id="1">[1]</a>
-Yoel Samuel Pérez Haas, Roman Ludwig, Riccardo Dal Bello, Lan Wenhong, Stephanie Tanadini-Lang, Jan Unkelbach;
-[**Adaptive fractionation at the MR-Linac based on a dynamic programming approach**](https://www.sciencedirect.com/science/article/pii/S0167814022027244), _ESTRO 2022_, OC-0944
+Yoel Samuel Pérez Haas et al.;
+**Adaptive fractionation at the MR-linac**, *Physics in Medicine & Biology*, Jan. 2023, doi: https://doi.org/10.1088/1361-6560/acafd4
