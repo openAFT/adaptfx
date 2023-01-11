@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from scipy.stats import truncnorm
-from scipy.interpolate import interp1d, interp2d, RegularGridInterpolator
+from scipy.stats import t, truncnorm
+# from scipy.interpolate import interp1d, interp2d, RegularGridInterpolator
 from scipy.optimize import minimize_scalar
 from decimal import Decimal as dec
 
@@ -77,8 +77,10 @@ def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
 
 def std_calc(measured_data, alpha, beta):
     """
-    calculates the most likely standard deviation for a list
-    of k sparing factors and a gamma conjugate prior
+    Function for probability updating:
+    Computes a maximum a priori estimation of the standard deviation
+    for a list of sparing factors (measured_data) and a gamma prior
+    distribution given by the parameters alpha and beta
 
     Parameters
     ----------
@@ -106,6 +108,40 @@ def std_calc(measured_data, alpha, beta):
                     method='bounded', options={'maxiter':19}).x
     
     return std
+
+def t_dist(measured_data, alpha, beta):
+    """
+    Function for probability updating:
+    Computes a posterior predictive sparing factor distribution
+    for a list of sparing factors (measured_data) and an
+    inverse-gamma conjugate prior distribution given by
+    the parameters alpha and beta
+
+    Parameters
+    ----------
+    measured_data : list/array
+        list of observed sparing factors
+    alpha : float
+        shape of gamma distribution
+    beta : float
+        scale of gamma distrinbution
+
+    Returns
+    -------
+    list
+        probability distribution of all sparing factors.
+
+    """
+    alpha_up = alpha + len(measured_data) / 2
+    beta_up = beta + measured_data.var(axis=0) * len(measured_data) / 2
+    mean_data = np.mean(measured_data)
+    prob_dist = t.pdf(
+        np.arange(0.01, 1.71, 0.01),
+        df=2 * alpha_up,
+        loc=mean_data,
+        scale=np.sqrt(beta_up / alpha_up),
+    )
+    return prob_dist / np.sum(prob_dist)
 
 def interpolate(x, x_pred, y_reg):
     """
