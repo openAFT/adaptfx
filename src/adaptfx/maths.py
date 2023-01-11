@@ -31,6 +31,39 @@ def truncated_normal(mean, std, low, upp):
 
     return normal
 
+def t_distribution(measured_data, alpha, beta):
+    """
+    Function for probability updating:
+    Computes a posterior predictive sparing factor distribution
+    for a list of sparing factors (measured_data) and an
+    inverse-gamma conjugate prior distribution given by
+    the parameters alpha and beta
+
+    Parameters
+    ----------
+    measured_data : list/array
+        list of observed sparing factors
+    alpha : float
+        shape of gamma distribution
+    beta : float
+        scale of gamma distrinbution
+
+    Returns
+    -------
+    scipy.stats._distn_infrastructure.rv_continuous_frozen
+        distribution function
+
+    """
+    n_sf = len(measured_data)
+    variance = np.var(measured_data)
+    mean = np.mean(measured_data)
+
+    alpha_up = alpha + n_sf / 2
+    beta_up = beta + variance * n_sf / 2
+    student_t = t(df=2 * alpha_up, loc=mean,
+        scale=np.sqrt(beta_up / alpha_up))
+    return student_t
+
 
 def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     """
@@ -108,40 +141,6 @@ def std_calc(measured_data, alpha, beta):
                     method='bounded', options={'maxiter':19}).x
     
     return std
-
-def t_dist(measured_data, alpha, beta):
-    """
-    Function for probability updating:
-    Computes a posterior predictive sparing factor distribution
-    for a list of sparing factors (measured_data) and an
-    inverse-gamma conjugate prior distribution given by
-    the parameters alpha and beta
-
-    Parameters
-    ----------
-    measured_data : list/array
-        list of observed sparing factors
-    alpha : float
-        shape of gamma distribution
-    beta : float
-        scale of gamma distrinbution
-
-    Returns
-    -------
-    list
-        probability distribution of all sparing factors.
-
-    """
-    alpha_up = alpha + len(measured_data) / 2
-    beta_up = beta + measured_data.var(axis=0) * len(measured_data) / 2
-    mean_data = np.mean(measured_data)
-    prob_dist = t.pdf(
-        np.arange(0.01, 1.71, 0.01),
-        df=2 * alpha_up,
-        loc=mean_data,
-        scale=np.sqrt(beta_up / alpha_up),
-    )
-    return prob_dist / np.sum(prob_dist)
 
 def interpolate(x, x_pred, y_reg):
     """
