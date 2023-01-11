@@ -120,9 +120,9 @@ def t_dist(data, alpha, beta):
     data : list/array
         list of observed sparing factors
     alpha : float
-        shape of gamma distribution
+        shape of inverse-gamma distribution
     beta : float
-        scale of gamma distrinbution
+        scale of inverse-gamma distrinbution
 
     Returns
     -------
