@@ -148,7 +148,7 @@ def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     sf = sample_sf[prob > probability_threshold]
     return [sf, probability]
 
-def std_calc(sf_observed, alpha, beta):
+def std_posterior(sf_observed, alpha, beta):
     """
     Function for probability updating:
     Computes a maximum a priori estimation of the standard deviation

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy.interpolate import interp1d, interp2d, RegularGridInterpolator
-from adaptfx import std_calc, truncated_normal, sf_probdist, bed_calc_matrix, bed_calc0, convert_to_physical, SETTING_DICT, DotDict
+from adaptfx import std_posterior, truncated_normal, sf_probdist, bed_calc_matrix, bed_calc0, convert_to_physical, SETTING_DICT, DotDict
 
 BED_calc_matrix = bed_calc_matrix
 BED_calc0 = bed_calc0
@@ -83,7 +83,7 @@ def min_oar_bed_old(keys, sets=SETTING_DICT):
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_calc(sparing_factors_public, alpha, beta)
+        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
@@ -248,7 +248,7 @@ def min_n_frac_old(keys, sets=SETTING_DICT):
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_calc(sparing_factors_public, alpha, beta)
+        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
@@ -436,7 +436,7 @@ def max_tumor_bed_old(keys, sets=SETTING_DICT):
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_calc(sparing_factors_public, alpha, beta)
+        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
@@ -653,7 +653,7 @@ def min_oar_max_tumor_old(keys, sets=SETTING_DICT):
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_calc(sparing_factors_public, alpha, beta)
+        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std

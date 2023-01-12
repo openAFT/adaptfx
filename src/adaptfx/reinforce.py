@@ -36,7 +36,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     if not fixed_prob:
         # setup the sparingfactor distribution
         mean = np.mean(sparing_factors_public)
-        std = afx.std_calc(sparing_factors_public, alpha, beta)
+        std = afx.std_posterior(sparing_factors_public, alpha, beta)
     else:
         mean = fixed_mean
         std = fixed_std
@@ -254,7 +254,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     if not fixed_prob:
         # setup the sparingfactor distribution
         mean = np.mean(sparing_factors_public)
-        std = afx.std_calc(sparing_factors_public, alpha, beta)
+        std = afx.std_posterior(sparing_factors_public, alpha, beta)
     else:
         mean = fixed_mean
         std = fixed_std
