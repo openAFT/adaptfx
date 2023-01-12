@@ -193,13 +193,13 @@ No matching distribution found for tkinter
 sudo dnf install python3-tkinter
 ```
 
-or on Ubuntu
+on Ubuntu
 
 ```
 sudo apt-get install python3-tk
 ```
 
-or use pyqt and install via pip
+**Solution:** on MacOS and Linux one could instead use `pip` to install `pyqt`
 
 ```
 pip install pyqt5
