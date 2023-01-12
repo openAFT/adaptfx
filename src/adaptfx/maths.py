@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from scipy.stats import t, truncnorm
+from scipy.stats import t, truncnorm, gamma, invgamma
 # from scipy.interpolate import interp1d, interp2d, RegularGridInterpolator
 from scipy.optimize import minimize_scalar
 from decimal import Decimal as dec
 
 def truncated_normal(mean, std, low, upp):
     """
-    produces a truncated normal distribution
+    Function for probability distribution:
+    returns a frozen truncated normal continuous random variable
 
     Parameters
     ----------
@@ -31,22 +32,23 @@ def truncated_normal(mean, std, low, upp):
 
     return normal
 
-def t_distribution(measured_data, alpha, beta):
+def student_t(measured_data, alpha, beta):
     """
     Function for probability updating:
     Computes a posterior predictive sparing factor distribution
     for a list of sparing factors (measured_data) and an
-    inverse-gamma conjugate prior distribution given by
-    the parameters alpha and beta
+    inverse-gamma conjugate prior distribution given by the
+    parameters alpha and beta. Returns a frozen student's t
+    random variable posterior
 
     Parameters
     ----------
     measured_data : list/array
         list of observed sparing factors
     alpha : float
-        shape of gamma distribution
+        shape of inverse-gamma distribution
     beta : float
-        scale of gamma distrinbution
+        scale of inverse-gamma distrinbution
 
     Returns
     -------
@@ -64,16 +66,54 @@ def t_distribution(measured_data, alpha, beta):
         scale=np.sqrt(beta_up / alpha_up))
     return student_t
 
+def fit_gamma_prior(measured_data):
+    """
+    fits the alpha and beta value for a gamma distribution
+
+    Parameters
+    ----------
+    measured_data : array
+        a nxk matrix with n the amount of patients and k the amount
+        of sparing factors per patient
+
+    Returns
+    -------
+    list
+        alpha (shape) and beta (scale) hyperparameter
+    """
+    stds = np.std(measured_data, axis=1)
+    alpha, _, beta = gamma.fit(stds, floc=0)
+    return [alpha, beta]
+
+def fit_invgamma_prior(measured_data):
+    """
+    fits the alpha and beta value for an inverse-gamma distribution
+
+    Parameters
+    ----------
+    measured_data : array
+        a nxk matrix with n the amount of patients and k the amount
+        of sparing factors per patient
+
+    Returns
+    -------
+    list
+        alpha (shape) and beta (scale) hyperparameter
+    """
+    variances = np.var(measured_data, axis=1)
+    alpha, _, beta = invgamma.fit(variances, floc=0)
+    return [alpha, beta]
+
 
 def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     """
-    This function produces a probability distribution
-    based on the normal distribution X
+    This function computes a probability distribution
+    based on the frozen random variable X
 
     Parameters
     ----------
     X : scipy.stats._distn_infrastructure.rv_frozen
-        distribution function
+        random variable
     sf_low : float
         lower bound for sparing factor distribution
     sf_high : float
@@ -85,6 +125,8 @@ def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
 
     Returns
     -------
+    list
+        of sf, and prob
     sf : array
         array with sparing factors
     prob : array
@@ -126,21 +168,21 @@ def std_calc(measured_data, alpha, beta):
 
     Returns
     -------
-    std : float
+    std_updated : float
         most likely std based on the measured data and gamma prior
 
     """
     n = len(measured_data)
-    variance = np.var(measured_data)
+    variance_measured = np.var(measured_data)
     # -------------------------------------------------------------------
     def likelihood(std):
-        L = std ** (alpha - n) * np.exp(- std / beta - 
-                n* variance / (2 * (std **2)))
+        L = ((std ** (alpha - 1)) / (std ** (n - 1)) * np.exp(- std / beta)
+            * np.exp(- n * variance_measured / (2 * (std ** 2)))
+        )
         return -L
-    std = minimize_scalar(likelihood, bounds=(0.001, 0.6), 
+    std_updated = minimize_scalar(likelihood, bounds=(0.001, 0.6), 
                     method='bounded', options={'maxiter':19}).x
-    
-    return std
+    return std_updated
 
 def interpolate(x, x_pred, y_reg):
     """
