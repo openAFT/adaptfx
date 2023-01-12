@@ -32,18 +32,18 @@ def truncated_normal(mean, std, low, upp):
 
     return normal
 
-def student_t(measured_data, alpha, beta):
+def student_t(sf_observed, alpha, beta):
     """
     Function for probability updating:
     Computes a posterior predictive sparing factor distribution
-    for a list of sparing factors (measured_data) and an
+    for a list of sparing factors (sf_observed) and an
     inverse-gamma conjugate prior distribution given by the
     parameters alpha and beta. Returns a frozen student's t
     random variable posterior
 
     Parameters
     ----------
-    measured_data : list/array
+    sf_observed : list/array
         list of observed sparing factors
     alpha : float
         shape of inverse-gamma distribution
@@ -56,9 +56,9 @@ def student_t(measured_data, alpha, beta):
         distribution function
 
     """
-    n_sf = len(measured_data)
-    variance = np.var(measured_data)
-    mean = np.mean(measured_data)
+    n_sf = len(sf_observed)
+    variance = np.var(sf_observed)
+    mean = np.mean(sf_observed)
 
     alpha_up = alpha + n_sf / 2
     beta_up = beta + variance * n_sf / 2
@@ -66,13 +66,13 @@ def student_t(measured_data, alpha, beta):
         scale=np.sqrt(beta_up / alpha_up))
     return student_t
 
-def fit_gamma_prior(measured_data):
+def fit_gamma_prior(sf_data):
     """
     fits the alpha and beta value for a gamma distribution
 
     Parameters
     ----------
-    measured_data : array
+    sf_data : array
         a nxk matrix with n the amount of patients and k the amount
         of sparing factors per patient
 
@@ -81,17 +81,17 @@ def fit_gamma_prior(measured_data):
     list
         alpha (shape) and beta (scale) hyperparameter
     """
-    stds = np.std(measured_data, axis=1)
+    stds = np.std(sf_data, axis=1)
     alpha, _, beta = gamma.fit(stds, floc=0)
     return [alpha, beta]
 
-def fit_invgamma_prior(measured_data):
+def fit_invgamma_prior(sf_data):
     """
     fits the alpha and beta value for an inverse-gamma distribution
 
     Parameters
     ----------
-    measured_data : array
+    sf_data : array
         a nxk matrix with n the amount of patients and k the amount
         of sparing factors per patient
 
@@ -100,10 +100,9 @@ def fit_invgamma_prior(measured_data):
     list
         alpha (shape) and beta (scale) hyperparameter
     """
-    variances = np.var(measured_data, axis=1)
+    variances = np.var(sf_data, axis=1)
     alpha, _, beta = invgamma.fit(variances, floc=0)
     return [alpha, beta]
-
 
 def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     """
@@ -149,17 +148,16 @@ def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     sf = sample_sf[prob > probability_threshold]
     return [sf, probability]
 
-
-def std_calc(measured_data, alpha, beta):
+def std_calc(sf_observed, alpha, beta):
     """
     Function for probability updating:
     Computes a maximum a priori estimation of the standard deviation
-    for a list of sparing factors (measured_data) and a gamma prior
+    for a list of sparing factors (sf_observed) and a gamma prior
     distribution given by the parameters alpha and beta
 
     Parameters
     ----------
-    measured_data : list/array
+    sf_observed : list/array
         list/array with k sparing factors
     alpha : float
         shape of gamma distribution
@@ -169,15 +167,15 @@ def std_calc(measured_data, alpha, beta):
     Returns
     -------
     std_updated : float
-        most likely std based on the measured data and gamma prior
+        most likely std based on the observed data and gamma prior
 
     """
-    n = len(measured_data)
-    variance_measured = np.var(measured_data)
+    n = len(sf_observed)
+    variance_observed = np.var(sf_observed)
     # -------------------------------------------------------------------
     def likelihood(std):
         L = ((std ** (alpha - 1)) / (std ** (n - 1)) * np.exp(- std / beta)
-            * np.exp(- n * variance_measured / (2 * (std ** 2)))
+            * np.exp(- n * variance_observed / (2 * (std ** 2)))
         )
         return -L
     std_updated = minimize_scalar(likelihood, bounds=(0.001, 0.6), 
