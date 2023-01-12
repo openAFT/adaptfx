@@ -204,32 +204,6 @@ def interpolate(x, x_pred, y_reg):
     y = np.interp(x, x_pred, y_reg)
     return y
 
-# def step_round(input_vector, step_size):
-#     """
-#     round value down to custom step_size
-
-#     Parameters
-#     ----------
-#     input_vector : array
-#         array to be rounded
-#     step_size : array
-#         stepsize for rounding
-
-#     Returns
-#     -------
-#     rounded_vector : array
-#         rounded values
-
-#     """
-#     def floor_step_size(input, step):
-#         step_size_dec = dec(str(step))
-#         rounded_vector = float(int(dec(str(input)) / 
-#                             step_size_dec) * step_size_dec)
-#         return rounded_vector
-
-#     f = np.vectorize(floor_step_size, otypes=[float], excluded=['stepsize'])
-#     return f(input_vector, step_size)
-
 def find_exponent(number):
     """
     find exponent of number in order of ten
@@ -246,26 +220,3 @@ def find_exponent(number):
 
     """
     return dec(str(number)).normalize().as_tuple().exponent
-
-# def obj_interpolate(x_pred, y_pred, z_reg):
-#     """
-#     creates linear interpolation object from x, y predictors
-#     and z regressor
-
-#     Parameters
-#     ----------
-#     x_pred : array
-#         x predictor for interpolated function
-#     y_pred : array
-#         y predictor for interpolated function
-#     z_reg : array
-#         regressand for interpolation
-
-#     Returns
-#     -------
-#     y_func(x,y) : scipy.interpolate._interpolate.interp2d
-#         scipy interpolation object
-
-#     """
-#     func = interp2d(x_pred, y_pred, z_reg)
-#     return func
