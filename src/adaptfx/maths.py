@@ -61,7 +61,7 @@ def student_t(sf_observed, alpha, beta):
     mean = np.mean(sf_observed)
 
     alpha_up = alpha + n_sf / 2
-    beta_up = beta + variance * n_sf / 2
+    beta_up = beta + variance / 2
     student_t = t(df=2 * alpha_up, loc=mean,
         scale=np.sqrt(beta_up / alpha_up))
     return student_t
