@@ -100,8 +100,8 @@ def fit_invgamma_prior(sf_data):
     list
         alpha (shape) and beta (scale) hyperparameter
     """
-    variances = np.var(sf_data, axis=1)
-    alpha, _, beta = invgamma.fit(variances, floc=0)
+    stds = np.std(sf_data, axis=1)
+    alpha, _, beta = invgamma.fit(stds, floc=0)
     return [alpha, beta]
 
 def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
