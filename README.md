@@ -81,7 +81,6 @@ The package is organized under the `src` folder. The relevant scripts that calcu
 
 ```
 adaptfx
-├── adaptfx_old
 ├── src/adaptfx
 │  ├── aft_propmt.py
 │  ├── aft_utils.py
@@ -90,6 +89,7 @@ adaptfx
 │  ├── maths.py
 │  ├── planning.py
 │  ├── radiobiology.py
+│  ├── reinforce_old.py
 │  ├── reinforce.py
 │  └── visualiser.py
 └── work
@@ -101,19 +101,21 @@ In the `reinforce` module one can find all relevant code to calculate an OAR tra
 
 ### The 2D algorithms
 
-The code in `tumor_maximization.py` globally tracks OAR BED to satisfy constraints on the dose to the normal tissue, while attempting to maximize the BED delivered to the tumor.
+All algorithms are packed in functions in either `reinforce.py` or `reinforce_old.py`. Where `reinforce.py` holds the newest functions supporting more features and faster calculation. Older functions are also integrated with the CLI, but need to be updated.
 
-`oar_minimization.py`, on the other hand, tracks tumor BED to achieve the tumor dose target and in doing so it minimizes the cumulative OAR BED.
+The function `max_tumor_bed_old` globally tracks OAR BED to satisfy constraints on the dose to the normal tissue, while attempting to maximize the BED delivered to the tumor.
+
+`min_oar_bed` and `min_oar_bed_old`, on the other hand, track tumor BED to achieve the tumor dose target and in doing so it minimizes the cumulative OAR BED.
 
 Since the state spaces for these two algorithms are essentially two-dimensional, they are the faster algorithm. But they may overshoot w.r.t. the dose delivered to the tumor/OAR, since only one of the structure's BED can be tracked, one has to decide whether reaching the prescribed tumor dose or staying below the maximum OAR BED is more relevant.
 
 Generally the OAR tracking is better suited for patients with anatomies where the OAR and tumor are close to each other and the prescribed dose may not be reached. When the OAR and tumor are farther apart, tracking the tumor BED and minimizing OAR BED can lead to reduced toxicity while achieving the same treatment goals.
 
-`fraction_minimisation.py` defines functions to track OAR BED and minimize the number of fractions in cases where there appears an exceptionally low sparing factor during the course of a treatment.
+`frac_min` defines the function to track OAR BED and minimize the number of fractions in cases where there appears an exceptionally low sparing factor during the course of a treatment.
 
 ### The 3D algorithms
 
-The 3D algorithms in `track_tumor_oar.py` track OAR BED and tumor BED simultaneously. In this version a prescribed tumor dose must be provided alongside an OAR BED constraint. The algorithm then tries smartly optimizes for a low OAR BED _and_ high tumor BED at the same time, while never compromising OAR constraints and always preferring to reduce normal tissue dose when achieving the treatment objectives.
+The 3D algorithms in function `min_oar_max_tumor_old` track OAR BED and tumor BED simultaneously. In this version a prescribed tumor dose must be provided alongside an OAR BED constraint. The algorithm then tries smartly optimizes for a low OAR BED _and_ high tumor BED at the same time, while never compromising OAR constraints and always preferring to reduce normal tissue dose when achieving the treatment objectives.
 
 The algorithms are based on an inverse-gamma prior distribution. To set up this distribution a dataset is needed with prior patient data (sparing factors) from the same population.
 
