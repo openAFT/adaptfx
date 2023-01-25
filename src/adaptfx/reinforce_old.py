@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from scipy.interpolate import interp1d, interp2d, RegularGridInterpolator
-from adaptfx import std_calc, truncated_normal, sf_probdist, bed_calc_matrix, bed_calc0, convert_to_physical, SETTING_DICT, DotDict
+from adaptfx import std_posterior, truncated_normal, sf_probdist, bed_calc_matrix, bed_calc0, convert_to_physical, SETTING_DICT, DotDict
 
 BED_calc_matrix = bed_calc_matrix
 BED_calc0 = bed_calc0
@@ -83,7 +83,7 @@ def min_oar_bed_old(keys, sets=SETTING_DICT):
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_calc(sparing_factors_public, alpha, beta)
+        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
@@ -210,11 +210,14 @@ def min_oar_bed_old(keys, sets=SETTING_DICT):
         optimal_action = policy4 / 10
     tumor_dose = BED_calc0(optimal_action, abt)
     oar_dose = BED_calc0(optimal_action, abn, sparing_factors_public[-1])
-    output = {'physical_dose': optimal_action, 'tumor_dose': tumor_dose, 
-        'oar_dose': oar_dose, 'sf': sf, 'states': bedt_states}
-    if policy_plot:
-        output['policy'] = policy
-    return DotDict(output)
+
+    output = DotDict({})
+
+    output.physical_dose = optimal_action
+    output.tumor_dose = tumor_dose
+    output.oar_dose = oar_dose
+    
+    return output
 
 
 
@@ -245,7 +248,7 @@ def min_n_frac_old(keys, sets=SETTING_DICT):
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_calc(sparing_factors_public, alpha, beta)
+        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
@@ -394,11 +397,14 @@ def min_n_frac_old(keys, sets=SETTING_DICT):
         optimal_action = policy4 / 10
     tumor_dose = bed_calc0(optimal_action, abt)
     oar_dose = bed_calc0(optimal_action, abn, sparing_factors_public[-1])
-    output = {'physical_dose': optimal_action, 'tumor_dose': tumor_dose, 
-        'oar_dose': oar_dose, 'sf': sf, 'states': bedt_states}
-    if policy_plot:
-        output['policy'] = policy
-    return DotDict(output)
+
+    output = DotDict({})
+
+    output.physical_dose = optimal_action
+    output.tumor_dose = tumor_dose
+    output.oar_dose = oar_dose
+    
+    return output
 
 
 
@@ -430,7 +436,7 @@ def max_tumor_bed_old(keys, sets=SETTING_DICT):
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_calc(sparing_factors_public, alpha, beta)
+        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
@@ -608,11 +614,14 @@ def max_tumor_bed_old(keys, sets=SETTING_DICT):
         )
         total_dose_delivered_oar = dose_delivered_oar + accumulated_oar_dose
         actual_dose_delivered = actual_policy[index_sf] / 10
-    output = {'physical_dose': actual_dose_delivered, 'tumor_dose': dose_delivered_tumor, 
-        'oar_dose': dose_delivered_oar, 'sf': sf, 'states': bedn}
-    if policy_plot:
-        output['policy'] = policy
-    return DotDict(output)
+
+    output = DotDict({})
+
+    output.physical_dose = actual_dose_delivered
+    output.tumor_dose = dose_delivered_tumor
+    output.oar_dose = dose_delivered_oar
+    
+    return output
 
 
 
@@ -644,7 +653,7 @@ def min_oar_max_tumor_old(keys, sets=SETTING_DICT):
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_calc(sparing_factors_public, alpha, beta)
+        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
     if fixed_prob == 1:
         mean = fixed_mean
         standard_deviation = fixed_std
@@ -832,8 +841,11 @@ def min_oar_max_tumor_old(keys, sets=SETTING_DICT):
         physical_dose = actual_policy / 10
     tumor_dose = BED_calc0(physical_dose, abt)
     oar_dose = BED_calc0(physical_dose, abn, sparing_factors_public[-1])
-    output = {'physical_dose': physical_dose, 'tumor_dose': tumor_dose, 
-        'oar_dose': oar_dose, 'sf': sf, 'bedn_states': bedn, 'bedt_states': bedt}
-    if policy_plot:
-        output['policy'] = policy
-    return DotDict(output)
+
+    output = DotDict({})
+
+    output.physical_dose = physical_dose
+    output.tumor_dose = tumor_dose
+    output.oar_dose = oar_dose
+    
+    return output

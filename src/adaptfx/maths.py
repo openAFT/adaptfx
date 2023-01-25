@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from scipy.stats import truncnorm
-from scipy.interpolate import interp1d, interp2d, RegularGridInterpolator
+from scipy.stats import t, truncnorm, gamma, invgamma
+# from scipy.interpolate import interp1d, interp2d, RegularGridInterpolator
 from scipy.optimize import minimize_scalar
 from decimal import Decimal as dec
 
 def truncated_normal(mean, std, low, upp):
     """
-    produces a truncated normal distribution
+    Function for probability distribution:
+    returns a frozen truncated normal continuous random variable
 
     Parameters
     ----------
@@ -31,16 +32,87 @@ def truncated_normal(mean, std, low, upp):
 
     return normal
 
+def student_t(sf_observed, alpha, beta):
+    """
+    Function for probability updating:
+    Computes a posterior predictive sparing factor distribution
+    for a list of sparing factors (sf_observed) and an
+    inverse-gamma conjugate prior distribution given by the
+    parameters alpha and beta. Returns a frozen student's t
+    random variable posterior
+
+    Parameters
+    ----------
+    sf_observed : list/array
+        list of observed sparing factors
+    alpha : float
+        shape of inverse-gamma distribution
+    beta : float
+        scale of inverse-gamma distrinbution
+
+    Returns
+    -------
+    scipy.stats._distn_infrastructure.rv_continuous_frozen
+        distribution function
+
+    """
+    n_sf = len(sf_observed)
+    variance = np.var(sf_observed)
+    mean = np.mean(sf_observed)
+
+    alpha_up = alpha + n_sf / 2
+    beta_up = beta + variance / 2
+    student_t = t(df=2 * alpha_up, loc=mean,
+        scale=np.sqrt(beta_up / alpha_up))
+    return student_t
+
+def fit_gamma_prior(sf_data):
+    """
+    fits the alpha and beta value for a gamma distribution
+
+    Parameters
+    ----------
+    sf_data : array
+        a nxk matrix with n the amount of patients and k the amount
+        of sparing factors per patient
+
+    Returns
+    -------
+    list
+        alpha (shape) and beta (scale) hyperparameter
+    """
+    stds = np.std(sf_data, axis=1)
+    alpha, _, beta = gamma.fit(stds, floc=0)
+    return [alpha, beta]
+
+def fit_invgamma_prior(sf_data):
+    """
+    fits the alpha and beta value for an inverse-gamma distribution
+
+    Parameters
+    ----------
+    sf_data : array
+        a nxk matrix with n the amount of patients and k the amount
+        of sparing factors per patient
+
+    Returns
+    -------
+    list
+        alpha (shape) and beta (scale) hyperparameter
+    """
+    stds = np.std(sf_data, axis=1)
+    alpha, _, beta = invgamma.fit(stds, floc=0)
+    return [alpha, beta]
 
 def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     """
-    This function produces a probability distribution
-    based on the normal distribution X
+    This function computes a probability distribution
+    based on the frozen random variable X
 
     Parameters
     ----------
     X : scipy.stats._distn_infrastructure.rv_frozen
-        distribution function
+        random variable
     sf_low : float
         lower bound for sparing factor distribution
     sf_high : float
@@ -52,6 +124,8 @@ def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
 
     Returns
     -------
+    list
+        of sf, and prob
     sf : array
         array with sparing factors
     prob : array
@@ -74,15 +148,16 @@ def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     sf = sample_sf[prob > probability_threshold]
     return [sf, probability]
 
-
-def std_calc(measured_data, alpha, beta):
+def std_posterior(sf_observed, alpha, beta):
     """
-    calculates the most likely standard deviation for a list
-    of k sparing factors and a gamma conjugate prior
+    Function for probability updating:
+    Computes a maximum a priori estimation of the standard deviation
+    for a list of sparing factors (sf_observed) and a gamma prior
+    distribution given by the parameters alpha and beta
 
     Parameters
     ----------
-    measured_data : list/array
+    sf_observed : list/array
         list/array with k sparing factors
     alpha : float
         shape of gamma distribution
@@ -91,21 +166,21 @@ def std_calc(measured_data, alpha, beta):
 
     Returns
     -------
-    std : float
-        most likely std based on the measured data and gamma prior
+    std_updated : float
+        most likely std based on the observed data and gamma prior
 
     """
-    n = len(measured_data)
-    variance = np.var(measured_data)
+    n = len(sf_observed)
+    variance_observed = np.var(sf_observed)
     # -------------------------------------------------------------------
     def likelihood(std):
-        L = std ** (alpha - n) * np.exp(- std / beta - 
-                n* variance / (2 * (std **2)))
+        L = ((std ** (alpha - 1)) / (std ** (n - 1)) * np.exp(- std / beta)
+            * np.exp(- n * variance_observed / (2 * (std ** 2)))
+        )
         return -L
-    std = minimize_scalar(likelihood, bounds=(0.001, 0.6), 
+    std_updated = minimize_scalar(likelihood, bounds=(0.001, 0.6), 
                     method='bounded', options={'maxiter':19}).x
-    
-    return std
+    return std_updated
 
 def interpolate(x, x_pred, y_reg):
     """
@@ -129,32 +204,6 @@ def interpolate(x, x_pred, y_reg):
     y = np.interp(x, x_pred, y_reg)
     return y
 
-# def step_round(input_vector, step_size):
-#     """
-#     round value down to custom step_size
-
-#     Parameters
-#     ----------
-#     input_vector : array
-#         array to be rounded
-#     step_size : array
-#         stepsize for rounding
-
-#     Returns
-#     -------
-#     rounded_vector : array
-#         rounded values
-
-#     """
-#     def floor_step_size(input, step):
-#         step_size_dec = dec(str(step))
-#         rounded_vector = float(int(dec(str(input)) / 
-#                             step_size_dec) * step_size_dec)
-#         return rounded_vector
-
-#     f = np.vectorize(floor_step_size, otypes=[float], excluded=['stepsize'])
-#     return f(input_vector, step_size)
-
 def find_exponent(number):
     """
     find exponent of number in order of ten
@@ -171,26 +220,3 @@ def find_exponent(number):
 
     """
     return dec(str(number)).normalize().as_tuple().exponent
-
-# def obj_interpolate(x_pred, y_pred, z_reg):
-#     """
-#     creates linear interpolation object from x, y predictors
-#     and z regressor
-
-#     Parameters
-#     ----------
-#     x_pred : array
-#         x predictor for interpolated function
-#     y_pred : array
-#         y predictor for interpolated function
-#     z_reg : array
-#         regressand for interpolation
-
-#     Returns
-#     -------
-#     y_func(x,y) : scipy.interpolate._interpolate.interp2d
-#         scipy interpolation object
-
-#     """
-#     func = interp2d(x_pred, y_pred, z_reg)
-#     return func

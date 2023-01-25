@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import argparse
+import json
 import adaptfx as afx
 import sys
 nme = __name__
@@ -14,33 +15,37 @@ class RL_object():
         try: # check if file can be opened
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
-            input_dict= eval(read_in)
+            input_dict= json.loads(read_in)
         except TypeError:
             if isinstance(instruction_filename, dict):
                 input_dict = instruction_filename
             else:
                 afx.aft_error(f'"{instruction_filename}" not a filename or dict', nme)
-        except SyntaxError:
-            afx.aft_error(f'Dictionary Syntax Error in: "{instruction_filename}"', nme)
+        except SyntaxError as syntax_err:
+            afx.aft_error(f'error in "{instruction_filename}", {syntax_err}', nme)
         except OSError:
             afx.aft_error(f'No such file: "{instruction_filename}"', nme)
+        except ValueError as decode_err:
+            afx.aft_error(f'decode error in "{instruction_filename}", {decode_err}', nme)
+        except:
+            afx.aft_error(f'error in "{instruction_filename}", {sys.exc_info()}', nme)
 
         try: # check if log flag is existent and boolean
             log_bool = input_dict['log']
-        except KeyError:
-            afx.aft_warning('no "log" flag was given, set to 0', nme)
-            log_bool = 0
+        except KeyError as log_err:
+            log_bool = afx.LOG_BOOL
+            afx.aft_warning(f'no {log_err} flag was given, set to {log_bool}', nme)
         else:
-            if not log_bool in [0,1]:
+            if not log_bool in afx.LOG_BOOL_LIST:
                 afx.aft_error('invalid "log" flag was set', nme)
 
         try: # check if log flag is existent and boolean
             log_level = input_dict['level']
-        except KeyError:
-            afx.aft_warning('no "level" mode was given, set to 1', nme)
-            log_level = 1
+        except KeyError as level_err:
+            log_level = afx.LOG_LEVEL
+            afx.aft_warning(f'no {level_err} mode was given, set to {log_level}', nme)
         else:
-            if not log_level in [0,1,2]:
+            if not log_level in afx.LOG_LEVEL_LIST:
                 afx.aft_error('invalid "debug" flag was set', nme)
 
         afx.logging_init(instruction_filename, log_bool, log_level)
@@ -49,8 +54,8 @@ class RL_object():
 
         try: # check if algorithm key matches known types
             algorithm = input_dict['algorithm']
-        except KeyError:
-            afx.aft_error(f'"algorithm" key missing in: "{instruction_filename}"', nme)
+        except KeyError as algo_err:
+            afx.aft_error(f'{algo_err} key missing in: "{instruction_filename}"', nme)
         else:
             if algorithm not in afx.KEY_DICT:
                 afx.aft_error(f'unknown "algorithm" type: "{algorithm}"', nme)
@@ -59,8 +64,8 @@ class RL_object():
 
         try: # check if keys exists and is a dictionnary
             raw_keys = input_dict['keys']
-        except KeyError:
-            afx.aft_error(f'"keys" is missing in : "{instruction_filename}"', nme)
+        except KeyError as key_err:
+            afx.aft_error(f'{key_err} is missing in : "{instruction_filename}"', nme)
         else:
             if not isinstance(raw_keys, dict):
                 afx.aft_error('"keys" is not a dictionary', nme)
@@ -70,8 +75,8 @@ class RL_object():
 
         try: # check if settings exist and is a dictionnary
             user_settings = input_dict['settings']
-        except KeyError:
-            afx.aft_warning('no "settings" were given, set to default', nme, 1)
+        except KeyError as sets_err:
+            afx.aft_warning(f'no {sets_err} were given, set to default', nme, 1)
             settings = afx.SETTING_DICT
             afx.aft_message_dict('settings', settings, nme, 1)
         else:

@@ -6,11 +6,11 @@ One should perform calculations in a working folder e.g. `adaptfx/work`. There t
 
 ## Format of the instruction file
 The user specifies following elements of the dictionary for the main entries: 
-- `'algorithm'`
-- `'debug'`
-- `'log'`
-- `'keys'`
-- `'settings'`
+- `"algorithm"`
+- `"debug"`
+- `"log"`
+- `"keys"`
+- `"settings"`
 
 Each entry of the dictionary is either a parameter or a dictionary itself. In the next section explained are the main entries.
 
@@ -23,9 +23,11 @@ algorithm: frac, oar, tumor, tumor_oar
     oar: minimise oar BED, with tumor constraint
     tumor : maximise tumor BED, with oar constraint
     tumor_oar : minimise oar and maximise tumor BED simultaneously
-debug: 0, 1, 2
-    show more information (for developers)
-    default: 0
+level: 0, 1, 2
+    quiet mode, 0 (for scripting)
+    normal mode, 1
+    debug mode, 2 (for developing)
+    default: 1
 log: 0,1
     log output to a file
     default: 0
@@ -47,9 +49,11 @@ fraction : int
 sparing_factors : list/array
     list/array with all observed sparing factors.
 alpha : float
-    shape of inverse-gamma distribution.
+    shape of inverse-gamma distribution, for prior.
+    mandatory if fixed_prob set to 0.
 beta : float
-    scale of inverse-gamme distribution.
+    scale of inverse-gamme distribution, for prior.
+    mandatory if fixed_prob set to 0.
 abt : float
     alpha-beta ratio of tumor.
 abn : float
@@ -129,42 +133,10 @@ plot_remains : int
 
 # Example
 
-Outlined is an example instruction file for fraction minimisation. It simply is a python dictionary with parameters.
+Outlined is an example instruction file for fraction minimisation. It simply is a `.json` that is translated into a python dictionary with. An example can be found [here](work/oar_example.json)
+
+This `.json` file can be called in with the CLI as:
 
 ```
-# instruction_file
-{
-'algorithm': 'frac',
-'debug': 1,
-'log': 0,
-'keys':
-    {
-	'number_of_fractions': 6,
-	'sparing_factors': [0.98, 0.97, 0.8, 0.83, 0.8, 0.85, 0.94],
-	'alpha': None,
-	'beta': None,
-    'abt': 10,
-    'abn': 3,
-	'fixed_prob': 1,
-	'fixed_mean': 0.9,
-	'fixed_std': 0.04,
-	'tumor_goal': 72,
-	'c': 0.8,
-    },
-'settings':
-    {
-    'dose_stepsize': 0.5,
-    'state_stepsize': 0.5,
-    'sf_low': 0,
-    'sf_high': 1.7,
-    'sf_stepsize': 0.01,
-    'sf_prob_threshold': 1e-5,
-    'plot_policy': 0
-    }
-}
-```
-This dictionary stored in a `.txt` file can be called in with the CLI as:
-
-```
-$ aft -f <instruction_file>
+$ aft -f work/oar_example.json
 ```
