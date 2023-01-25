@@ -8,10 +8,9 @@
 4. [Describtion](#description)  
     1. [2D Algorithms](#the-2d-algorithms)
     2. [3D Algorithms](#the-3d-algorithms)
-    3. [Discrete Value Function](#discrete-value-function)
-    4. [GUI](#gui)
-    5. [t-Distribution](#t-distribution)
-    6. [Additional Data](#additional-data)
+    3. [GUI](#gui)
+    4. [Probability Updating](#probability-updating)
+    5. [Additional Data](#additional-data)
 5. [Extended Function](#extended-functionality)
 6. [Troubleshooting](#troubleshooting)
 
@@ -120,10 +119,6 @@ The algorithms are based on an inverse-gamma prior distribution. To set up this 
 
 There is a function to calculate the hyperparameters of the inverse-gamma distribution. But there is also the option to use a fixed probability distribution for the sparing factors. In this case, the probability distribution must be provided with a mean and a standard deviation, and it is not updated as more information is available. To check out how the hyperparameters influence the prior distribution, the `Inverse_gamma_distribution_preview.py` file has been included that allows direct modelling of the distribution.
 
-### Discrete Value Function
-
-There is a subfolder with more basic algorithms, the discrete algorithms. Generally, we cannot calculate the value function for each possible OAR BED and sparing factor. Thus, the values must be calculated for discrete steps. E.g. 0.1Gy BED steps for the OAR BED and 0.01 steps for the sparing factors. The discrete algorithms depict this idea of using these steps to calculate the value for each discrete value of BED and sparing factor. This approach limits the precision of the computed doses, as we must round any given BED to the given steps. So interpolation was used to improve precision, in calculating every possible BED. A higher precision comes with the cost of larger computation time, but the 2D code still runs in a matter of seconds, while the 3D code runs in a matter of minutes.
-
 ### GUI
 
 A last addition is made with graphical user interfaces that facilitate the use of the interpolation algorithms. There are two interfaces that can be run. In these interfaces all variables can be given to compute an adaptive fractionation plan for a patient. 
@@ -131,11 +126,19 @@ A last addition is made with graphical user interfaces that facilitate the use o
 > :warning: Note:\
 > The interfaces are not optimized, and thus it is not recommended using them to further develop extensions.
 
-### $t$-Distribution
+### Probability Updating
 
-Apart from using a gamma prior for the standard deviation, a full Bayesian approach can be done with a conjugate prior for the variance.
-In the $t$-distribution folder the same algorithms as in the paper are applied, but instead of using the gamma prior, the probability distribution is estimated from an updated $t$-distribution by using an inverse-gamma prior for the variance.
-The results are slightly different when alternative priors are applied. Since the $t$-distribution estimates larger standard deviations, more sparing factors are relevant and thus the state space is increased which results in a longer computation time.
+The DP algorithm relies on a description of the environment to compute an optimal policy, in this case the probability distribution of the sparing factor $P(\delta)$, which we assume to be a Gaussian distribution truncated at $0$, with patient-specific parameters for mean and standard deviation. At the start of a treatment, only two sparing factors are available for that patient, from the planning scan and the first fraction. In each fraction, an additional sparing factor is measured, which can be used to calculate updated estimates $\mu_t$ and $\sigma_t$ for mean and standard deviation, respectively.
+
+#### Maximum a posteriori estimation
+
+In each fraction $t$, a maximum likelihood estimator of the mean of the sparing factor distribution and an estimator for the standard deviation (following a chi-squared distribution) is used. Both estimators are used to constitute the updated normal distribution in fraction $t$.
+
+However, the standard deviation may be severely under- or overestimated if calculated from only two samples at the very beginning of the treatment. Therefore, we assume a population based prior for the standard deviation and compute the maximum a posterior estimator of $\sigma_t$ via Bayesian inference. As the sparing factors are assumed to follow a normal distribution with unknown variance, a gamma distribution is chosen as prior to estimate the standard deviation $\sigma$.
+
+#### Posterior predicitve distribution
+
+Apart from using a gamma prior for the standard deviation, a full Bayesian approach can be done with a inverse-gamm distribution as a conjugate prior for the variance. The resulting posterior predictive distribution is a t-distribution. With this approach instead of using the gamma prior to estimate, the probability distribution is estimated from an updated t-distribution. The results are slightly different when alternative priors are applied. Since the t-distribution estimates larger standard deviations, more sparing factors are relevant and thus the state space is increased which results in a longer computation time.
 
 ### Additional Data
 
