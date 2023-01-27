@@ -210,7 +210,7 @@ sudo apt-get install python3-tk
 **Solution:** on MacOS and Linux one could instead use `pip` to install `pyqt`
 
 ```
-pip install pyqt5
+pip install pyqt6
 ```
 
 
