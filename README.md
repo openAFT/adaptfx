@@ -77,7 +77,7 @@ $ sudo apt install python3-tk
 
 ## Package Structure
 
-The package is organized under the `src` folder. The relevant scripts that calculate the fractionation schemes are located in `reinforce`. 
+The package is organized under the `src` folder. All relevant scripts that calculate the fractionation schemes are packed as functions in either `reinforce.py` or `reinforce_old.py`. Where `reinforce.py` holds the newest functions supporting more features and faster calculation. Older functions are also integrated with the CLI, but need to be updated.
 
 ```
 adaptfx
@@ -97,11 +97,7 @@ adaptfx
 
 ## Description
 
-In the `reinforce` module one can find all relevant code to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumor biological effective dose (tumor BED) and OAR BED (maximizing tumor BED while minimizing OAR BED). 
-
 ### The 2D algorithms
-
-All algorithms are packed in functions in either `reinforce.py` or `reinforce_old.py`. Where `reinforce.py` holds the newest functions supporting more features and faster calculation. Older functions are also integrated with the CLI, but need to be updated.
 
 The function `max_tumor_bed_old` globally tracks OAR BED to satisfy constraints on the dose to the normal tissue, while attempting to maximize the BED delivered to the tumor.
 
@@ -210,7 +206,7 @@ sudo apt-get install python3-tk
 **Solution:** on MacOS and Linux one could instead use `pip` to install `pyqt`
 
 ```
-pip install pyqt6
+pip install pyqt5
 ```
 
 
