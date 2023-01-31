@@ -48,12 +48,35 @@ fraction : int
     default: 0
 sparing_factors : list/array
     list/array with all observed sparing factors.
-alpha : float
+prob_update : int
+    set type of updating for probability distribution of sparing factor.
+    If set to 0, the sparing factor is not updated and the probabability
+    distribution fixed, specified with 'fixed_mean' and 'fixed_std'.
+    If set to 1, then the assumed probability distribution is a normal
+    distribution which is updated with maximum a posteriori estimation. 
+    The prior is a gamma distribution with hyperparameters 'scale' and 'shape'.
+    If set to 2, full Bayesian approach is employed, where a posterior
+    predictive distribution is estimated. The conjugate prior is an
+    inverse-gamma distribution with hyperparameters 'scale_inv' and 'shape_inv'.
+    default: 0
+fixed_mean: float
+    mean of the fixed sparing factor normal distribution.
+    mandatory if 'prob_update' set to 0.
+fixed_std: float
+    standard deviation of the fixed sparing factor normal distribution.
+    mandatory if 'prob_update' set to 0.
+shape : float
+    shape of gamma distribution, for prior.
+    mandatory if 'prob_update' set to 1.
+scale : float
+    scale of gamma distribution, for prior.
+    mandatory if 'prob_update' set to 1.
+shape_inv : float
     shape of inverse-gamma distribution, for prior.
-    mandatory if fixed_prob set to 0.
-beta : float
+    mandatory if 'prop_update' set to 2.
+scale_inv : float
     scale of inverse-gamme distribution, for prior.
-    mandatory if fixed_prob set to 0.
+    mandatory if 'prob_update' set to 2.
 abt : float
     alpha-beta ratio of tumor.
 abn : float
@@ -72,15 +95,6 @@ max_dose : float
     remaining dose tumor dose to be delivered or the remaining OAR dose 
     allowed to be prescribed.
     default: -1
-fixed_prob : int
-    this variable is to turn on a fixed probability distribution.
-    If the variable is not used (0), then the probability will be updated.
-    If the variable is turned to (1), the inserted mean and std will be used
-    for a fixed sparing factor distribution. Then alpha and beta are unused.
-fixed_mean: float
-    mean of the fixed sparing factor normal distribution.
-fixed_std: float
-    standard deviation of the fixed sparing factor normal distribution.
 ```
 
 ## Specific entries according to algorithm type
@@ -101,7 +115,7 @@ minimise number of fractions
 tumor_goal : float
     prescribed tumor BED.
 c: float
-    fixed constant to penalise for each additional fraction that is used.
+    fixed constant to penalise each additional fraction.
 ```
 
 ## General settings for calculation
@@ -124,16 +138,17 @@ sf_prob_threshold': float
 inf_penalty : float
     infinite penalty for certain undesired states.
 plot_policy : int
-    in which fraction should current and future policies be plotted.
+    starting from which fraction policy should be plotted.
 plot_values : int
-    in which fraction should current and future value function be plotted.
+    starting from which fraction value should be plotted.
 plot_remains : int
-    in which fraction should current and future expected remaining number of fractions be plotted.
+    starting from which fraction expected remaining number 
+    of fractions should be plotted.
 ```
 
 # Example
 
-Outlined is an example instruction file for fraction minimisation. It simply is a `.json` that is translated into a python dictionary with. An example can be found [here](work/oar_example.json)
+Outlined is an example instruction file for fraction minimisation. It simply is a `.json` that is translated into a python dictionary. An example can be found [here](work/oar_example.json)
 
 This `.json` file can be called in with the CLI as:
 
