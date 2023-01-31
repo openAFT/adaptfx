@@ -21,8 +21,13 @@ ALPHA_BETA_OAR = 3
 FULL_DICT = {'number_of_fractions':None,
         'fraction': 0,
         'sparing_factors': None,
-        'alpha': None,
-        'beta': None,
+        'prob_update': 0,
+        'fixed_mean': None,
+        'fixed_std': None
+        'shape': None,
+        'scale': None,
+        'shape_inv': None,
+        'scale_inv': None,
         'tumor_goal': None,
         'oar_limit': None,
         'c': None,
@@ -32,9 +37,6 @@ FULL_DICT = {'number_of_fractions':None,
         'accumulated_tumor_dose': 0,
         'min_dose': 0,
         'max_dose': -1,
-        'fixed_prob': 0,
-        'fixed_mean': None,
-        'fixed_std': None
         }
 
 SETTING_DICT = {
@@ -54,17 +56,19 @@ STANDARD_LIST = [
         'number_of_fractions',
         'fraction',
         'sparing_factors',
-        'alpha',
-        'beta',
+        'prob_update',
+        'fixed_mean',
+        'fixed_std'
+        'shape',
+        'scale',
+        'shape_inv',
+        'scale_inv',
         'abt',
         'abn',
         'accumulated_oar_dose',
         'accumulated_tumor_dose',
         'min_dose',
         'max_dose',
-        'fixed_prob',
-        'fixed_mean',
-        'fixed_std'
         ]
 
 OAR_LIST = STANDARD_LIST + ['tumor_goal']

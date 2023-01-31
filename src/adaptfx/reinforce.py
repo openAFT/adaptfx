@@ -15,16 +15,18 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     number_of_fractions = keys.number_of_fractions
     accumulated_tumor_dose = keys.accumulated_tumor_dose
     sparing_factors_public = keys.sparing_factors_public
-    alpha = keys.alpha
-    beta = keys.beta
+    fixed_prob = keys.prob_update
+    fixed_mean = keys.fixed_mean
+    fixed_std = keys.fixed_std
+    alpha = keys.shape
+    beta = keys.scale
+    shape_inv = keys.shape_inv
+    scale_inv = keys.scale_inv
     tumor_goal = keys.tumor_goal
     abt = keys.abt
     abn = keys.abn
     min_dose = keys.min_dose
     max_dose = keys.max_dose
-    fixed_prob = keys.fixed_prob
-    fixed_mean = keys.fixed_mean
-    fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
     # check in which fraction data should be returned for plotting
     policy_plot = 1 if sets.plot_policy == fraction else 0
@@ -232,17 +234,19 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     number_of_fractions = keys.number_of_fractions
     accumulated_tumor_dose = keys.accumulated_tumor_dose
     sparing_factors_public = keys.sparing_factors_public
-    alpha = keys.alpha
-    beta = keys.beta
+    fixed_prob = keys.prob_update
+    fixed_mean = keys.fixed_mean
+    fixed_std = keys.fixed_std
+    alpha = keys.shape
+    beta = keys.scale
+    shape_inv = keys.shape_inv
+    scale_inv = keys.scale_inv
     tumor_goal = keys.tumor_goal
     c = keys.c
     abt = keys.abt
     abn = keys.abn
     min_dose = keys.min_dose
     max_dose = keys.max_dose
-    fixed_prob = keys.fixed_prob
-    fixed_mean = keys.fixed_mean
-    fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
     # check in which fraction data should be returned for plotting
     policy_plot = 1 if sets.plot_policy == fraction else 0
