@@ -23,7 +23,7 @@ FULL_DICT = {'number_of_fractions':None,
         'sparing_factors': None,
         'prob_update': 0,
         'fixed_mean': None,
-        'fixed_std': None
+        'fixed_std': None,
         'shape': None,
         'scale': None,
         'shape_inv': None,
@@ -58,7 +58,7 @@ STANDARD_LIST = [
         'sparing_factors',
         'prob_update',
         'fixed_mean',
-        'fixed_std'
+        'fixed_std',
         'shape',
         'scale',
         'shape_inv',
