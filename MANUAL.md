@@ -79,8 +79,10 @@ scale_inv : float
     mandatory if 'prob_update' set to 2.
 abt : float
     alpha-beta ratio of tumor.
+    default: 10
 abn : float
     alpha-beta ratio of OAR.
+    default: 3
 accumulated_oar_dose : float
     accumulated OAR BED (from previous fractions).
 accumulated_tumor_dose : float
