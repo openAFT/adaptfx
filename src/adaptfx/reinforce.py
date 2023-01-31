@@ -15,11 +15,11 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
     number_of_fractions = keys.number_of_fractions
     accumulated_tumor_dose = keys.accumulated_tumor_dose
     sparing_factors_public = keys.sparing_factors_public
-    fixed_prob = keys.prob_update
+    prob_update = keys.prob_update
     fixed_mean = keys.fixed_mean
     fixed_std = keys.fixed_std
-    alpha = keys.shape
-    beta = keys.scale
+    shape = keys.shape
+    scale = keys.scale
     shape_inv = keys.shape_inv
     scale_inv = keys.scale_inv
     tumor_goal = keys.tumor_goal
@@ -35,15 +35,23 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
 
     # prepare distribution
     actual_sf = sparing_factors_public[fraction]
-    if not fixed_prob:
-        # setup the sparingfactor distribution
-        mean = np.mean(sparing_factors_public)
-        std = afx.std_posterior(sparing_factors_public, alpha, beta)
-    else:
+    if prob_update == 0:
+        # fixed normal distribution for sparing factor
         mean = fixed_mean
         std = fixed_std
-    # initialise normal distributed random variable (rv)
-    rv = afx.truncated_normal(mean, std, sets.sf_low, sets.sf_high)
+        rv = afx.truncated_normal(mean, std, sets.sf_low, sets.sf_high)
+    elif prob_update == 1:
+        # update normal distribution with gamma prior
+        mean = np.mean(sparing_factors_public)
+        std = afx.std_posterior(sparing_factors_public, shape, scale)
+        rv = afx.truncated_normal(mean, std, sets.sf_low, sets.sf_high)
+    elif prob_update == 2:
+        # update distribution with inverse-gamma prior
+        # posterior predictive distribution is student-t distribution
+        rv = afx.student_t(sparing_factors_public, shape_inv, scale_inv)
+    else:
+        afx.aft_error('invalid "prob_update" key was set', nme)
+    # initialise distribution from random variable (rv)
     [sf, prob] = afx.sf_probdist(rv, sets.sf_low, sets.sf_high,
         sets.sf_stepsize, sets.sf_prob_threshold)
     n_sf = len(sf)
@@ -234,11 +242,11 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     number_of_fractions = keys.number_of_fractions
     accumulated_tumor_dose = keys.accumulated_tumor_dose
     sparing_factors_public = keys.sparing_factors_public
-    fixed_prob = keys.prob_update
+    prob_update = keys.prob_update
     fixed_mean = keys.fixed_mean
     fixed_std = keys.fixed_std
-    alpha = keys.shape
-    beta = keys.scale
+    shape = keys.shape
+    scale = keys.scale
     shape_inv = keys.shape_inv
     scale_inv = keys.scale_inv
     tumor_goal = keys.tumor_goal
@@ -255,15 +263,23 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
 
     # prepare distribution
     actual_sf = sparing_factors_public[fraction]
-    if not fixed_prob:
-        # setup the sparingfactor distribution
-        mean = np.mean(sparing_factors_public)
-        std = afx.std_posterior(sparing_factors_public, alpha, beta)
-    else:
+    if prob_update == 0:
+        # fixed normal distribution for sparing factor
         mean = fixed_mean
         std = fixed_std
-    # initialise normal distributed random variable (rv)
-    rv = afx.truncated_normal(mean, std, sets.sf_low, sets.sf_high)
+        rv = afx.truncated_normal(mean, std, sets.sf_low, sets.sf_high)
+    elif prob_update == 1:
+        # update normal distribution with gamma prior
+        mean = np.mean(sparing_factors_public)
+        std = afx.std_posterior(sparing_factors_public, shape, scale)
+        rv = afx.truncated_normal(mean, std, sets.sf_low, sets.sf_high)
+    elif prob_update == 2:
+        # update distribution with inverse-gamma prior
+        # posterior predictive distribution is student-t distribution
+        rv = afx.student_t(sparing_factors_public, shape_inv, scale_inv)
+    else:
+        afx.aft_error('invalid "prob_update" key was set', nme)
+    # initialise distribution from random variable (rv)
     [sf, prob] = afx.sf_probdist(rv, sets.sf_low, sets.sf_high,
         sets.sf_stepsize, sets.sf_prob_threshold)
     n_sf = len(sf)
