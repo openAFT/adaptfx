@@ -59,7 +59,7 @@ def convert_to_physical(bed, ab, sf=1):
     BED : float/array
         tumor or OAR BED for which physical dose has to be calculated.
     ab : float
-        alpha beta ratio.
+        alpha-beta ratio.
     sf : float/array
         sparing factor, only specify when OAR BED
 
