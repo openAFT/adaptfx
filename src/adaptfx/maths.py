@@ -61,7 +61,8 @@ def student_t(sf_observed, shape_inv, scale_inv):
 
     # update the hyperparameters
     shape_prime = shape_inv + n_sf / 2
-    scale_prime = scale_inv + variance / 2
+    # n_sf to correct for normalisation
+    scale_prime = scale_inv + n_sf * variance / 2
     # constitue random variable
     student_t = t(df=2 * shape_prime, loc=mean,
         scale=np.sqrt(scale_prime / shape_prime))
@@ -102,8 +103,9 @@ def fit_invgamma_prior(sf_data):
     list
         shape_inv and scale_inv hyperparameter
     """
-    stds = np.std(sf_data, axis=1)
-    shape_inv, _, scale_inv = invgamma.fit(stds, floc=0)
+    # use variance instead of standard deviation
+    variances = np.var(sf_data, axis=1)
+    shape_inv, _, scale_inv = invgamma.fit(variances, floc=0)
     return [shape_inv, scale_inv]
 
 def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
