@@ -183,7 +183,7 @@ def min_oar_bed(keys, sets=afx.SETTING_DICT):
             future_values_discrete = (values[fraction_index + 1] * prob).sum(axis=1)
             # bedt_states is reshaped such that numpy broadcast leads to 2D array
             future_bedt = bedt_states.reshape(n_bedt_states, 1) + bedt_space
-            future_bedt = np.round(np.where(future_bedt > tumor_goal, tumor_limit, future_bedt), -exp)
+            future_bedt = np.where(future_bedt > tumor_goal, tumor_limit, future_bedt)
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
             # dim(bedn_sf_space)=(1,n_action,n_sf),dim(future_values)=(n_states,n_action)
             # every row of values_penalties is transposed and copied n_sf times
@@ -360,18 +360,23 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
 
             if policy_plot or values_plot or remains_plot:
                 # for the policy plot
-                vs_full = (-bedn_sf_space + future_values.reshape(1, n_action, 1) +
-                    c_penalties.reshape(1, n_action, 1))[0]
+                future_bedt_full = bedt_states.reshape(n_bedt_states, 1) + bedt_space
+                future_bedt_full = np.where(future_bedt_full > tumor_goal, tumor_limit, future_bedt_full)
+                c_penalties_full = np.where(future_bedt_full < tumor_goal, -c, 0).reshape(n_bedt_states, n_action, 1)
+                future_values_full = afx.interpolate(future_bedt_full, bedt_states, future_values_discrete)
+                vs_full = -bedn_sf_space + future_values_full.reshape(n_bedt_states, n_action, 1) + c_penalties_full
                 # check vs along the sf axis
-                current_policy = bedt_space[vs_full.argmax(axis=0)]
+                current_policy = bedt_space[vs_full.argmax(axis=1)]
+                # ensure that for the goal reached the value/policy is zero (min_dose)
+                current_policy[bedt_states == tumor_goal] = 0
                 future_remains_discrete = (remains[fraction_index + 1] * prob).sum(axis=1)
-                future_bedt_opt = current_policy + accumulated_tumor_dose
+                future_bedt_opt = current_policy + bedt_states.reshape(n_bedt_states, 1)
                 future_remains = afx.interpolate(future_bedt_opt, bedt_states, future_remains_discrete)
-                current_remains = np.where((current_policy - remaining_bed) >= 0, 0, 1)
+                current_remains = np.where((current_policy - remaining_states[::-1].reshape(n_bedt_states, 1)) >= 0, 0, 1)
                 # write to arrays
-                policy[fraction_index][0] = current_policy
-                values[fraction_index][0] = vs_full.max(axis=0)
-                remains[fraction_index][0] = current_remains + future_remains
+                policy[fraction_index] = current_policy
+                values[fraction_index] = vs_full.max(axis=1)
+                remains[fraction_index] = current_remains + future_remains
 
         elif fraction == number_of_fractions:
             # in the last fraction value is not relevant
@@ -415,7 +420,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             future_values_discrete = (values[fraction_index + 1] * prob).sum(axis=1)
             # bedt_states is reshaped such that numpy broadcast leads to 2D array
             future_bedt = bedt_states.reshape(n_bedt_states, 1) + bedt_space
-            future_bedt = np.round(np.where(future_bedt > tumor_goal, tumor_limit, future_bedt), -exp)
+            future_bedt = np.where(future_bedt > tumor_goal, tumor_limit, future_bedt)
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
             c_penalties = np.where(future_bedt < tumor_goal, -c, 0).reshape(n_bedt_states, n_action, 1)
             # dim(bedn_sf_space)=(1,n_action,n_sf),dim(future_values)=(n_states,n_action)
@@ -428,10 +433,10 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
 
             if policy_plot or remains_plot:
                 current_policy = bedt_space[vs.argmax(axis=1)]
-                # ensure that for the goal reached the value/poliy is zero (min_dose)
+                # ensure that for the goal reached the value/policy is zero (min_dose)
                 current_policy[bedt_states == tumor_goal] = 0
                 future_remains_discrete = (remains[fraction_index + 1] * prob).sum(axis=1)
-                future_bedt_opt = current_policy + (bedt_states).reshape(n_bedt_states, 1)
+                future_bedt_opt = current_policy + bedt_states.reshape(n_bedt_states, 1)
                 future_remains = afx.interpolate(future_bedt_opt, bedt_states, future_remains_discrete)
                 current_remains = np.where((current_policy - remaining_states[::-1].reshape(n_bedt_states, 1)) >= 0, 0, 1)
                 # write to arrays
