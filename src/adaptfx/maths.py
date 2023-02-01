@@ -32,22 +32,21 @@ def truncated_normal(mean, std, low, upp):
 
     return normal
 
-def student_t(sf_observed, alpha, beta):
+def student_t(sf_observed, shape_inv, scale_inv):
     """
     Function for probability updating:
     Computes a posterior predictive sparing factor distribution
-    for a list of sparing factors (sf_observed) and an
-    inverse-gamma conjugate prior distribution given by the
-    parameters alpha and beta. Returns a frozen student's t
-    random variable posterior
+    for a list of sparing factors (sf_observed) and an inverse-gamma
+    conjugate prior distribution given by the shape_inv and scale_inv 
+    parameters. Returns a frozen student's t random variable posterior
 
     Parameters
     ----------
     sf_observed : list/array
         list of observed sparing factors
-    alpha : float
+    shape_inv : float
         shape of inverse-gamma distribution
-    beta : float
+    scale_inv : float
         scale of inverse-gamma distrinbution
 
     Returns
@@ -60,15 +59,18 @@ def student_t(sf_observed, alpha, beta):
     variance = np.var(sf_observed)
     mean = np.mean(sf_observed)
 
-    alpha_up = alpha + n_sf / 2
-    beta_up = beta + variance / 2
-    student_t = t(df=2 * alpha_up, loc=mean,
-        scale=np.sqrt(beta_up / alpha_up))
+    # update the hyperparameters
+    shape_prime = shape_inv + n_sf / 2
+    # n_sf to correct for normalisation
+    scale_prime = scale_inv + n_sf * variance / 2
+    # constitue random variable
+    student_t = t(df=2 * shape_prime, loc=mean,
+        scale=np.sqrt(scale_prime / shape_prime))
     return student_t
 
 def fit_gamma_prior(sf_data):
     """
-    fits the alpha and beta value for a gamma distribution
+    fits the shape and scale parameters for a gamma distribution
 
     Parameters
     ----------
@@ -79,15 +81,16 @@ def fit_gamma_prior(sf_data):
     Returns
     -------
     list
-        alpha (shape) and beta (scale) hyperparameter
+        shape and scale hyperparameter
     """
     stds = np.std(sf_data, axis=1)
-    alpha, _, beta = gamma.fit(stds, floc=0)
-    return [alpha, beta]
+    shape, _, scale = gamma.fit(stds, floc=0)
+    return [shape, scale]
 
 def fit_invgamma_prior(sf_data):
     """
-    fits the alpha and beta value for an inverse-gamma distribution
+    fits the shape_inv and scale_inv parameters for an
+    inverse-gamma distribution
 
     Parameters
     ----------
@@ -98,11 +101,12 @@ def fit_invgamma_prior(sf_data):
     Returns
     -------
     list
-        alpha (shape) and beta (scale) hyperparameter
+        shape_inv and scale_inv hyperparameter
     """
-    stds = np.std(sf_data, axis=1)
-    alpha, _, beta = invgamma.fit(stds, floc=0)
-    return [alpha, beta]
+    # use variance instead of standard deviation
+    variances = np.var(sf_data, axis=1)
+    shape_inv, _, scale_inv = invgamma.fit(variances, floc=0)
+    return [shape_inv, scale_inv]
 
 def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     """
@@ -148,20 +152,20 @@ def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     sf = sample_sf[prob > probability_threshold]
     return [sf, probability]
 
-def std_posterior(sf_observed, alpha, beta):
+def std_posterior(sf_observed, shape, scale):
     """
     Function for probability updating:
     Computes a maximum a priori estimation of the standard deviation
     for a list of sparing factors (sf_observed) and a gamma prior
-    distribution given by the parameters alpha and beta
+    distribution given by the shape and scale parameters
 
     Parameters
     ----------
     sf_observed : list/array
         list/array with k sparing factors
-    alpha : float
+    shape : float
         shape of gamma distribution
-    beta : float
+    scale : float
         scale of gamma distrinbution
 
     Returns
@@ -174,7 +178,7 @@ def std_posterior(sf_observed, alpha, beta):
     variance_observed = np.var(sf_observed)
     # -------------------------------------------------------------------
     def likelihood(std):
-        L = ((std ** (alpha - 1)) / (std ** (n - 1)) * np.exp(- std / beta)
+        L = ((std ** (shape - 1)) / (std ** (n - 1)) * np.exp(- std / scale)
             * np.exp(- n * variance_observed / (2 * (std ** 2)))
         )
         return -L

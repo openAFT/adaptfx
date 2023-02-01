@@ -38,22 +38,24 @@ def logging_init(filename, log, level):
         log_level = logging.ERROR
     
     if log:
+        logfile_extension = "log"
         # create logfile name
-        basename = "{0}".format(*filename.rsplit('.', 1))
+        # get the basename before .json extension
+        basename = filename.rsplit('.')[0]
         # search for existing filename ...
         i = 1
-        while os.path.exists("{0}_{1}.{2}".format(basename, i, 'log')):
+        while os.path.exists(f'{basename}_{i}.{logfile_extension}'):
             # exponential search if many files exist
             i *= 2
         a, b = (i // 2, i)
         while a+1 < b:
-            c = a + b // 2
-            if os.path.exists("{0}_{1}.{2}".format(basename, c, 'log')):
+            c = (a + b) // 2
+            if os.path.exists(f'{basename}_{c}.{logfile_extension}'):
                 a, b = (c, b)
             else:
-                a, b = (a,c)
+                a, b = (a, c)
         # ... end of search
-        log_filename = "{0}_{1}.{2}".format(basename, b, 'log')
+        log_filename = f'{basename}_{b}.{logfile_extension}'
         logging.basicConfig(
             format=format_file,
             level=log_level, 

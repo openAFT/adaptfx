@@ -77,7 +77,7 @@ $ sudo apt install python3-tk
 
 ## Package Structure
 
-The package is organized under the `src` folder. The relevant scripts that calculate the fractionation schemes are located in `reinforce`. 
+The package is organized under the `src` folder. All relevant scripts that calculate the fractionation schemes are packed as functions in either `reinforce.py` or `reinforce_old.py`. Where `reinforce.py` holds the newest functions supporting more features and faster calculation. Older functions are also integrated with the CLI, but need to be updated.
 
 ```
 adaptfx
@@ -97,11 +97,7 @@ adaptfx
 
 ## Description
 
-In the `reinforce` module one can find all relevant code to calculate an OAR tracked adaptive fractionation plan and plan by tracking tumor biological effective dose (tumor BED) and OAR BED (maximizing tumor BED while minimizing OAR BED). 
-
 ### The 2D algorithms
-
-All algorithms are packed in functions in either `reinforce.py` or `reinforce_old.py`. Where `reinforce.py` holds the newest functions supporting more features and faster calculation. Older functions are also integrated with the CLI, but need to be updated.
 
 The function `max_tumor_bed_old` globally tracks OAR BED to satisfy constraints on the dose to the normal tissue, while attempting to maximize the BED delivered to the tumor.
 
@@ -132,6 +128,10 @@ A last addition is made with graphical user interfaces that facilitate the use o
 
 The DP algorithm relies on a description of the environment to compute an optimal policy, in this case the probability distribution of the sparing factor $P(\delta)$, which we assume to be a Gaussian distribution truncated at $0$, with patient-specific parameters for mean and standard deviation. At the start of a treatment, only two sparing factors are available for that patient, from the planning scan and the first fraction. In each fraction, an additional sparing factor is measured, which can be used to calculate updated estimates $\mu_t$ and $\sigma_t$ for mean and standard deviation, respectively.
 
+#### No Updating
+
+In case where the probability is not updated the parameters $\mu_t$ and $\sigma_t$ of the normal distribution can be fixed.
+
 #### Maximum a posteriori estimation
 
 In each fraction $t$, a maximum likelihood estimator of the mean of the sparing factor distribution and an estimator for the standard deviation (following a chi-squared distribution) is used. Both estimators are used to constitute the updated normal distribution in fraction $t$.
@@ -140,10 +140,7 @@ However, the standard deviation may be severely under- or overestimated if calcu
 
 #### Posterior predicitve distribution
 
-Apart from using a gamma prior for the standard deviation, a full Bayesian approach can be done with a inverse-gamm distribution as a conjugate prior for the variance. The resulting posterior predictive distribution is a t-distribution. With this approach instead of using the gamma prior to estimate, the probability distribution is estimated from an updated t-distribution. The results are slightly different when alternative priors are applied. Since the t-distribution estimates larger standard deviations, more sparing factors are relevant and thus the state space is increased which results in a longer computation time.
-
-> :warning: Note:\
-> As of yet the interfaces are not yet optimized using the posterior predictive distribution in the current version, and thus it is not possible to use this feature.
+Apart from using a gamma prior for the standard deviation, a full Bayesian approach can be employed with an inverse-gamm distribution as a conjugate prior for the variance. The resulting posterior predictive distribution is a student t-distribution. With this approach instead of using the gamma prior to estimate, the probability distribution is estimated from an updated t-distribution. The results are slightly different compared to the maximum a posteriori estimation.
 
 ### Additional Data
 

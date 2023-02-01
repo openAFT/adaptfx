@@ -94,7 +94,13 @@ class RL_object():
 
     def optimise(self):
         self.output = afx.multiple(self.algorithm, self.keys, self.settings)
-    
+
+    def fraction_counter(self):
+        if self.algorithm == 'frac' and self.keys.fraction == 0:
+            # in the case for whole treatment calculations
+            n_frac = self.keys.number_of_fractions
+            afx.aft_message(f'fractions used: ({self.output.fractions_used}/{n_frac})', nme)
+            
     def plot(self):
         out = self.output
         sets = self.settings
@@ -142,13 +148,18 @@ def main():
     afx.timing(start)
 
     # show retrospective dose prescribtion
-    afx.aft_message_list('physical dose:', plan.output.physical_doses, nme, 1)
+    afx.aft_message_list('physical tumor dose:', plan.output.physical_doses, nme, 1)
     afx.aft_message_list('tumor dose:', plan.output.tumor_doses, nme)
     afx.aft_message_list('oar dose:', plan.output.oar_doses, nme)
 
     # show accumulated dose
     afx.aft_message_info('accumulated oar dose:', plan.output.oar_sum, nme, 1)
     afx.aft_message_info('accumulated tumor dose:', plan.output.tumor_sum, nme)
+
+    # number of fractions used
+    plan.fraction_counter()
+
+    # show plots
     plan.plot()
     afx.aft_message('close session...', nme, 1)
 
