@@ -136,10 +136,7 @@ However, the standard deviation may be severely under- or overestimated if calcu
 
 #### Posterior predicitve distribution
 
-Apart from using a gamma prior for the standard deviation, a full Bayesian approach can be done with a inverse-gamm distribution as a conjugate prior for the variance. The resulting posterior predictive distribution is a t-distribution. With this approach instead of using the gamma prior to estimate, the probability distribution is estimated from an updated t-distribution. The results are slightly different when alternative priors are applied. Since the t-distribution estimates larger standard deviations, more sparing factors are relevant and thus the state space is increased which results in a longer computation time.
-
-> :warning: Note:\
-> As of yet the interfaces are not yet optimized using the posterior predictive distribution in the current version, and thus it is not possible to use this feature.
+Apart from using a gamma prior for the standard deviation, a full Bayesian approach can be employed with an inverse-gamm distribution as a conjugate prior for the variance. The resulting posterior predictive distribution is a student t-distribution. With this approach instead of using the gamma prior to estimate, the probability distribution is estimated from an updated t-distribution. The results are slightly different compared to the maximum a posteriori estimation.
 
 ### Additional Data
 
