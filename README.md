@@ -128,6 +128,10 @@ A last addition is made with graphical user interfaces that facilitate the use o
 
 The DP algorithm relies on a description of the environment to compute an optimal policy, in this case the probability distribution of the sparing factor $P(\delta)$, which we assume to be a Gaussian distribution truncated at $0$, with patient-specific parameters for mean and standard deviation. At the start of a treatment, only two sparing factors are available for that patient, from the planning scan and the first fraction. In each fraction, an additional sparing factor is measured, which can be used to calculate updated estimates $\mu_t$ and $\sigma_t$ for mean and standard deviation, respectively.
 
+#### No Updating
+
+In case where the probability is not updated the parameters $\mu_t$ and $\sigma_t$ of the normal distribution can be fixed.
+
 #### Maximum a posteriori estimation
 
 In each fraction $t$, a maximum likelihood estimator of the mean of the sparing factor distribution and an estimator for the standard deviation (following a chi-squared distribution) is used. Both estimators are used to constitute the updated normal distribution in fraction $t$.
