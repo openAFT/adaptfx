@@ -82,5 +82,6 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         [physical_doses, tumor_doses, oar_doses], -exponent)
     output_whole.oar_sum, output_whole.tumor_sum = np.around(
         [np.nansum(oar_doses), np.nansum(tumor_doses)], -exponent)
+    output_whole.fractions_used = np.count_nonzero(~np.isnan(output_whole.physical_doses))
 
     return output_whole
