@@ -105,11 +105,14 @@ class RL_object():
         out = self.output
         sets = self.settings
         if self.settings.plot_policy:
-            afx.plot_val(out.policy.sf, out.policy.states, out.policy.val, out.policy.fractions)
+            afx.plot_val(out.policy.sf, out.policy.states, out.policy.val,
+            out.policy.fractions, 'turbo')
         if self.settings.plot_values:
-            afx.plot_val(out.value.sf, out.value.states, out.value.val, out.value.fractions)
+            afx.plot_val(out.value.sf, out.value.states,
+            out.value.val, out.value.fractions, 'viridis')
         if self.settings.plot_remains:
-            afx.plot_val(out.remains.sf, out.remains.states, out.remains.val, out.remains.fractions)
+            afx.plot_val(out.remains.sf, out.remains.states,
+            out.remains.val, out.remains.fractions, 'plasma')
 
         if sets.plot_policy or sets.plot_values or sets.plot_remains:
             afx.show_plot()
