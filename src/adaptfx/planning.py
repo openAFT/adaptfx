@@ -22,11 +22,11 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         sets = afx.DotDict(sets)
 
     if keys.fraction != 0:
-        # if only a specific fraction should be calculated
-        fractions_list = np.array([keys.fraction])
-        physical_doses = np.zeros(1)
-        tumor_doses = np.zeros(1)
-        oar_doses = np.zeros(1)
+        # if only up to a specific fraction should be calculated
+        fractions_list = np.arange(1, keys.fraction + 1, 1)
+        physical_doses = np.zeros(keys.fraction)
+        tumor_doses = np.zeros(keys.fraction)
+        oar_doses = np.zeros(keys.fraction)
     else:
         # for calculation whole treatment in retrospect
         fractions_list = np.arange(1, keys.number_of_fractions + 1, 1)
@@ -34,6 +34,7 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         tumor_doses = np.zeros(keys.number_of_fractions)
         oar_doses = np.zeros(keys.number_of_fractions)
 
+    plot_numbering = np.arange(1, keys.number_of_fractions + 1, 1)
     first_tumor_dose = keys.accumulated_tumor_dose
     first_oar_dose = keys.accumulated_oar_dose
 
@@ -68,13 +69,13 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         # if both zero than the user doesn't want to plot policy
         if sets.plot_policy == keys.fraction:
             output_whole.policy = output.policy
-            output_whole.policy.fractions = fractions_list[sets.plot_policy - 1:]
+            output_whole.policy.fractions = plot_numbering[sets.plot_policy - 1:]
         if sets.plot_values == keys.fraction:
             output_whole.value = output.value
-            output_whole.value.fractions = fractions_list[sets.plot_values - 1:]
+            output_whole.value.fractions = plot_numbering[sets.plot_values - 1:]
         if sets.plot_remains == keys.fraction:
             output_whole.remains = output.remains
-            output_whole.remains.fractions = fractions_list[sets.plot_remains - 1:]
+            output_whole.remains.fractions = plot_numbering[sets.plot_remains - 1:]
 
     # store doses
     exponent = afx.find_exponent(sets.dose_stepsize) - 1
