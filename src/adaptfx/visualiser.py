@@ -51,8 +51,12 @@ def plot_val(sfs, states, data, fractions, colmap='turbo'):
     except:
         # in case ax is a 1x1 subplot
         axs = np.array([ax])
+    # turn off axes
+    for a in axs:
+        a.axis(False)
     
     for i, pol in enumerate(data):
+        axs[i].axis(True)
         axs[i].imshow(pol, interpolation=None, origin='upper',
             norm=normaliser, cmap=colormap, aspect='auto',
             extent=[x_min, x_max, y_min, y_max])
