@@ -63,12 +63,12 @@ def plot_val(sfs, states, data, fractions, colmap='turbo'):
             pass
 
             
-    fig.supxlabel('sparing factor')
-    fig.supylabel('remaining BED')
+    fig.supxlabel('Sparing Factor')
+    fig.supylabel('BED State')
     fig.tight_layout()
     fig.colorbar(mappable=im, ax=axs.tolist())
 
-    return axs
+    return fig
 
 def show_plot():
     plt.show()
