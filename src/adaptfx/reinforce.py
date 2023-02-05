@@ -235,16 +235,16 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
         output.policy = {}
         output.policy.val = policy
         output.policy.sf = sf
-        output.policy.states = remaining_states
+        output.policy.states = bedt_states[::-1]
     if values_plot:
         output.value = {}
         output.value.val = values
         output.value.sf = sf
-        output.value.states = remaining_states
+        output.value.states = bedt_states[::-1]
     if remains_plot:
         output.remains = {}
         output.remains.val = remains
         output.remains.sf = sf
-        output.remains.states = remaining_states
+        output.remains.states = bedt_states[::1]
 
     return output
