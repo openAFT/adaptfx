@@ -18,7 +18,8 @@ INF_PENALTY = 1e4
 ALPHA_BETA_TUMOR = 10
 ALPHA_BETA_OAR = 3
 
-FULL_DICT = {'number_of_fractions':None,
+# "None" are mandatory keys
+FULL_DICT = {'number_of_fractions': None,
         'fraction': 0,
         'sparing_factors': None,
         'prob_update': 0,
