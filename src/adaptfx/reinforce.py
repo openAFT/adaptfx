@@ -245,6 +245,6 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
         output.remains = {}
         output.remains.val = remains
         output.remains.sf = sf
-        output.remains.states = bedt_states[::1]
+        output.remains.states = bedt_states[::-1]
 
     return output
