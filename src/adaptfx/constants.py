@@ -22,7 +22,7 @@ ALPHA_BETA_OAR = 3
 FULL_DICT = {'number_of_fractions': None,
         'fraction': 0,
         'sparing_factors': None,
-        'prob_update': 0,
+        'prob_update': None,
         'fixed_mean': None,
         'fixed_std': None,
         'shape': None,
