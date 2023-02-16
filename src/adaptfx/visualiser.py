@@ -27,6 +27,14 @@ def plot_val(sfs, states, data, fractions, colmap='turbo'):
         matplotlib pyplot figure
 
     """
+    if colmap == 'turbo':
+        label = r'Policy $\pi$ in BED$_{10}$ [Gy]'
+    elif colmap == 'viridis':
+        label = r'Value $v$'
+    elif colmap == 'plasma':
+        label = 'Expected Remaining Number'
+    else:
+        label = 'empty'
     [n_grids, _, _] = data.shape
     # search for optimal rectangular size of subplot grid
     n_rows = n_columns = int(np.sqrt(n_grids))
@@ -60,17 +68,17 @@ def plot_val(sfs, states, data, fractions, colmap='turbo'):
         axs[i].imshow(pol, interpolation=None, origin='upper',
             norm=normaliser, cmap=colormap, aspect='auto',
             extent=[x_min, x_max, y_min, y_max])
-        axs[i].set_title(fractions[i], loc='left')
+        axs[i].set_title(rf'$t = {fractions[i]}$', loc='left')
         try: # get rid of inner axes values
             axs[i].label_outer()
         except:
             pass
 
-            
-    fig.supxlabel('Sparing Factor')
-    fig.supylabel('BED State')
+    T_text = r'{\mathrm{T}}'
+    fig.supxlabel(r'$\delta$')
+    fig.supylabel(rf'$B^{T_text}$ [Gy]')
     fig.tight_layout()
-    fig.colorbar(mappable=im, ax=axs.tolist())
+    fig.colorbar(mappable=im, ax=axs.tolist(), label=label)
 
     return fig
 
