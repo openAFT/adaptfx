@@ -173,12 +173,12 @@ ImportError: No module named '_ctypes'
 **Solution:** with the specific package manager of the Linux distribution install `libffi-dev` development tool. E.g. in Fedora Linux and derivatives install this tool
 
 ```
-sudo dnf install libffi-devel
+$ sudo dnf install libffi-devel
 ```
 
 On Ubuntu:
 ```
-sudo apt install libffi-dev
+$ sudo apt install libffi-dev
 ```
 
 ### No GUI backend for `matplotlib`
@@ -195,19 +195,19 @@ No matching distribution found for tkinter
 **Solution:** on Fedora Linux and derivative distributions one could solve this by either installing python tkinter
 
 ```
-sudo dnf install python3-tkinter
+$ sudo dnf install python3-tkinter
 ```
 
 on Ubuntu
 
 ```
-sudo apt-get install python3-tk
+$ sudo apt-get install python3-tk
 ```
 
 **Solution:** on MacOS and Linux one could instead use `pip` to install `pyqt`
 
 ```
-pip install pyqt5
+$ pip install pyqt5
 ```
 
 
