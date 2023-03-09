@@ -6,14 +6,47 @@ import os
 prompt = 'AFT> '
 empty = ''
 
-def logging_init(filename, log, level):
+def get_abs_path(filename, name):
+    """
+    from filename create absolute path and basename
+    without ".appendix"
+
+    Parameters
+    ----------
+    filename : string
+        filename of instructions
+    name : string
+        logger name
+
+    Returns
+    -------
+    norm_path : string
+        normalised absolute path
+    basename : string
+        absolute path to file without suffix
+
+        
+    """
+    if os.path.isfile(filename): # check if filepath exists
+        if not os.path.isabs(filename): # check if absolute
+            filename = os.path.abspath(filename)
+        # collapse redundant separators get base
+        norm_path = os.path.normpath(filename)
+        abs_path, name = os.path.split(norm_path)
+        base, _ = os.path.splitext(name)
+        basename = os.path.join(abs_path, base)
+    else:
+        aft_error(f'did not find "{filename}"', name)
+    return norm_path, basename
+
+def logging_init(basename, log, level):
     """
     log initialisation to write to filename
 
     Parameters
     ----------
-    filename : string
-        filename of log file
+    basename : string
+        filename of log file without suffix
     log : bool
         if true store log to filename
     debug: bool
@@ -39,9 +72,7 @@ def logging_init(filename, log, level):
     
     if log:
         logfile_extension = "log"
-        # create logfile name
-        # get the basename before .json extension
-        basename = filename.rsplit('.')[0]
+        # create logfile name and
         # search for existing filename ...
         i = 1
         while os.path.exists(f'{basename}_{i}.{logfile_extension}'):
