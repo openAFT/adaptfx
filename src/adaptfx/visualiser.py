@@ -32,7 +32,7 @@ def plot_val(sfs, states, data, fractions, colmap='turbo'):
     elif colmap == 'viridis':
         label = r'Value $v$'
     elif colmap == 'plasma':
-        label = 'Expected Remaining Number'
+        label = r'Expected Remaining Number $\varepsilon$'
     else:
         label = 'empty'
     [n_grids, _, _] = data.shape
@@ -84,3 +84,8 @@ def plot_val(sfs, states, data, fractions, colmap='turbo'):
 
 def show_plot():
     plt.show()
+
+def save_plot(fig, basename):
+    fig.savefig(f'{basename}.pdf', format='pdf')
+    plt.clf()
+    plt.close()
