@@ -11,7 +11,8 @@ class RL_object():
     of calculation, invoke keys and define
     calculation settings from file
     """
-    def __init__(self, instruction_filename):
+    def __init__(self, instruction_filename_in):
+        instruction_filename, basename = afx.get_abs_path(instruction_filename_in, nme)
         try: # check if file can be opened
             with open(instruction_filename, 'r') as f:
                 read_in = f.read()
@@ -48,7 +49,7 @@ class RL_object():
             if not log_level in afx.LOG_LEVEL_LIST:
                 afx.aft_error('invalid "debug" flag was set', nme)
 
-        afx.logging_init(instruction_filename, log_bool, log_level)
+        afx.logging_init(basename, log_bool, log_level)
         afx.aft_message_info('log level:', log_level, nme)
         afx.aft_message_info('log to file:', log_bool, nme)
 
@@ -86,6 +87,8 @@ class RL_object():
             settings = afx.setting_reader(afx.SETTING_DICT, user_settings)
             afx.aft_message_dict('settings', settings, nme, 1)
 
+        self.filename = instruction_filename
+        self.basename = basename
         self.algorithm = algorithm
         self.log = log_bool
         self.log_level = log_level
