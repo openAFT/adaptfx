@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # log settings
-LOG_BOOL = 0
-LOG_BOOL_LIST = [0,1]
-LOG_LEVEL = 1
-LOG_LEVEL_LIST = [0,1,2]
+LOG_BOOL = 0            # no logging to file
+LOG_BOOL_LIST = [0,1]   # options for logging
+LOG_LEVEL = 1           # logging level middle
+LOG_LEVEL_LIST = [0,1,2]# options for logging level
 
 # dose, sf
 DOSE_STEPSIZE = 0.1
@@ -11,7 +11,7 @@ STATE_STEPSIZE = 1
 SF_LOW = 0
 SF_HIGH = 1.7
 SF_STEPSIZE = 0.01
-SF_PROB_THRESHOLD = 1e-5
+SF_PROB_THRESHOLD = 1e-3
 INF_PENALTY = 1e4
 
 # keys
@@ -72,6 +72,7 @@ STANDARD_LIST = [
         'max_dose',
         ]
 
+# define the list for each optimisation method
 OAR_LIST = STANDARD_LIST + ['tumor_goal']
 
 TUMOR_LIST = STANDARD_LIST + ['oar_limit']

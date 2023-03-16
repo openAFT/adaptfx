@@ -136,9 +136,11 @@ sf_high : float
 sf_stepsize: float
     stepsize of the sparing factor stepsize.
 sf_prob_threshold': float
-    probability threshold of the sparing factor occuring.
+    probability threshold of the sparing factor occuring
+    which defines the range of sparing factors.
 inf_penalty : float
-    infinite penalty for certain undesired states.
+    define infinite penalty for undesired states
+    choose arbitrarily large compared to highest occuring reward.
 plot_policy : int
     starting from which fraction policy should be plotted.
 plot_values : int
