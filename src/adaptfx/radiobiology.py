@@ -128,7 +128,8 @@ def cost_func(keys, n_list, n_samples):
 
 def c_calc_0(keys):
     """
-    For a specified n_pres gives the optimal C
+    For a specified n_pres gives the optimal C,
+    when minimising OAR BED 
 
     Parameters
     ----------
@@ -145,8 +146,8 @@ def c_calc_0(keys):
 
     def cost_fit_func(a, b):
         """
-        Fit function for total BED cost, derived from optimal
-        fraction decision-making
+        Fit function for total OAR BED cost,
+        derived from optimal fraction decision-making
 
         Parameters
         ----------
@@ -156,7 +157,7 @@ def c_calc_0(keys):
         Returns
         -------
         cost : positive float
-            total BED
+            total OAR BED
         """
         curvature = 4 * keys.tumor_goal / keys.abt
         cost = a * (n_list - np.sqrt(n_list**2 + curvature * n_list)) + b
