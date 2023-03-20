@@ -82,6 +82,33 @@ def plot_val(sfs, states, data, fractions, colmap='turbo'):
 
     return fig
 
+def plot_accumulated_bed(n_list, bed_dict):
+    """
+    creates plot for simulated adaptive fractionation therapies
+
+    Parameters
+    ----------
+    n_list : array
+        1d array for number of fractions
+    accumulated_bed : list of arrays
+        list of 1d array for average accumulated bed
+
+    Returns
+    -------
+    fig : matplotlib.pyplot.figure
+        matplotlib pyplot figure
+    """
+    fig, ax = plt.subplots(1, 1)
+    for key in bed_dict:
+        ax.plot(n_list, bed_dict[key], label=key)
+
+    fig.supylabel('accumulated BED')
+    fig.supxlabel('total number of fractions $n$')
+    plt.legend()
+    
+    return fig
+
+
 def show_plot():
     plt.show()
 
