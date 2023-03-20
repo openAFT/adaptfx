@@ -126,15 +126,18 @@ def cost_func(keys, n_list, n_samples):
     return BED_uft, BED_aft, BED_opt
 
 
-def c_calc_0(keys):
+def c_calc(keys, n_target, n_samples):
     """
-    For a specified n_pres gives the optimal C,
-    when minimising OAR BED 
+    For a specified targeted number of fractions
+    gives the optimal C, when minimising OAR BED 
 
     Parameters
     ----------
     keys : dict
         algorithm instructions.
+
+    n_target : int
+        targeted number of fractions
 
     Returns
     -------
@@ -142,9 +145,9 @@ def c_calc_0(keys):
         optimal parameter for achieving n_pres fractions.
     """
     n_upper = keys.number_of_fractions
-    n_list = np.arange(1, n_upper+1)
+    n_list = np.arange(1, n_upper + 3)
 
-    def cost_fit_func(a, b):
+    def cost_fit_func(n_list, a, b):
         """
         Fit function for total OAR BED cost,
         derived from optimal fraction decision-making
@@ -163,10 +166,20 @@ def c_calc_0(keys):
         cost = a * (n_list - np.sqrt(n_list**2 + curvature * n_list)) + b
         return cost
     
-    _, y, _ = cost_func(keys, n_list, 15)
+    def d_cost_fit_func(a, n_target):
+        """
+        Negative derivative of cost_fit_func at n_target
+        """
+        curvature = 4 * keys.tumor_goal / keys.abt
+        d_cost_fit_func = a - (a*curvature + 2 * a * n_target)/(2*np.sqrt(n_target * (curvature + n_target)))
+        return -d_cost_fit_func
     
-    popt, _ = opt.curve_fit(cost_fit_func, n_list, y)
-    
-    # popt = opt.minimize(cost_fit_func, x0=[10,100])
-    return popt
+    if n_upper <= n_target:
+        c_opt = 0
+    else:
+        _, y, _ = cost_func(keys, n_list, n_samples)
+        [a_opt, _], _ = opt.curve_fit(cost_fit_func, n_list, y)
+        c_opt = d_cost_fit_func(a_opt, n_target)
+
+    return c_opt
 
