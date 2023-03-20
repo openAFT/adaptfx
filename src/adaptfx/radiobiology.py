@@ -79,8 +79,8 @@ def convert_to_physical(bed, ab, sf=1):
 def cost_func(keys, n_list, n_samples):
     """
     For a specified list of maximum number of fractions
-    simulates average cumulative OAR BED for uniform,
-    adaptive and optimal fractionation
+    simulates average cumulative OAR BED for uniform-,
+    adaptive- and optimal-fractionation (theoretical optimum)
 
     Parameters
     ----------
