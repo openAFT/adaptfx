@@ -126,7 +126,7 @@ def cost_func(keys, n_list, n_samples):
     return BED_uft, BED_aft, BED_opt
 
 
-def c_calc(keys, n_target, n_samples):
+def c_calc(keys, n_target, n_samples, plot=False):
     """
     For a specified targeted number of fractions
     gives the optimal C, when minimising OAR BED 
@@ -177,9 +177,14 @@ def c_calc(keys, n_target, n_samples):
     if n_upper <= n_target:
         c_opt = 0
     else:
-        _, y, _ = cost_func(keys, n_list, n_samples)
-        [a_opt, _], _ = opt.curve_fit(cost_fit_func, n_list, y)
+        y_no, y_aft, y_opt = cost_func(keys, n_list, n_samples)
+        [a_opt, b_opt], _ = opt.curve_fit(cost_fit_func, n_list, y_aft)
         c_opt = d_cost_fit_func(a_opt, n_target)
+
+    if plot:
+        bed_results = {'uniform':y_no, 'adaptive':y_aft, 'optimal':y_opt,
+                       'aft_fit':cost_fit_func(n_list, a_opt, b_opt)}
+        fig = afx.plot_accumulated_bed(n_list, bed_results)
 
     return c_opt
 
