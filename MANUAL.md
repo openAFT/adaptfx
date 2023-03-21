@@ -2,7 +2,9 @@
 
 ## Working tree
 
-One should perform calculations in a working folder e.g. `adaptfx/work`. There the instruction files can be specified by the user and `adaptfx` will automatically produce log files if the user wishes to.
+The package ships a CLI with which calculations can be performed which will be explained here. One should perform calculations in a working folder e.g. `adaptfx/work`. There the instruction files can be specified by the user and `adaptfx` will automatically produce log files if the user wishes to.
+
+The package also also provides a class that can be used in scripting mode. When using the package in scripts, a class creates an object with according attributes. To understand the attributes and behaviour of optimisation, read the doc-string of the `aft.py` script [here](src/adaptfx/aft.py)
 
 ## Format of the instruction file
 The user specifies following elements of the dictionary for the main entries: 
@@ -148,7 +150,14 @@ plot_values : int
 plot_remains : int
     starting from which fraction expected remaining number 
     of fractions should be plotted.
+plot_probability : int
+    flag if the probability distribution should be plotted
 ```
+
+## Note on Plots
+Policy, Value and Remaining number of fractions plots are calculated with the probability distribution in the fraction from which the plots should start. That is the value function that is known when iterating backwards through the fractions. E.g. the plotted policy starting to plot in the first fraction i.e `plot_policy = 1` and `prob_update = 0`  is the policy which is known throughout the treatment, when observing only the first sparing factor. In the case of probability updating e.g `prob_update = 1` the plotted policy is the optimal policy for the probability distribution known when observing the first sparing factor. As the probability distribution changes also future optimal policies change and one has to keep in mind only policy with the constant probability distribution from fraction `1` is plotted.
+
+Different is the probability plot: the probability is set for each fraction and updated with additional oberved sparing factors.
 
 # Example
 
