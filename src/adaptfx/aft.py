@@ -7,10 +7,72 @@ nme = __name__
 
 class RL_object():
     """
-    Reinforcement Learning class to check instructions
-    of calculation, invoke keys and define
-    calculation settings from file
-    """
+    Invokes a class with one dictionary object and multiple functions
+    to operate on the dictionary. Dictionary is created from instruction
+    file and contains instructions, keys, settings. Once optimisation
+    is performed it also provides results.
+
+    Parameters
+    ----------
+    instruction_filename_in : string
+        string of instruction filename
+
+    Returns
+    -------
+    returns : class
+    The optimisation result represented as a ``plan`` object.
+    Important attributes are: ``keys`` and ``settings`` the keys and 
+    settings from the instruction file. To start the optimisation one
+    can run ``plan.optimise`` which will store the results in ``output``.
+    Important attributes are: ``output.physical_doses``,
+    ``output.tumor_doses``, ``output.oar_doses``.
+    If one is looking for summed doses they are found in:
+    ``output.tumor_sum``, ``output.oar_sum``.
+    In case where number of fractions are minimised one can check
+    utilised number of fractions with ``output.fractions_used``.
+
+    A full list of attributes:
+    ``plan.filename``
+    ``plan.basename``
+    ``plan.algorithm``
+    ``plan.log``
+    ``plan.log_level``
+    ``plan.keys``
+    ``plan.settings``
+    ``plan.output.physical_doses``
+    ``plan.output.tumor_doses``
+    ``plan.output.oar_doses``
+    ``plan.output.tumor_sum``
+    ``plan.output.oar_sum``
+    ``plan.output.fractions_used``
+
+    A full list of available functions:
+    ``plan.optimise()``
+    ``plan.plot()``
+    ``plan.fraction_counter()``
+
+
+    Examples
+    --------
+    Consider the following demonstration:
+
+    >>> import adaptfx as afx
+    >>> plan = afx.RL_object('path/to/instruction_file')
+
+    >>> plan.keys.sparing_factors
+    [0.98, 0.97, 0.8, 0.83, 0.8, 0.85, 0.94]
+
+
+    >>> plan.optimise()
+    process duration: 0.0219 s:
+    >>> plan.output.oar_doses
+    array([  0. ,   3.2,   3.3,  11.6, 107.1])
+    >>> plan.output.tumor_sum
+    72.0
+    >>> plan.output.fractions_used
+    5
+
+"""
     def __init__(self, instruction_filename_in):
         instruction_filename, basename = afx.get_abs_path(instruction_filename_in, nme)
         try: # check if file can be opened
@@ -96,7 +158,10 @@ class RL_object():
         self.settings = afx.DotDict(settings)
 
     def optimise(self):
+        afx.aft_message('optimising...', nme, 1)
+        start = afx.timing()
         self.output = afx.multiple(self.algorithm, self.keys, self.settings)
+        afx.timing(start)
 
     def fraction_counter(self):
         if self.algorithm == 'frac' and self.keys.fraction == 0:
@@ -126,7 +191,6 @@ def main():
     """
     CLI interface to invoke the RL class
     """
-    start = afx.timing()
     parser = argparse.ArgumentParser(
         description='Calculate optimal dose per fraction dependent on algorithm type'
     )
@@ -149,9 +213,7 @@ def main():
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
     plan = RL_object(args.filename)
 
-    afx.aft_message('start session...', nme, 1)
     plan.optimise()
-    afx.timing(start)
 
     # show retrospective dose prescribtion
     afx.aft_message_list('physical tumor dose:', plan.output.physical_doses, nme, 1)
