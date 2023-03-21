@@ -187,6 +187,8 @@ class RL_object():
         if self.settings.plot_remains:
             afx.plot_val(out.remains.sf, out.remains.states,
             out.remains.val, out.remains.fractions, 'plasma')
+        if self.settings.plot_probability:
+            afx.plot_probability(out.probability.sf, out.probability.pdf, out.probability.fractions)
 
         if sets.plot_policy or sets.plot_values or sets.plot_remains:
             afx.show_plot()

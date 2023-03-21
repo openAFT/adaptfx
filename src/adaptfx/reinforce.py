@@ -235,8 +235,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     if probability_plot:
         output.probability = {}
         output.probability.sf = sf
-        output.probability.prob = prob
-        output.probability.rv = rv
+        output.probability.pdf = rv.pdf(sf)
     if policy_plot:
         output.policy = {}
         output.policy.val = policy

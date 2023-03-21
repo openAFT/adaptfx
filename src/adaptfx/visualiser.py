@@ -108,6 +108,35 @@ def plot_accumulated_bed(n_list, bed_dict):
     
     return fig
 
+def plot_probability(sf_list, pdf_list, fractions_list):
+    """
+    creates plot for multiple probability density functions
+
+    Parameters
+    ----------
+    sf_list : list
+        list with sf lists
+    pdf_list : list
+        list with probability density values list
+    fractions_list : list
+        list with specified fraction
+
+    Returns
+    -------
+    fig : matplotlib.pyplot.figure
+        matplotlib pyplot figure
+    """
+    fig, ax = plt.subplots(1, 1)
+    for i, fraction in enumerate(fractions_list):
+        ax.plot(sf_list[i], pdf_list[i], label=rf'$t={fraction}$')
+
+    fig.supxlabel(r'$\delta$')
+    fig.supylabel(r'$PDF(\delta)$')
+    fig.tight_layout()
+    plt.legend()
+    
+    return fig
+
 
 def show_plot():
     plt.show()

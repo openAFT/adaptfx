@@ -39,8 +39,7 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         # note that the shape of probability distribution
         # is 1) unknown and 2) non-constant --> use list
         sf = []
-        prob = []
-        rv = []
+        pdf = []
 
     # create array for keeping track of fractions
     plot_numbering = np.arange(1, keys.number_of_fractions + 1, 1)
@@ -78,8 +77,7 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         # if both zero than the user doesn't want to plot policy
         if sets.plot_probability:
             sf.append(list(output.probability.sf))
-            prob.append(list(output.probability.prob))
-            rv.append(output.probability.rv)
+            pdf.append(list(output.probability.pdf))
         if sets.plot_policy == keys.fraction:
             output_whole.policy = output.policy
             output_whole.policy.fractions = plot_numbering[sets.plot_policy - 1:]
@@ -97,10 +95,11 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
     output_whole.oar_sum, output_whole.tumor_sum = np.around(
         [np.nansum(oar_doses), np.nansum(tumor_doses)], -exponent)
     output_whole.fractions_used = np.count_nonzero(~np.isnan(output_whole.physical_doses))
-    # store probability distribution
-    output_whole.probability = {}
-    output_whole.probability.sf = sf
-    output_whole.probability.prob = prob
-    output_whole.probability.rv = rv
+    if sets.plot_probability:
+        # store probability distribution
+        output_whole.probability = {}
+        output_whole.probability.sf = sf
+        output_whole.probability.pdf = pdf
+        output_whole.probability.fractions = fractions_list
 
     return output_whole
