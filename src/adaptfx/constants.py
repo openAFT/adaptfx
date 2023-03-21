@@ -51,6 +51,7 @@ SETTING_DICT = {
         'plot_policy': 0,
         'plot_values': 0,
         'plot_remains': 0,
+        'plot_probability': 0,
         }
 
 STANDARD_LIST = [
