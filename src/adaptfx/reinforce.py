@@ -39,6 +39,7 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     max_dose = keys.max_dose
     # ---------------------------------------------------------------------- #
     # check in which fraction data should be returned for plotting
+    probability_plot = 1 if sets.plot_probability else 0
     policy_plot = 1 if sets.plot_policy == fraction else 0
     values_plot = 1 if sets.plot_values == fraction else 0
     remains_plot = 1 if sets.plot_remains == fraction else 0
@@ -231,6 +232,11 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
     output.tumor_dose = bedt_space[action_index] if not finished else np.nan
     output.oar_dose = bedn_space[action_index] if not finished else np.nan
 
+    if probability_plot:
+        output.probability = {}
+        output.probability.sf = sf
+        output.probability.prob = prob
+        output.probability.rv = rv
     if policy_plot:
         output.policy = {}
         output.policy.val = policy

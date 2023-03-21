@@ -33,7 +33,16 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         physical_doses = np.zeros(keys.number_of_fractions)
         tumor_doses = np.zeros(keys.number_of_fractions)
         oar_doses = np.zeros(keys.number_of_fractions)
+    
+    if sets.plot_probability:
+        # create lists for storing probability distribution
+        # note that the shape of probability distribution
+        # is 1) unknown and 2) non-constant --> use list
+        sf = []
+        prob = []
+        rv = []
 
+    # create array for keeping track of fractions
     plot_numbering = np.arange(1, keys.number_of_fractions + 1, 1)
     first_tumor_dose = keys.accumulated_tumor_dose
     first_oar_dose = keys.accumulated_oar_dose
@@ -67,6 +76,10 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
 
         # user specifies to plot policy number, if equal to fraction plot
         # if both zero than the user doesn't want to plot policy
+        if sets.plot_probability:
+            sf.append(list(output.probability.sf))
+            prob.append(list(output.probability.prob))
+            rv.append(output.probability.rv)
         if sets.plot_policy == keys.fraction:
             output_whole.policy = output.policy
             output_whole.policy.fractions = plot_numbering[sets.plot_policy - 1:]
@@ -84,5 +97,10 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
     output_whole.oar_sum, output_whole.tumor_sum = np.around(
         [np.nansum(oar_doses), np.nansum(tumor_doses)], -exponent)
     output_whole.fractions_used = np.count_nonzero(~np.isnan(output_whole.physical_doses))
+    # store probability distribution
+    output_whole.probability = {}
+    output_whole.probability.sf = sf
+    output_whole.probability.prob = prob
+    output_whole.probability.rv = rv
 
     return output_whole
