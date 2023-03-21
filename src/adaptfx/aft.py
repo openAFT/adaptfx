@@ -19,7 +19,7 @@ class RL_object():
 
     Returns
     -------
-    returns : class
+    returns : ``plan`` class
     The optimisation result represented as a ``plan`` object.
     Important attributes are: ``keys`` and ``settings`` the keys and 
     settings from the instruction file. To start the optimisation one
@@ -45,6 +45,12 @@ class RL_object():
     ``plan.output.tumor_sum``
     ``plan.output.oar_sum``
     ``plan.output.fractions_used``
+
+    A full list of optional attributes (dependent if the user specifies plot):
+    ``plan.output.policy``
+    ``plan.output.value``
+    ``plan.output.remains``
+    ``plan.output.probability``
 
     A full list of available functions:
     ``plan.optimise()``
