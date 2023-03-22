@@ -28,7 +28,7 @@ def truncated_normal(mean, std, low, upp):
 
     """
     normal = truncnorm((low - mean) / std, (upp - mean) / std,
-                        loc=mean, scale=std)
+        loc=mean, scale=std)
 
     return normal
 
@@ -143,8 +143,8 @@ def sf_probdist(X, sf_low, sf_high, sf_stepsize, probability_threshold):
     # sum probability density from cumulative density function in interval
     # to get probability
     half_interval = sf_stepsize/2
-    upp_bound = (half_interval - sf_stepsize*1e-6) * np.ones(n_samples)
-    low_bound = half_interval * np.ones(n_samples)
+    upp_bound = (half_interval - sf_stepsize*1e-6)
+    low_bound = half_interval
     prob = X.cdf(sample_sf + upp_bound) - X.cdf(sample_sf - low_bound)
 
      # get rid of all probabilities below given threshold
