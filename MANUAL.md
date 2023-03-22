@@ -175,8 +175,18 @@ There is also a second CLI that allows to plot sparing factors, policy functions
 $ ast [options] -f <simulation_file>
 ```
 
+The entry for algorithm simulation type is
+
 ```
-sim
+algorithm_simulation: histogram, fraction, single_state, all_state
+single_distance, single_patient, grid_distance, grid_fraction
+    allowed plots options
+keys_simulation: dict
+    simulation keys
+```
+
+```
+keys_simulation
 ----------------
 # Histogram of applied AFT for sampled patients
 n_patients : float
