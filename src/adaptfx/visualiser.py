@@ -46,7 +46,7 @@ def plot_val(sfs, states, data, fractions, colmap='turbo'):
             n_rows += 1
     # initiate plot and parameters
     fig, ax = plt.subplots(n_rows, n_columns)
-    x_min, x_max, y_min, y_max = sfs[0], sfs[-1], states[0], states[-1]
+    x_min, x_max, y_min, y_max = np.min(sfs), np.max(sfs), np.min(states), np.max(states)
 
     # create shared colorbar
     colmin, colmax = np.min(data), np.max(data)
