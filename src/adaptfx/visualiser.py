@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize as normalise
 import matplotlib.cm as cm
+import adaptfx as afx
 
 def plot_val(sfs, states, data, fractions, colmap='turbo'):
     """
@@ -141,7 +142,14 @@ def plot_probability(sf_list, pdf_list, fractions_list):
 def show_plot():
     plt.show()
 
-def save_plot(fig, basename):
-    fig.savefig(f'{basename}.pdf', format='pdf')
-    plt.clf()
-    plt.close()
+def save_plot(basename, *figures):
+    if len(figures)==1:
+        fig_name = create_name(basename, 'pdf')
+        figures.savefig(fig_name, format='pdf')
+        plt.clf()
+        plt.close()
+    else:
+        for fig in figures:
+            # create name from base, search for untaken name
+            fig_name = afx.create_name(basename, 'pdf')
+            fig.savefig(fig_name, format='pdf')

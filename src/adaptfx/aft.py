@@ -178,19 +178,27 @@ class RL_object():
     def plot(self):
         out = self.output
         sets = self.settings
+        figures = []
         if self.settings.plot_policy:
-            afx.plot_val(out.policy.sf, out.policy.states, out.policy.val,
-            out.policy.fractions, 'turbo')
+            policy_fig = afx.plot_val(out.policy.sf, out.policy.states, out.policy.val,
+                out.policy.fractions, 'turbo')
+            figures.append(policy_fig)
         if self.settings.plot_values:
-            afx.plot_val(out.value.sf, out.value.states,
-            out.value.val, out.value.fractions, 'viridis')
+            values_fig = afx.plot_val(out.value.sf, out.value.states,
+                out.value.val, out.value.fractions, 'viridis')
+            figures.append(values_fig)
         if self.settings.plot_remains:
-            afx.plot_val(out.remains.sf, out.remains.states,
-            out.remains.val, out.remains.fractions, 'plasma')
+            remains_fig = afx.plot_val(out.remains.sf, out.remains.states,
+                out.remains.val, out.remains.fractions, 'plasma')
+            figures.append(remains_fig)
         if self.settings.plot_probability:
-            afx.plot_probability(out.probability.sf, out.probability.pdf, out.probability.fractions)
+            prob_fig = afx.plot_probability(out.probability.sf, out.probability.pdf,
+                out.probability.fractions)
+            figures.append(prob_fig)
 
-        if sets.plot_policy or sets.plot_values or sets.plot_remains:
+        if sets.save_plot:
+            afx.save_plot(self.basename, *figures)
+        elif sets.plot_policy or sets.plot_values or sets.plot_remains or sets.plot_probability:
             afx.show_plot()
         else:
             afx.aft_message('nothing to plot', nme, 1)

@@ -52,6 +52,7 @@ SETTING_DICT = {
         'plot_values': 0,
         'plot_remains': 0,
         'plot_probability': 0,
+        'save_plot': 0,
         }
 
 STANDARD_LIST = [
