@@ -174,3 +174,37 @@ There is also a second CLI that allows to plot sparing factors, policy functions
 ```
 $ ast [options] -f <simulation_file>
 ```
+
+```
+sim
+----------------
+# Histogram of applied AFT for sampled patients
+n_patients : float
+    stepsize of the actionspace.
+fixed_mean_sample : float
+    mean of sampled patient sparing factor
+fixed_std_sample : float
+    standard deviation of sampled patient sparing factor
+
+# Data related plots
+c_list : list
+    list of c parameters
+plot_index : int
+    which index to plot
+data_filepath : string
+    path to sparing factor file
+data_selection : list
+    two elements of header in sparing factor file
+data_row_hue : string
+    seaborn hue or row
+
+# Settings of plots
+figsize : list
+    two elements of size figure
+fontsize : float
+    fontsize of plots
+save : bool
+    boolean to instruct saving plot
+usetex : bool
+    boolean if TeX font should be used
+```
