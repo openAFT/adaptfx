@@ -96,7 +96,7 @@ min_dose : float
 max_dose : float
     maximal physical doses to be delivered in one fraction.
     The doses are aimed at PTV 95. If -1 the dose is adapted to the
-    remaining dose tumor dose to be delivered or the remaining OAR dose 
+    remaining tumor BED to be delivered or the remaining OAR dose 
     allowed to be prescribed.
     default: -1
 ```
