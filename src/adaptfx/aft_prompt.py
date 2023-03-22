@@ -1,43 +1,10 @@
 # -*- coding: utf-8 -*-
 import sys
 import logging
-import os
+import adaptfx as afx
 
 prompt = 'AFT> '
 empty = ''
-
-def get_abs_path(filename, name):
-    """
-    from filename create absolute path and basename
-    without ".appendix"
-
-    Parameters
-    ----------
-    filename : string
-        filename of instructions
-    name : string
-        logger name
-
-    Returns
-    -------
-    norm_path : string
-        normalised absolute path
-    basename : string
-        absolute path to file without suffix
-
-        
-    """
-    if os.path.isfile(filename): # check if filepath exists
-        if not os.path.isabs(filename): # check if absolute
-            filename = os.path.abspath(filename)
-        # collapse redundant separators get base
-        norm_path = os.path.normpath(filename)
-        abs_path, name = os.path.split(norm_path)
-        base, _ = os.path.splitext(name)
-        basename = os.path.join(abs_path, base)
-    else:
-        aft_error(f'did not find "{filename}"', name)
-    return norm_path, basename
 
 def logging_init(basename, log, level):
     """
@@ -71,22 +38,7 @@ def logging_init(basename, log, level):
         log_level = logging.ERROR
     
     if log:
-        logfile_extension = "log"
-        # create logfile name and
-        # search for existing filename ...
-        i = 1
-        while os.path.exists(f'{basename}_{i}.{logfile_extension}'):
-            # exponential search if many files exist
-            i *= 2
-        a, b = (i // 2, i)
-        while a+1 < b:
-            c = (a + b) // 2
-            if os.path.exists(f'{basename}_{c}.{logfile_extension}'):
-                a, b = (c, b)
-            else:
-                a, b = (a, c)
-        # ... end of search
-        log_filename = f'{basename}_{b}.{logfile_extension}'
+        log_filename = afx.create_name(basename, "log")
         logging.basicConfig(
             format=format_file,
             level=log_level, 
