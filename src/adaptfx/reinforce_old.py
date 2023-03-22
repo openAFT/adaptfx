@@ -65,26 +65,26 @@ def min_oar_bed_old(keys, sets=SETTING_DICT):
     number_of_fractions = keys.number_of_fractions
     accumulated_tumor_dose = keys.accumulated_tumor_dose
     sparing_factors_public = keys.sparing_factors_public
-    alpha = keys.alpha
-    beta = keys.beta
+    shape = keys.shape
+    scale = keys.scale
     tumor_goal = keys.tumor_goal
     abt = keys.abt
     abn = keys.abn
     min_dose = keys.min_dose
     max_dose = keys.max_dose
-    fixed_prob = keys.fixed_prob
+    prob_update = keys.prob_update
     fixed_mean = keys.fixed_mean
     fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
     # check in which fraction policy should be returned
     policy_plot = 1 if sets.plot_policy == fraction else 0
 
-    if fixed_prob != 1:
+    if prob_update == 1:
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
-    if fixed_prob == 1:
+        standard_deviation = std_posterior(sparing_factors_public, shape, scale)
+    elif prob_update == 0:
         mean = fixed_mean
         standard_deviation = fixed_std
     X = truncated_normal(mean, standard_deviation, sets.sf_low, sets.sf_high)
@@ -229,27 +229,27 @@ def min_n_frac_old(keys, sets=SETTING_DICT):
     number_of_fractions = keys.number_of_fractions
     accumulated_tumor_dose = keys.accumulated_tumor_dose
     sparing_factors_public = keys.sparing_factors_public
-    alpha = keys.alpha
-    beta = keys.beta
+    shape = keys.shape
+    scale = keys.scale
     tumor_goal = keys.tumor_goal
     c = keys.c
     abt = keys.abt
     abn = keys.abn
     min_dose = keys.min_dose
     max_dose = keys.max_dose
-    fixed_prob = keys.fixed_prob
+    prob_update = keys.prob_update
     fixed_mean = keys.fixed_mean
     fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
     # check in which fraction policy should be returned
     policy_plot = 1 if sets.plot_policy == fraction else 0
 
-    if fixed_prob != 1:
+    if prob_update == 1:
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
-    if fixed_prob == 1:
+        standard_deviation = std_posterior(sparing_factors_public, shape, scale)
+    elif prob_update == 0:
         mean = fixed_mean
         standard_deviation = fixed_std
     X = truncated_normal(mean, standard_deviation, sets.sf_low, sets.sf_high)
@@ -417,14 +417,14 @@ def max_tumor_bed_old(keys, sets=SETTING_DICT):
     number_of_fractions = keys.number_of_fractions
     accumulated_oar_dose = keys.accumulated_tumor_dose
     sparing_factors_public = keys.sparing_factors_public
-    alpha = keys.alpha
-    beta = keys.beta
+    shape = keys.shape
+    scale = keys.scale
     oar_limit = keys.oar_limit
     abt = keys.abt
     abn = keys.abn
     min_dose = keys.min_dose
     max_dose = keys.max_dose
-    fixed_prob = keys.fixed_prob
+    prob_update = keys.prob_update
     fixed_mean = keys.fixed_mean
     fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
@@ -432,12 +432,12 @@ def max_tumor_bed_old(keys, sets=SETTING_DICT):
     policy_plot = 1 if sets.plot_policy == fraction else 0
     
     actual_sparing = sparing_factors_public[-1]
-    if fixed_prob != 1:
+    if prob_update == 1:
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
-    if fixed_prob == 1:
+        standard_deviation = std_posterior(sparing_factors_public, shape, scale)
+    elif prob_update == 0:
         mean = fixed_mean
         standard_deviation = fixed_std
     X = truncated_normal(mean, standard_deviation, sets.sf_low, sets.sf_high)
@@ -634,27 +634,27 @@ def min_oar_max_tumor_old(keys, sets=SETTING_DICT):
     accumulated_tumor_dose = keys.accumulated_tumor_dose
     accumulated_oar_dose = keys.accumulated_oar_dose
     sparing_factors_public = keys.sparing_factors_public
-    alpha = keys.alpha
-    beta = keys.beta
+    shape = keys.shape
+    scale = keys.scale
     tumor_goal = keys.tumor_goal
     oar_limit = keys.oar_limit
     abt = keys.abt
     abn = keys.abn
     min_dose = keys.min_dose
     max_dose = keys.max_dose
-    fixed_prob = keys.fixed_prob
+    prob_update = keys.prob_update
     fixed_mean = keys.fixed_mean
     fixed_std = keys.fixed_std
     # ---------------------------------------------------------------------- #
     # check in which fraction policy should be returned
     policy_plot = 1 if sets.plot_policy == fraction else 0
 
-    if fixed_prob != 1:
+    if prob_update == 1:
         mean = np.mean(
             sparing_factors_public
         )  # extract the mean and std to setup the sparingfactor distribution
-        standard_deviation = std_posterior(sparing_factors_public, alpha, beta)
-    if fixed_prob == 1:
+        standard_deviation = std_posterior(sparing_factors_public, shape, scale)
+    elif prob_update == 0:
         mean = fixed_mean
         standard_deviation = fixed_std
     X = truncated_normal(mean, standard_deviation, sets.sf_low, sets.sf_high)
