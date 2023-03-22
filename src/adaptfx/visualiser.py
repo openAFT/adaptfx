@@ -144,8 +144,7 @@ def show_plot():
 
 def save_plot(basename, *figures):
     if len(figures)==1:
-        fig_name = afx.create_name(basename, 'pdf')
-        figures[0].savefig(fig_name, format='pdf')
+        figures[0].savefig(f'{basename}.pdf', format='pdf')
         plt.clf()
         plt.close()
     else:
