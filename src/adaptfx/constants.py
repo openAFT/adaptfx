@@ -86,6 +86,6 @@ TUMOR_OAR_LIST = STANDARD_LIST + ['tumor_goal', 'oar_limit']
 KEY_DICT = {
         'oar': OAR_LIST, 'oar_old': OAR_LIST, 
         'tumor': TUMOR_LIST, 'tumor_old': TUMOR_LIST,
-        'frac': FRAC_LIST, 'frac_old': FRAC_LIST,
+        'frac': FRAC_LIST,
         'tumor_oar': TUMOR_OAR_LIST, 'tumor_oar_old': TUMOR_OAR_LIST
         }
