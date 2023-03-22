@@ -1,16 +1,16 @@
 {
-"algorithm": "frac",
+"algorithm": "oar",
 "level": 1,
 "log": 0,
 "keys": 
 	{
 	"number_of_fractions": 6,
 	"fraction": 0,
-	"sparing_factors": [0.94657944, 0.90661544, 0.90529964, 0.7963188 , 0.8688744 ,
-	0.91669474, 0.95471553],
-	"prob_update": 2,
-	"fixed_mean": 0.9,
-	"fixed_std": 0.04,
+	"sparing_factors": [0.946, 0.906, 0.905, 0.796 , 0.868,
+	0.916, 0.954],
+	"prob_update": 0,
+	"fixed_mean": 0.85,
+	"fixed_std": 0.1,
 	"shape": 10.61,
 	"scale": 0.003,
 	"shape_inv": 2.27,
@@ -19,8 +19,7 @@
 	"accumulated_tumor_dose": 0,
 	"min_dose": 0,
 	"max_dose": -1,
-	"tumor_goal": 72,
-	"c": 0
+	"tumor_goal": 72
 	},
 "settings":
 	{
@@ -28,8 +27,12 @@
 	"state_stepsize": 0.5,
 	"sf_stepsize": 0.005,
 	"sf_low": 0.7,
-	"sf_high": 1.1,
-	"sf_prob_threshold": 0,
-	"plot_policy": 1
+	"sf_high": 1,
+	"sf_prob_threshold": 1e-3,
+	"plot_policy": 1,
+	"plot_remains": 0,
+	"plot_values": 0,
+	"plot_probability": 1,
+	"save_plot": 0
 	}
 }
