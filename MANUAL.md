@@ -159,12 +159,18 @@ Policy, Value and Remaining number of fractions plots are calculated with the pr
 
 Different is the probability plot: the probability is set for each fraction and updated with additional oberved sparing factors.
 
-# Example
+# AFT CLI
 
-Outlined is an example instruction file for fraction minimisation. It simply is a `.json` that is translated into a python dictionary. An example can be found [here](work/oar_example.json)
+Outlined is an example instruction file for fraction minimisation. It simply is a `.json` that is translated into a python dictionary. An example can be found [here](work/example_0.json)
 
 This `.json` file can be called in with the CLI as:
 
 ```
 $ aft -f work/oar_example.json
+```
+
+# AST CLI
+There is also a second CLI that allows to plot sparing factors, policy functions, temporal Adaptive Fractionation Therapy etc.
+```
+$ ast [options] -f <simulation_file>
 ```
