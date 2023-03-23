@@ -154,6 +154,9 @@ plot_probability : int
     flag if the probability distribution should be plotted
 ```
 
+> :warning: Note:\
+> It is dangerous to use an upper and lower bound in `sf_low` and `sf_high`, as a truncated probability distribution may result that not accurately represents the environment model. Best is to set `sf_prob_threshold` to `1e-3` or lower or leave it at the default which is set at `1e-4`.
+
 ## Note on Plots
 Policy, Value and Remaining number of fractions plots are calculated with the probability distribution in the fraction from which the plots should start. That is the value function that is known when iterating backwards through the fractions. E.g. the plotted policy starting to plot in the first fraction i.e `plot_policy = 1` and `prob_update = 0`  is the policy which is known throughout the treatment, when observing only the first sparing factor. In the case of probability updating e.g `prob_update = 1` the plotted policy is the optimal policy for the probability distribution known when observing the first sparing factor. As the probability distribution changes also future optimal policies change and one has to keep in mind only policy with the constant probability distribution from fraction `1` is plotted.
 
