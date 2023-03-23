@@ -134,11 +134,9 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
             future_bedt = accumulated_tumor_dose + bedt_space
             future_bedt = np.where(future_bedt > tumor_goal, tumor_limit, future_bedt)
             c_penalties = np.where(np.round(future_bedt, -exp) < tumor_goal, -c, 0)
-            # for discrete matching
-            # future_values = future_values_discrete[np.where(np.isclose(bedt_states, future_bedt))]
             future_values = afx.interpolate(future_bedt, bedt_states, future_values_discrete)
             vs = -bedn_space + future_values + c_penalties
-            # argmax of vs along axis 0 to find best action fot the actual sf
+            # argmax of vs along axis 0 to find best action for the actual sf
             action_index = vs.argmax(axis=0)
 
             if policy_plot or values_plot or remains_plot:
