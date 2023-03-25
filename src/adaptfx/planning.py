@@ -54,6 +54,8 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
             output = afx.min_oar_bed(keys, sets)
         elif algorithm == 'frac':
             output = afx.min_n_frac(keys, sets)
+        elif algorithm == 'tumor':
+            output = afx.max_tumor_bed(keys, sets)
             
         elif algorithm == 'oar_old':
             output = afx.min_oar_bed_old(keys, sets)
