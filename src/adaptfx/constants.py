@@ -77,7 +77,7 @@ STANDARD_LIST = [
 # define the list for each optimisation method
 OAR_LIST = STANDARD_LIST + ['tumor_goal']
 
-TUMOR_LIST = STANDARD_LIST + ['oar_limit']
+TUMOR_LIST = STANDARD_LIST + ['oar_limit', 'c']
 
 FRAC_LIST = STANDARD_LIST + ['tumor_goal', 'c']
 

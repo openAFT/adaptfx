@@ -314,13 +314,12 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
     remaining_bed = np.round(oar_limit - accumulated_oar_dose, -exp)
     n_bedsteps = int(np.round(remaining_bed / sets.dose_stepsize, 0))
     n_statesteps = int(np.round(remaining_bed / sets.state_stepsize, 0))
-    max_physical_dose = afx.convert_to_physical(remaining_bed, abn)
 
     # automatic max_dose calculation
     if max_dose == -1:
-        max_dose = max_physical_dose
+        max_dose = remaining_bed
     # Reduce max_dose to prohibit tumor_goal overshoot (efficiency)
-    max_dose = min(max_dose, max_physical_dose)
+    max_dose = min(max_dose, remaining_bed)
 
     # actionspace in bed dose
     bedn_space = np.linspace(0, remaining_bed, n_bedsteps + 1)
@@ -414,30 +413,26 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
             # final state to initialise terminal reward
             # dose remaining to be delivered, this is the actionspace in bedt
             last_bed_actions = np.round(oar_limit - bedn_states, -exp)
+            # cut the actionspace to min and max dose constraints
             last_bed_actions = np.where(last_bed_actions < min_dose, min_dose, last_bed_actions)
             last_bed_actions = np.where(last_bed_actions > max_dose, max_dose, last_bed_actions)
             last_actions = afx.convert_to_physical(last_bed_actions.reshape(n_bedn_states, 1), abn,
                 sf.reshape(1, n_sf))
-            last_bed_actions_helper = np.zeros((1, n_sf)) + last_bed_actions.reshape(n_bedn_states, 1)
-            # cut the actionspace to min and max dose constraints
-            last_bed_actions = np.where(last_bed_actions_helper > max_dose, bedn_space[-1], last_bed_actions_helper)
-            last_bed_actions = np.where(last_bed_actions_helper < min_dose, bedn_space[0], last_bed_actions_helper)
-            last_actions = np.where(last_bed_actions_helper > max_dose, actionspace[-1], last_actions)
-            last_actions = np.where(last_bed_actions_helper < min_dose, actionspace[0], last_actions)
+            last_bed_actions_sf = np.zeros((1, n_sf)) + last_bed_actions.reshape(n_bedn_states, 1)
             last_bedt = afx.bed_calc0(last_actions, abt)
             # this smooths out the penalties in underdose and overdose regions
-            bedn_diff = np.round(bedn_states.reshape(n_bedn_states, 1) + last_bed_actions - oar_limit, -exp)
+            bedn_diff = np.round(bedn_states.reshape(n_bedn_states, 1) + last_bed_actions_sf - oar_limit, -exp)
             penalties = np.where(bedn_diff == 0, 0, -np.abs(bedn_diff) * sets.inf_penalty)
             # to each best action add the according penalties
             # penalties need to be reshaped for broadcasting
-            vs = last_bedt + penalties
+            vs = last_bedt
             values[fraction_index] = vs
             # ensure that for the goal reached the value/policy is zero (min_dose)
             values[fraction_index][bedn_states==oar_limit] = 0
 
             if policy_plot:
                 # policy calculation for each bedt, but sf is not considered
-                policy[fraction_index] = last_bed_actions
+                policy[fraction_index] = last_bed_actions_sf
                 # ensure that for the goal reached the value/policy is zero (min_dose)
                 policy[fraction_index][bedn_states==oar_limit] = 0
 
