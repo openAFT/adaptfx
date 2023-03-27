@@ -25,9 +25,9 @@
 	},
 "settings":
 	{
-	"dose_stepsize": 10,
-	"state_stepsize": 10,
-	"sf_stepsize": 0.05,
+	"dose_stepsize": 15,
+	"state_stepsize": 15,
+	"sf_stepsize": 0.1,
 	"sf_prob_threshold": 1e-4,
 	"plot_policy": 1,
 	"plot_remains": 0,
