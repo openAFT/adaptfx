@@ -425,7 +425,7 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
             penalties = np.where(bedn_diff == 0, 0, -np.abs(bedn_diff) * sets.inf_penalty)
             # to each best action add the according penalties
             # penalties need to be reshaped for broadcasting
-            vs = last_bedt
+            vs = last_bedt + penalties
             values[fraction_index] = vs
             # ensure that for the goal reached the value/policy is zero (min_dose)
             values[fraction_index][bedn_states==oar_limit] = 0
