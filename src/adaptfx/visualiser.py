@@ -68,7 +68,7 @@ def plot_val(sfs, states, data, fractions, colmap='turbo'):
         axs[i].axis(True)
         axs[i].imshow(pol, interpolation=None, origin='upper',
             norm=normaliser, cmap=colormap, aspect='auto',
-            extent=[x_min, x_max, y_min, y_max])
+            extent=[x_min, x_max, y_max, y_min])
         axs[i].set_title(rf'$t = {fractions[i]}$', loc='left')
         try: # get rid of inner axes values
             axs[i].label_outer()
