@@ -14,7 +14,7 @@ from .planning import *
 from .radiobiology import *
 from .visualiser import *
 from .reinforce import *
-from .reinforce_old import *
+from .reinforce_old import max_tumor_bed_old, min_oar_bed_old, min_oar_max_tumor_old
 
 __all__ = ['bed_calc_matrix',
             'convert_to_physical',
