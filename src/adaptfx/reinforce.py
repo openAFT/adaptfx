@@ -238,17 +238,17 @@ def min_n_frac(keys, sets=afx.SETTING_DICT):
         output.policy = {}
         output.policy.val = policy
         output.policy.sf = sf
-        output.policy.states = bedt_states[::-1]
+        output.policy.states = bedt_states
     if values_plot:
         output.value = {}
         output.value.val = values
         output.value.sf = sf
-        output.value.states = bedt_states[::-1]
+        output.value.states = bedt_states
     if remains_plot:
         output.remains = {}
         output.remains.val = remains
         output.remains.sf = sf
-        output.remains.states = bedt_states[::-1]
+        output.remains.states = bedt_states
 
     return output
 
@@ -322,18 +322,25 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
     max_dose = min(max_dose, remaining_bed)
 
     # actionspace in bed dose
-    bedn_space = np.linspace(0, remaining_bed, n_bedsteps + 1)
-    actionspace = afx.convert_to_physical(bedn_space, abn, actual_sf)
-    range_action = (bedn_space >= min_dose) & (bedn_space <= max_dose)
-    # bed_space to relate actionspace to oar- and tumor-dose
-    bedn_space = bedn_space[range_action]
-    actionspace = actionspace[range_action]
-    if not range_action.any():
+    # pre calculation
+    bedn_space_pre = np.linspace(0, remaining_bed, n_bedsteps + 1)
+    actionspace_pre = afx.convert_to_physical(bedn_space_pre, abn, actual_sf)
+    bedt_space_pre = afx.bed_calc0(actionspace_pre, abt)
+    range_action = (bedn_space_pre >= min_dose) & (bedn_space_pre <= max_dose)
+    if range_action.any():
         # check if actionspace is empty
-        bedn_space = np.array([min_dose])
-        actionspace = afx.convert_to_physical(bedn_space, abn, actual_sf)
-    bedt_space = afx.bed_calc0(actionspace, abt)
-    n_action = len(actionspace)
+        bedn_space = bedn_space_pre[range_action]
+        actionspace = actionspace_pre[range_action]
+        bedt_space = bedt_space_pre[range_action]
+        n_action = len(bedn_space)
+        bedn_space_sf = np.zeros((1, n_sf)) + bedn_space.reshape(n_action, 1)
+        # bed_space to relate actionspace to oar- and tumor-dose
+        actionspace_sf = afx.convert_to_physical(bedn_space.reshape(n_action, 1), abn, sf)
+    else:
+        bedn_space_sf = np.zeros((1, n_sf)) + np.array([min_dose])
+        actionspace_sf = afx.convert_to_physical(bedn_space_sf, abn, sf)
+        n_action = 1
+    bedt_space_sf = afx.bed_calc0(actionspace_sf, abt)
 
     # tumor bed states for tracking dose
     oar_upper_bound = oar_limit + sets.state_stepsize
@@ -344,10 +351,6 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
     remaining_states = bedn_states - accumulated_oar_dose
     n_bedn_states = len(bedn_states)
     
-    # relate actionspace to bed and possible sparing factors
-    # necessary reshape for broadcasting in value calculation
-    actionspace_sf = afx.convert_to_physical(bedn_space.reshape(n_action, 1), abn, sf.reshape(1, n_sf))
-    bedt_sf_space = afx.bed_calc0(actionspace_sf, abt).reshape(1, n_action, n_sf)
     # values matrix
     # dim(values) = dim(policy) = fractions_remaining * bedt * sf
     n_remaining_fractions = number_of_fractions - fraction
@@ -382,11 +385,11 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
 
             if policy_plot or values_plot or remains_plot:
                 # for the policy plot
-                future_bedn_full = bedn_states.reshape(n_bedn_states, 1) + bedn_space
+                future_bedn_full = bedn_states.reshape(n_bedn_states, 1, 1) + bedn_space_sf.reshape(1, n_action, n_sf)
                 future_bedn_full = np.where(future_bedn_full > oar_limit, oar_upper_bound, future_bedn_full)
-                c_penalties_full = np.where(future_bedn_full < oar_limit, -c, 0).reshape(n_bedn_states, n_action, 1)
+                c_penalties_full = np.where(future_bedn_full < oar_limit, -c, 0)
                 future_values_full = afx.interpolate(future_bedn_full, bedn_states, future_values_discrete)
-                vs_full = bedt_sf_space + future_values_full.reshape(n_bedn_states, n_action, 1) + c_penalties_full
+                vs_full = bedt_space_sf.reshape(1, n_action, n_sf) + future_values_full + c_penalties_full
                 # check vs along the sf axis
                 current_policy = bedn_space[vs_full.argmax(axis=1)]
                 # ensure that for the goal reached the value/policy is zero (min_dose)
@@ -416,12 +419,11 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
             # cut the actionspace to min and max dose constraints
             last_bed_actions = np.where(last_bed_actions < min_dose, min_dose, last_bed_actions)
             last_bed_actions = np.where(last_bed_actions > max_dose, max_dose, last_bed_actions)
-            last_actions = afx.convert_to_physical(last_bed_actions.reshape(n_bedn_states, 1), abn,
-                sf.reshape(1, n_sf))
-            last_bed_actions_sf = np.zeros((1, n_sf)) + last_bed_actions.reshape(n_bedn_states, 1)
+            last_bed_actions_reshaped = last_bed_actions.reshape(n_bedn_states, 1)
+            last_actions = afx.convert_to_physical(last_bed_actions_reshaped, abn, sf)
             last_bedt = afx.bed_calc0(last_actions, abt)
             # this smooths out the penalties in underdose and overdose regions
-            bedn_diff = np.round(bedn_states.reshape(n_bedn_states, 1) + last_bed_actions_sf - oar_limit, -exp)
+            bedn_diff = np.round(bedn_states.reshape(n_bedn_states, 1) + last_bed_actions_reshaped - oar_limit, -exp)
             penalties = np.where(bedn_diff == 0, 0, -np.abs(bedn_diff) * sets.inf_penalty)
             # to each best action add the according penalties
             # penalties need to be reshaped for broadcasting
@@ -432,7 +434,7 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
 
             if policy_plot:
                 # policy calculation for each bedt, but sf is not considered
-                policy[fraction_index] = last_bed_actions_sf
+                policy[fraction_index] += last_bed_actions_reshaped
                 # ensure that for the goal reached the value/policy is zero (min_dose)
                 policy[fraction_index][bedn_states==oar_limit] = 0
 
@@ -441,13 +443,13 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
             # this calculates the value function in the future fractions
             future_values_discrete = (values[fraction_index + 1] * prob).sum(axis=1)
             # bedt_states is reshaped such that numpy broadcast leads to 2D array
-            future_bedn = bedn_states.reshape(n_bedn_states, 1) + bedn_space.reshape(1, n_action)
+            future_bedn = bedn_states.reshape(n_bedn_states, 1, 1) + bedn_space_sf.reshape(1, n_action, n_sf)
             future_bedn = np.where(future_bedn > oar_limit, oar_upper_bound, future_bedn)
             future_values = afx.interpolate(future_bedn, bedn_states, future_values_discrete)
             c_penalties = np.where(future_bedn < oar_limit, -c, 0)
             # dim(bedn_sf_space)=(1,n_action,n_sf),dim(future_values)=(n_states,n_action)
             # every row of values_penalties is transposed and copied n_sf times
-            vs = bedt_sf_space + future_values.reshape(n_bedn_states, n_action, 1) + c_penalties.reshape(n_bedn_states, n_action, 1)
+            vs = bedt_space_sf.reshape(1, n_action, n_sf) + future_values + c_penalties
             # check vs along the sf axis
             values[fraction_index] = vs.max(axis=1)
             # ensure that for the goal reached the value/policy is zero (min_dose)
@@ -466,10 +468,9 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
                 remains[fraction_index] = current_remains + future_remains
 
     output = afx.DotDict({})
-
     output.physical_dose = actionspace[action_index] if not finished else np.nan
-    output.tumor_dose = bedn_space[action_index] if not finished else np.nan
-    output.oar_dose = bedt_space[action_index] if not finished else np.nan
+    output.tumor_dose = bedt_space[action_index] if not finished else np.nan
+    output.oar_dose = bedn_space[action_index] if not finished else np.nan
 
     if probability_plot:
         output.probability = {}
@@ -479,16 +480,16 @@ def max_tumor_bed(keys, sets=afx.SETTING_DICT):
         output.policy = {}
         output.policy.val = policy
         output.policy.sf = sf
-        output.policy.states = bedn_states[::-1]
+        output.policy.states = bedn_states
     if values_plot:
         output.value = {}
         output.value.val = values
         output.value.sf = sf
-        output.value.states = bedn_states[::-1]
+        output.value.states = bedn_states
     if remains_plot:
         output.remains = {}
         output.remains.val = remains
         output.remains.sf = sf
-        output.remains.states = bedn_states[::-1]
+        output.remains.states = bedn_states
 
     return output
