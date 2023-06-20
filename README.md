@@ -124,6 +124,10 @@ A last addition is made with graphical user interfaces that facilitate the use o
 > :warning: Note:\
 > The interfaces are not optimized, and thus it is not recommended using them to further develop extensions.
 
+### Reducing Number of Fractions
+
+For the 2D algorithms there exist the possibility to reduce number of fractions. A constant $c$ can be chosen which introduces a reward (or rather a cost) linear to the number of fractions used to finish the treatment. The cost is added to the immediate reward returned by the environment in the current fraction. There exist a simulative model helping to estimate what the constant $c$ should be chosen in order for the treatment to finish on some target number of fractions $n_{\text{targ}}$. The function can be found [here](src/adaptfx/radiobiology.py) in `c_calc`.
+
 ### Probability Updating
 
 The DP algorithm relies on a description of the environment to compute an optimal policy, in this case the probability distribution of the sparing factor $P(\delta)$, which we assume to be a Gaussian distribution truncated at $0$, with patient-specific parameters for mean and standard deviation. At the start of a treatment, only two sparing factors are available for that patient, from the planning scan and the first fraction. In each fraction, an additional sparing factor is measured, which can be used to calculate updated estimates $\mu_t$ and $\sigma_t$ for mean and standard deviation, respectively.
@@ -173,12 +177,12 @@ ImportError: No module named '_ctypes'
 **Solution:** with the specific package manager of the Linux distribution install `libffi-dev` development tool. E.g. in Fedora Linux and derivatives install this tool
 
 ```
-sudo dnf install libffi-devel
+$ sudo dnf install libffi-devel
 ```
 
 On Ubuntu:
 ```
-sudo apt install libffi-dev
+$ sudo apt install libffi-dev
 ```
 
 ### No GUI backend for `matplotlib`
@@ -195,19 +199,19 @@ No matching distribution found for tkinter
 **Solution:** on Fedora Linux and derivative distributions one could solve this by either installing python tkinter
 
 ```
-sudo dnf install python3-tkinter
+$ sudo dnf install python3-tkinter
 ```
 
 on Ubuntu
 
 ```
-sudo apt-get install python3-tk
+$ sudo apt-get install python3-tk
 ```
 
 **Solution:** on MacOS and Linux one could instead use `pip` to install `pyqt`
 
 ```
-pip install pyqt5
+$ pip install pyqt5
 ```
 
 

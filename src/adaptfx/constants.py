@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # log settings
-LOG_BOOL = 0
-LOG_BOOL_LIST = [0,1]
-LOG_LEVEL = 1
-LOG_LEVEL_LIST = [0,1,2]
+LOG_BOOL = 0            # no logging to file
+LOG_BOOL_LIST = [0,1]   # options for logging
+LOG_LEVEL = 1           # logging level middle
+LOG_LEVEL_LIST = [0,1,2]# options for logging level
 
 # dose, sf
 DOSE_STEPSIZE = 0.1
@@ -11,17 +11,18 @@ STATE_STEPSIZE = 1
 SF_LOW = 0
 SF_HIGH = 1.7
 SF_STEPSIZE = 0.01
-SF_PROB_THRESHOLD = 1e-5
+SF_PROB_THRESHOLD = 1e-4
 INF_PENALTY = 1e4
 
 # keys
 ALPHA_BETA_TUMOR = 10
 ALPHA_BETA_OAR = 3
 
-FULL_DICT = {'number_of_fractions':None,
+# "None" are mandatory keys
+FULL_DICT = {'number_of_fractions': None,
         'fraction': 0,
         'sparing_factors': None,
-        'prob_update': 0,
+        'prob_update': None,
         'fixed_mean': None,
         'fixed_std': None,
         'shape': None,
@@ -50,6 +51,8 @@ SETTING_DICT = {
         'plot_policy': 0,
         'plot_values': 0,
         'plot_remains': 0,
+        'plot_probability': 0,
+        'save_plot': 0,
         }
 
 STANDARD_LIST = [
@@ -71,9 +74,10 @@ STANDARD_LIST = [
         'max_dose',
         ]
 
+# define the list for each optimisation method
 OAR_LIST = STANDARD_LIST + ['tumor_goal']
 
-TUMOR_LIST = STANDARD_LIST + ['oar_limit']
+TUMOR_LIST = STANDARD_LIST + ['oar_limit', 'c']
 
 FRAC_LIST = STANDARD_LIST + ['tumor_goal', 'c']
 
@@ -82,6 +86,6 @@ TUMOR_OAR_LIST = STANDARD_LIST + ['tumor_goal', 'oar_limit']
 KEY_DICT = {
         'oar': OAR_LIST, 'oar_old': OAR_LIST, 
         'tumor': TUMOR_LIST, 'tumor_old': TUMOR_LIST,
-        'frac': FRAC_LIST, 'frac_old': FRAC_LIST,
+        'frac': FRAC_LIST,
         'tumor_oar': TUMOR_OAR_LIST, 'tumor_oar_old': TUMOR_OAR_LIST
         }

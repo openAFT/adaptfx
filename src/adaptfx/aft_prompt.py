@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 import sys
 import logging
-import os
+import adaptfx as afx
 
 prompt = 'AFT> '
 empty = ''
 
-def logging_init(filename, log, level):
+def logging_init(basename, log, level):
     """
     log initialisation to write to filename
 
     Parameters
     ----------
-    filename : string
-        filename of log file
+    basename : string
+        filename of log file without suffix
     log : bool
         if true store log to filename
     debug: bool
@@ -38,24 +38,7 @@ def logging_init(filename, log, level):
         log_level = logging.ERROR
     
     if log:
-        logfile_extension = "log"
-        # create logfile name
-        # get the basename before .json extension
-        basename = filename.rsplit('.')[0]
-        # search for existing filename ...
-        i = 1
-        while os.path.exists(f'{basename}_{i}.{logfile_extension}'):
-            # exponential search if many files exist
-            i *= 2
-        a, b = (i // 2, i)
-        while a+1 < b:
-            c = (a + b) // 2
-            if os.path.exists(f'{basename}_{c}.{logfile_extension}'):
-                a, b = (c, b)
-            else:
-                a, b = (a, c)
-        # ... end of search
-        log_filename = f'{basename}_{b}.{logfile_extension}'
+        log_filename = afx.create_name(basename, "log")
         logging.basicConfig(
             format=format_file,
             level=log_level, 

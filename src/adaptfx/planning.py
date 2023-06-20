@@ -22,18 +22,27 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
         sets = afx.DotDict(sets)
 
     if keys.fraction != 0:
-        # if only a specific fraction should be calculated
-        fractions_list = np.array([keys.fraction])
-        physical_doses = np.zeros(1)
-        tumor_doses = np.zeros(1)
-        oar_doses = np.zeros(1)
+        # if only up to a specific fraction should be calculated
+        fractions_list = np.arange(1, keys.fraction + 1, 1)
+        physical_doses = np.zeros(keys.fraction)
+        tumor_doses = np.zeros(keys.fraction)
+        oar_doses = np.zeros(keys.fraction)
     else:
         # for calculation whole treatment in retrospect
         fractions_list = np.arange(1, keys.number_of_fractions + 1, 1)
         physical_doses = np.zeros(keys.number_of_fractions)
         tumor_doses = np.zeros(keys.number_of_fractions)
         oar_doses = np.zeros(keys.number_of_fractions)
+    
+    if sets.plot_probability:
+        # create lists for storing probability distribution
+        # note that the shape of probability distribution
+        # is 1) unknown and 2) non-constant --> use list
+        sf = []
+        pdf = []
 
+    # create array for keeping track of fractions
+    plot_numbering = np.arange(1, keys.number_of_fractions + 1, 1)
     first_tumor_dose = keys.accumulated_tumor_dose
     first_oar_dose = keys.accumulated_oar_dose
 
@@ -45,6 +54,8 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
             output = afx.min_oar_bed(keys, sets)
         elif algorithm == 'frac':
             output = afx.min_n_frac(keys, sets)
+        elif algorithm == 'tumor':
+            output = afx.max_tumor_bed(keys, sets)
             
         elif algorithm == 'oar_old':
             output = afx.min_oar_bed_old(keys, sets)
@@ -66,15 +77,18 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
 
         # user specifies to plot policy number, if equal to fraction plot
         # if both zero than the user doesn't want to plot policy
+        if sets.plot_probability:
+            sf.append(list(output.probability.sf))
+            pdf.append(list(output.probability.pdf))
         if sets.plot_policy == keys.fraction:
             output_whole.policy = output.policy
-            output_whole.policy.fractions = fractions_list[sets.plot_policy - 1:]
+            output_whole.policy.fractions = plot_numbering[sets.plot_policy - 1:]
         if sets.plot_values == keys.fraction:
             output_whole.value = output.value
-            output_whole.value.fractions = fractions_list[sets.plot_values - 1:]
+            output_whole.value.fractions = plot_numbering[sets.plot_values - 1:]
         if sets.plot_remains == keys.fraction:
             output_whole.remains = output.remains
-            output_whole.remains.fractions = fractions_list[sets.plot_remains - 1:]
+            output_whole.remains.fractions = plot_numbering[sets.plot_remains - 1:]
 
     # store doses
     exponent = afx.find_exponent(sets.dose_stepsize) - 1
@@ -83,5 +97,11 @@ def multiple(algorithm, keys, sets=afx.SETTING_DICT):
     output_whole.oar_sum, output_whole.tumor_sum = np.around(
         [np.nansum(oar_doses), np.nansum(tumor_doses)], -exponent)
     output_whole.fractions_used = np.count_nonzero(~np.isnan(output_whole.physical_doses))
+    if sets.plot_probability:
+        # store probability distribution
+        output_whole.probability = {}
+        output_whole.probability.sf = sf
+        output_whole.probability.pdf = pdf
+        output_whole.probability.fractions = fractions_list
 
     return output_whole

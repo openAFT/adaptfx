@@ -2,7 +2,9 @@
 
 ## Working tree
 
-One should perform calculations in a working folder e.g. `adaptfx/work`. There the instruction files can be specified by the user and `adaptfx` will automatically produce log files if the user wishes to.
+The package ships a CLI with which calculations can be performed which will be explained here. One should perform calculations in a working folder e.g. `adaptfx/work`. There the instruction files can be specified by the user and `adaptfx` will automatically produce log files if the user wishes to.
+
+The package also also provides a class that can be used in scripting mode. When using the package in scripts, a class creates an object with according attributes. To understand the attributes and behaviour of optimisation, read the doc-string of the `aft.py` script [here](src/adaptfx/aft.py)
 
 ## Format of the instruction file
 The user specifies following elements of the dictionary for the main entries: 
@@ -94,7 +96,7 @@ min_dose : float
 max_dose : float
     maximal physical doses to be delivered in one fraction.
     The doses are aimed at PTV 95. If -1 the dose is adapted to the
-    remaining dose tumor dose to be delivered or the remaining OAR dose 
+    remaining tumor BED to be delivered or the remaining OAR dose 
     allowed to be prescribed.
     default: -1
 ```
@@ -136,9 +138,11 @@ sf_high : float
 sf_stepsize: float
     stepsize of the sparing factor stepsize.
 sf_prob_threshold': float
-    probability threshold of the sparing factor occuring.
+    probability threshold of the sparing factor occuring
+    which defines the range of sparing factors.
 inf_penalty : float
-    infinite penalty for certain undesired states.
+    define infinite penalty for undesired states
+    choose arbitrarily large compared to highest occuring reward.
 plot_policy : int
     starting from which fraction policy should be plotted.
 plot_values : int
@@ -146,14 +150,74 @@ plot_values : int
 plot_remains : int
     starting from which fraction expected remaining number 
     of fractions should be plotted.
+plot_probability : int
+    flag if the probability distribution should be plotted
 ```
 
-# Example
+> :warning: Note:\
+> It is dangerous to use an upper and lower bound in `sf_low` and `sf_high`, as a truncated probability distribution may result that not accurately represents the environment model. Best is to set `sf_prob_threshold` to `1e-3` or lower or leave it at the default which is set at `1e-4`.
 
-Outlined is an example instruction file for fraction minimisation. It simply is a `.json` that is translated into a python dictionary. An example can be found [here](work/oar_example.json)
+## Note on Plots
+Policy, Value and Remaining number of fractions plots are calculated with the probability distribution in the fraction from which the plots should start. That is the value function that is known when iterating backwards through the fractions. E.g. the plotted policy starting to plot in the first fraction i.e `plot_policy = 1` and `prob_update = 0`  is the policy which is known throughout the treatment, when observing only the first sparing factor. In the case of probability updating e.g `prob_update = 1` the plotted policy is the optimal policy for the probability distribution known when observing the first sparing factor. As the probability distribution changes also future optimal policies change and one has to keep in mind only policy with the constant probability distribution from fraction `1` is plotted.
+
+Different is the probability plot: the probability is set for each fraction and updated with additional oberved sparing factors.
+
+# AFT CLI
+
+Outlined is an example instruction file for fraction minimisation. It simply is a `.json` that is translated into a python dictionary. An example can be found [here](work/example_0.json)
 
 This `.json` file can be called in with the CLI as:
 
 ```
 $ aft -f work/oar_example.json
+```
+
+# AST CLI
+There is also a second CLI that allows to plot sparing factors, policy functions, temporal Adaptive Fractionation Therapy etc.
+```
+$ ast [options] -f <simulation_file>
+```
+
+The entry for algorithm simulation type is
+
+```
+algorithm_simulation: histogram, fraction, single_state, all_state
+single_distance, single_patient, grid_distance, grid_fraction
+    allowed plots options
+keys_simulation: dict
+    simulation keys
+```
+
+```
+keys_simulation
+----------------
+# Histogram of applied AFT for sampled patients
+n_patients : float
+    stepsize of the actionspace.
+fixed_mean_sample : float
+    mean of sampled patient sparing factor
+fixed_std_sample : float
+    standard deviation of sampled patient sparing factor
+
+# Data related plots
+c_list : list
+    list of c parameters
+plot_index : int
+    which index to plot
+data_filepath : string
+    path to sparing factor file
+data_selection : list
+    two elements of header in sparing factor file
+data_row_hue : string
+    seaborn hue or row
+
+# Settings of plots
+figsize : list
+    two elements of size figure
+fontsize : float
+    fontsize of plots
+save : bool
+    boolean to instruct saving plot
+usetex : bool
+    boolean if TeX font should be used
 ```

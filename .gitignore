@@ -63,6 +63,7 @@ cover/
 
 # OS
 .DS_Store
+*.pdf
 
 # Django stuff:
 *.log

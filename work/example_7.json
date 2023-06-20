@@ -1,0 +1,38 @@
+{
+"algorithm": "tumor",
+"level": 1,
+"log": 0,
+"keys": 
+	{
+	"number_of_fractions": 6,
+	"fraction": 1,
+	"sparing_factors": [0.946, 0.906, 0.905, 0.796 , 0.868,
+	0.916, 0.954],
+	"prob_update": 0,
+	"fixed_mean": 0.85,
+	"fixed_std": 0.1,
+	"shape": 10.61,
+	"scale": 0.003,
+	"shape_inv": 2.27,
+	"scale_inv": 0.002,
+	"accumulated_oar_dose": 0,
+	"accumulated_tumor_dose": 0,
+	"min_dose": 0,
+	"max_dose": -1,
+	"tumor_goal": 72,
+	"oar_limit": 90,
+	"c": 0
+	},
+"settings":
+	{
+	"dose_stepsize": 15,
+	"state_stepsize": 15,
+	"sf_stepsize": 0.1,
+	"sf_prob_threshold": 1e-4,
+	"plot_policy": 1,
+	"plot_remains": 0,
+	"plot_values": 1,
+	"plot_probability": 0,
+	"save_plot": 0
+	}
+}
